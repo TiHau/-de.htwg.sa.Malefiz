@@ -1,5 +1,5 @@
 name          := "Malefiz"
-organization  := "de.htwg.se"
+organization  := "de.htwg.sa"
 version       := "1.0.0"
 scalaVersion  := "2.12.7"
 scalacOptions := Seq("-unchecked", "-feature", "-deprecation", "-encoding", "utf8")
