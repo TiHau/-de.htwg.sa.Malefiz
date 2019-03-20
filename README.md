@@ -1,6 +1,6 @@
 Malefiz
 ========================
-[![Build Status](https://travis-ci.org/HuntedHunter/de.htwg.se.Malefiz.svg?branch=master)](https://travis-ci.org/HuntedHunter/de.htwg.se.Malefiz) [![Coverage Status](https://coveralls.io/repos/github/HuntedHunter/de.htwg.se.Malefiz/badge.svg?branch=master)](https://coveralls.io/github/HuntedHunter/de.htwg.se.Malefiz?branch=master)
+[![Build Status](https://travis-ci.com/TiHau/de.htwg.sa.Malefiz.svg?branch=master)](https://travis-ci.com/TiHau/de.htwg.sa.Malefiz) [![Coverage Status](https://coveralls.io/repos/github/TiHau/de.htwg.sa.Malefiz/badge.svg?branch=master)](https://coveralls.io/github/TiHau/de.htwg.sa.Malefiz?branch=master)
 
 # Table of Contents
 1. [About the Project](#about-the-project)
