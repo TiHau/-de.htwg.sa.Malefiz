@@ -106,10 +106,10 @@ class FileIO extends FileIOInterface {
         </state>
         <choosenPlayerStone>
           <startX>
-            { controller.getChoosenPlayerStone.startField.asInstanceOf[Field].x }
+            { controller.getChosenPlayerStone.startField.asInstanceOf[Field].x }
           </startX>
           <startY>
-            { controller.getChoosenPlayerStone.startField.asInstanceOf[Field].x }
+            { controller.getChosenPlayerStone.startField.asInstanceOf[Field].x }
           </startY>
         </choosenPlayerStone>
         <needToSetBlockStone>

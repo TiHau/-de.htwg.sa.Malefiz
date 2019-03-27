@@ -286,7 +286,7 @@ class ControllerSpec extends WordSpec with Matchers {
 
         val testPlayerStone = controller.gameBoard.player1.stones(0)
         controller.setChosenPlayerStone(testPlayerStone)
-        controller.getChoosenPlayerStone shouldBe testPlayerStone
+        controller.getChosenPlayerStone shouldBe testPlayerStone
       }
 
       "save and load" in {

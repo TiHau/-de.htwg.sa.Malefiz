@@ -95,5 +95,5 @@ trait ControllerInterface extends Observable with Publisher {
    * Liefert den ausgewählten Spielerstein
    * @return ausgewählter Spielerstein
    */
-  def getChoosenPlayerStone: PlayerStone
+  def getChosenPlayerStone: PlayerStone
 }
