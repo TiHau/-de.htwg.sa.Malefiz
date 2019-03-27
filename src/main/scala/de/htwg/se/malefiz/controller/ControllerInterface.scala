@@ -86,34 +86,14 @@ trait ControllerInterface extends Observable with Publisher {
   def reset(): Unit
 
   /**
-   * Setzt das Zielfeld auf die Übergebenen Koordinaten, übeprüft ab es ein gültiges Zielfeld ist
-   * @param x X-Koordinate
-   * @param y y-Koordinate
-   * @return true, wenn das Zielfeld gültig ist
-   */
-  def setTargetForPlayerStone(x: Int, y: Int): Boolean
-
-  /**
    * Setzt den ausgwählten Spielerstein
    * @param newStone neuer Spielerstein
    */
-  def setChoosenPlayerStone(newStone: PlayerStone): Unit
+  def setChosenPlayerStone(newStone: PlayerStone): Unit
 
   /**
    * Liefert den ausgewählten Spielerstein
    * @return ausgewählter Spielerstein
    */
   def getChoosenPlayerStone: PlayerStone
-
-  /**
-   * Setzt das Zielfeld
-   * @param newField neues Zielfeld
-   */
-  def setDestField(newField: Field): Unit
-
-  /**
-   * Liefert das Zielfeld
-   * @return
-   */
-  def getDestField: Field
 }

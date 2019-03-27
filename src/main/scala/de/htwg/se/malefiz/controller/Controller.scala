@@ -22,7 +22,6 @@ case class Controller @Inject() () extends ControllerInterface with Publisher {
   private val fileIO = injector.instance[FileIOInterface]
   private val undoManager = new UndoManager()
   private var chosenPlayerStone = gameBoard.player1.stones(0)
-  private var destField = gameBoard.board(8)(0).asInstanceOf[Field]
 
   override def loadSavedGame(): Unit = fileIO.load(this)
 
@@ -126,23 +125,13 @@ case class Controller @Inject() () extends ControllerInterface with Publisher {
 
   def takeInput(x: Int, y: Int): Unit = {
     state match {
-      case Print =>
-      case SetPlayerCount =>
       case ChoosePlayerStone =>
         if (checkValidPlayerStone(x, y)) {
           chooseStone()
         }
-      case ChooseTarget =>
-        if (setTargetForPlayerStone(x, y)) {
-          chooseTarget()
-        }
-      case SetBlockStone =>
-        if (setTargetForBlockStone(x, y)) {
-          setBlockStone()
-        }
-      case PlayerWon =>
-      case BeforeEndOfTurn =>
-      case EndTurn =>
+      case ChooseTarget => setTargetField(x, y)
+      case SetBlockStone => setBlockStone(x, y)
+      case _ =>
     }
   }
 
@@ -152,33 +141,12 @@ case class Controller @Inject() () extends ControllerInterface with Publisher {
     notifyObservers()
   }
 
-  private def setBlockStone(): Unit = {
-    undoManager.doStep(new BlockStoneCommand(destField, this))
-    state = Print
-    notifyObservers()
-    state = BeforeEndOfTurn
-    notifyObservers()
-  }
-
   private def chooseStone(): Unit = {
     undoManager.doStep(new ChooseCommand(chosenPlayerStone, this))
     state = Print
     notifyObservers()
     state = ChooseTarget
     notifyObservers()
-  }
-
-  private def chooseTarget(): Unit = {
-    undoManager.doStep(new MoveCommand(chosenPlayerStone, destField, this))
-    state = Print
-    notifyObservers()
-    if (needToSetBlockStone) {
-      state = SetBlockStone
-      notifyObservers()
-    } else {
-      state = BeforeEndOfTurn
-      notifyObservers()
-    }
   }
 
   private def dice(): Unit = {
@@ -199,23 +167,29 @@ case class Controller @Inject() () extends ControllerInterface with Publisher {
     }
   }
 
-  def setTargetForPlayerStone(x: Int, y: Int): Boolean = {
+  private def setTargetField(x: Int, y: Int): Unit = {
     if (gameBoard.checkDestForPlayerStone(x, y)) {
-      destField = gameBoard.board(x)(y).asInstanceOf[Field]
-      true
-    } else {
-      false
+      undoManager.doStep(new MoveCommand(chosenPlayerStone, gameBoard.board(x)(y).asInstanceOf[Field], this))
+      state = Print
+      notifyObservers()
+      if (needToSetBlockStone) {
+        state = SetBlockStone
+        notifyObservers()
+      } else {
+        state = BeforeEndOfTurn
+        notifyObservers()
+      }
     }
   }
 
-  private def setTargetForBlockStone(x: Int, y: Int): Boolean = {
+  private def setBlockStone(x: Int, y: Int): Unit = {
     if (gameBoard.checkDestForBlockStone(x, y)) {
-      destField = gameBoard.board(x)(y).asInstanceOf[Field]
-      true
-    } else {
-      false
+      undoManager.doStep(new BlockStoneCommand(gameBoard.board(x)(y).asInstanceOf[Field], this))
+      state = Print
+      notifyObservers()
+      state = BeforeEndOfTurn
+      notifyObservers()
     }
-
   }
 
   private def checkValidPlayerStone(x: Int, y: Int): Boolean = {
@@ -234,11 +208,7 @@ case class Controller @Inject() () extends ControllerInterface with Publisher {
     }
   }
 
-  def setChoosenPlayerStone(newStone: PlayerStone): Unit = chosenPlayerStone = newStone
+  def setChosenPlayerStone(newStone: PlayerStone): Unit = chosenPlayerStone = newStone
 
-  def getChoosenPlayerStone: PlayerStone = chosenPlayerStone
-
-  def setDestField(newField: Field): Unit = destField = newField
-
-  def getDestField: Field = destField
+  def getChosenPlayerStone: PlayerStone = chosenPlayerStone
 }

@@ -83,13 +83,9 @@ class FileIO extends FileIOInterface {
 
     for (playerStone <- playerStones) {
       if (playerStone.startField.asInstanceOf[Field].x == startFieldX && playerStone.startField.asInstanceOf[Field].y == startFieldY) {
-        controller.setChoosenPlayerStone(playerStone)
+        controller.setChosenPlayerStone(playerStone)
       }
     }
-
-    controller.setDestField(controller.gameBoard.board(
-      (controllerNode \\ "destField" \ "x").text.trim.toInt)(
-        (controllerNode \\ "destField" \ "y").text.trim.toInt).asInstanceOf[Field])
   }
 
   override def save(controller: ControllerInterface): Unit = {
@@ -116,14 +112,6 @@ class FileIO extends FileIOInterface {
             { controller.getChoosenPlayerStone.startField.asInstanceOf[Field].x }
           </startY>
         </choosenPlayerStone>
-        <destField>
-          <x>
-            { controller.getDestField.x }
-          </x>
-          <y>
-            { controller.getDestField.y }
-          </y>
-        </destField>
         <needToSetBlockStone>
           { controller.needToSetBlockStone }
         </needToSetBlockStone>

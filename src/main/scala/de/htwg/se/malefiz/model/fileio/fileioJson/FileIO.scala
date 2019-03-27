@@ -45,13 +45,9 @@ class FileIO extends FileIOInterface {
 
     for (playerStone <- playerStones) {
       if (playerStone.startField.asInstanceOf[Field].x == startFieldX && playerStone.startField.asInstanceOf[Field].y == startFieldY) {
-        controller.setChoosenPlayerStone(playerStone)
+        controller.setChosenPlayerStone(playerStone)
       }
     }
-
-    controller.setDestField(controller.gameBoard.board(
-      (json \ "controller" \ "destField" \ "x").get.toString().toInt)(
-        (json \ "controller" \ "destField" \ "y").get.toString().toInt).asInstanceOf[Field])
 
     controller.needToSetBlockStone = (json \ "controller" \ "needToSetBlockStone").get.toString().toBoolean
   }
@@ -108,9 +104,6 @@ class FileIO extends FileIOInterface {
         "choosenPlayerStone" -> Json.obj(
           "startX" -> JsNumber(controller.getChoosenPlayerStone.startField.asInstanceOf[Field].x),
           "startY" -> JsNumber(controller.getChoosenPlayerStone.startField.asInstanceOf[Field].y)),
-        "destField" -> Json.obj(
-          "x" -> JsNumber(controller.getDestField.x),
-          "y" -> JsNumber(controller.getDestField.y)),
         "needToSetBlockStone" -> JsBoolean(controller.needToSetBlockStone)),
       "board" -> Json.obj(
         "fields" -> Json.toJson(
