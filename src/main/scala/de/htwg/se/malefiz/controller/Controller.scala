@@ -13,7 +13,7 @@ import play.api.libs.json.JsObject
 
 import scala.swing.Publisher
 
-case class Controller @Inject() () extends ControllerInterface with Publisher {
+case class Controller @Inject()() extends ControllerInterface with Publisher {
   val injector: Injector = Guice.createInjector(new MalefizModule)
   var gameBoard: GameBoardInterface = injector.instance[GameBoardInterface](Names.named("default")).createBoard
   activePlayer = gameBoard.player3
@@ -125,10 +125,7 @@ case class Controller @Inject() () extends ControllerInterface with Publisher {
 
   def takeInput(x: Int, y: Int): Unit = {
     state match {
-      case ChoosePlayerStone =>
-        if (checkValidPlayerStone(x, y)) {
-          chooseStone()
-        }
+      case ChoosePlayerStone => chosePlayerStone(x, y)
       case ChooseTarget => setTargetField(x, y)
       case SetBlockStone => setBlockStone(x, y)
       case _ =>
@@ -138,14 +135,6 @@ case class Controller @Inject() () extends ControllerInterface with Publisher {
   def reset(): Unit = {
     activePlayer = gameBoard.player3
     state = SetPlayerCount
-    notifyObservers()
-  }
-
-  private def chooseStone(): Unit = {
-    undoManager.doStep(new ChooseCommand(chosenPlayerStone, this))
-    state = Print
-    notifyObservers()
-    state = ChooseTarget
     notifyObservers()
   }
 
@@ -192,19 +181,20 @@ case class Controller @Inject() () extends ControllerInterface with Publisher {
     }
   }
 
-  private def checkValidPlayerStone(x: Int, y: Int): Boolean = {
+  private def chosePlayerStone(x: Int, y: Int): Unit = {
     if (x >= 0 && x < 17 && y >= 0 && y < 16 && (!gameBoard.board(x)(y).isFreeSpace() && gameBoard.board(x)(y).asInstanceOf[Field].stone.sort == 'p')) {
-      var retBool: Boolean = false
       for (s <- activePlayer.stones) {
         if ((s.actualField.asInstanceOf[Field].x == gameBoard.board(x)(y).asInstanceOf[Field].x)
           && (s.actualField.asInstanceOf[Field].y == gameBoard.board(x)(y).asInstanceOf[Field].y)) {
-          chosenPlayerStone = gameBoard.board(x)(y).asInstanceOf[Field].stone.asInstanceOf[PlayerStone]
-          retBool = true
+
+          undoManager.doStep(new ChooseCommand(gameBoard.board(x)(y).asInstanceOf[Field].stone.asInstanceOf[PlayerStone], this))
+          state = Print
+          notifyObservers()
+          state = ChooseTarget
+          notifyObservers()
+
         }
       }
-      retBool
-    } else {
-      false
     }
   }
 
