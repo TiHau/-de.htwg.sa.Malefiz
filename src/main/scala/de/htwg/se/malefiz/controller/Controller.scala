@@ -13,7 +13,7 @@ import play.api.libs.json.JsObject
 
 import scala.swing.Publisher
 
-case class Controller @Inject() () extends ControllerInterface with Publisher {
+case class Controller @Inject()() extends ControllerInterface with Publisher {
   val injector: Injector = Guice.createInjector(new MalefizModule)
   var gameBoard: GameBoardInterface = injector.instance[GameBoardInterface](Names.named("default")).createBoard
   activePlayer = gameBoard.player3
@@ -29,23 +29,20 @@ case class Controller @Inject() () extends ControllerInterface with Publisher {
   override def saveGame(): Unit = fileIO.save(this)
 
   def newGame(playerCount: Int): Unit = {
-    if (playerCount <= 2) {
-      gameBoard = injector.instance[GameBoardInterface](Names.named("tiny")).createBoard
-    } else if (playerCount == 3) {
-      gameBoard = injector.instance[GameBoardInterface](Names.named("small")).createBoard
-    } else {
-      gameBoard = injector.instance[GameBoardInterface](Names.named("default")).createBoard
+    gameBoard = playerCount match {
+      case 2 => injector.instance[GameBoardInterface](Names.named("tiny")).createBoard
+      case 3 => injector.instance[GameBoardInterface](Names.named("small")).createBoard
+      case _ => injector.instance[GameBoardInterface](Names.named("default")).createBoard
     }
+
     nextTurn()
   }
 
   def setPlayerCount(playerCount: Int): Unit = {
-    if (playerCount <= 2) {
-      gameBoard = injector.instance[GameBoardInterface](Names.named("tiny")).createBoard
-    } else if (playerCount == 3) {
-      gameBoard = injector.instance[GameBoardInterface](Names.named("small")).createBoard
-    } else {
-      gameBoard = injector.instance[GameBoardInterface](Names.named("default")).createBoard
+    gameBoard = playerCount match {
+      case 2 => injector.instance[GameBoardInterface](Names.named("tiny")).createBoard
+      case 3 => injector.instance[GameBoardInterface](Names.named("small")).createBoard
+      case _ => injector.instance[GameBoardInterface](Names.named("default")).createBoard
     }
   }
 
