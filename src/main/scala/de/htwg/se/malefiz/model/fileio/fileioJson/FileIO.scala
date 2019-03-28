@@ -23,14 +23,11 @@ class FileIO extends FileIOInterface {
 
   private def loadController(json: JsValue, controller: ControllerInterface): Unit = {
     val activeColor = (json \ "controller" \ "activePlayer").get.toString().toInt
-    if (activeColor == 1) {
-      controller.activePlayer = controller.gameBoard.player1
-    } else if (activeColor == 2) {
-      controller.activePlayer = controller.gameBoard.player2
-    } else if (activeColor == 3) {
-      controller.activePlayer = controller.gameBoard.player3
-    } else {
-      controller.activePlayer = controller.gameBoard.player4
+    activeColor match {
+      case 1 =>  controller.activePlayer = controller.gameBoard.player1
+      case 2 =>  controller.activePlayer = controller.gameBoard.player2
+      case 3 =>  controller.activePlayer = controller.gameBoard.player3
+      case _ =>  controller.activePlayer = controller.gameBoard.player4
     }
 
     controller.diced = (json \ "controller" \ "diced").get.toString().toInt
