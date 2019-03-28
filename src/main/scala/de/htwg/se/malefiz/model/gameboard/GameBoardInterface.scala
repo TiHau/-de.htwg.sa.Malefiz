@@ -30,7 +30,7 @@ trait GameBoardInterface extends Publisher {
   /**
    * Das Spielfeld
    */
-  val board: Array[Array[AbstractField]] = Array.ofDim[AbstractField](x, y)
+  val board: Array[Array[Option[Field]]] = Array.ofDim[Option[Field]](x, y)
 
   /**
    * Initialisiert Felder neu

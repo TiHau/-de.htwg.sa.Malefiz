@@ -21,7 +21,7 @@ class StoneFieldSpec extends WordSpec with Matchers {
         field.avariable shouldBe (false)
       }
       "is empty false" in {
-        field.isEmpty shouldBe (false)
+        field.hasNoStoneOnIt shouldBe (false)
 
       }
 

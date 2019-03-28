@@ -5,9 +5,9 @@ import de.htwg.se.malefiz.model.gameboard.{ Field, FreeStone, PlayerStone, Stone
 
 class MoveCommand(stone: PlayerStone, destField: Field, controller: ControllerInterface) extends Command {
 
-  private val xStone = stone.actualField.asInstanceOf[Field].x
-  private val yStone = stone.actualField.asInstanceOf[Field].y
-  private val currentField = controller.gameBoard.board(xStone)(yStone).asInstanceOf[Field]
+  private val xStone = stone.actualField.x
+  private val yStone = stone.actualField.y
+  private val currentField = controller.gameBoard.board(xStone)(yStone).get
   private var hitStone = new Stone('f')
 
   override def doStep(): Unit = {
@@ -30,9 +30,9 @@ class MoveCommand(stone: PlayerStone, destField: Field, controller: ControllerIn
     destField.stone = hitStone
 
     if (hitStone.sort == 'p') {
-      val x = hitStone.asInstanceOf[PlayerStone].startField.asInstanceOf[Field].x
-      val y = hitStone.asInstanceOf[PlayerStone].startField.asInstanceOf[Field].y
-      controller.gameBoard.board(x)(y).asInstanceOf[Field].stone = FreeStone()
+      val x = hitStone.asInstanceOf[PlayerStone].startField.x
+      val y = hitStone.asInstanceOf[PlayerStone].startField.y
+      controller.gameBoard.board(x)(y).get.stone = FreeStone()
       hitStone.asInstanceOf[PlayerStone].actualField = destField
     }
 

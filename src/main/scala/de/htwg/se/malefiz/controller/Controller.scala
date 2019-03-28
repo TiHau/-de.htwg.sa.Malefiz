@@ -22,7 +22,7 @@ case class Controller @Inject() () extends ControllerInterface with Publisher {
   private val fileIO = injector.instance[FileIOInterface]
   private val undoManager = new UndoManager()
   private var chosenPlayerStone = gameBoard.player1.stones(0)
-  private var destField = gameBoard.board(8)(0).asInstanceOf[Field]
+  private var destField = gameBoard.board(8)(0).get
 
   override def loadSavedGame(): Unit = fileIO.load(this)
 
@@ -201,7 +201,7 @@ case class Controller @Inject() () extends ControllerInterface with Publisher {
 
   def setTargetForPlayerStone(x: Int, y: Int): Boolean = {
     if (gameBoard.checkDestForPlayerStone(x, y)) {
-      destField = gameBoard.board(x)(y).asInstanceOf[Field]
+      destField = gameBoard.board(x)(y).get
       true
     } else {
       false
@@ -210,7 +210,7 @@ case class Controller @Inject() () extends ControllerInterface with Publisher {
 
   private def setTargetForBlockStone(x: Int, y: Int): Boolean = {
     if (gameBoard.checkDestForBlockStone(x, y)) {
-      destField = gameBoard.board(x)(y).asInstanceOf[Field]
+      destField = gameBoard.board(x)(y).get
       true
     } else {
       false
@@ -219,12 +219,12 @@ case class Controller @Inject() () extends ControllerInterface with Publisher {
   }
 
   private def checkValidPlayerStone(x: Int, y: Int): Boolean = {
-    if (x >= 0 && x < 17 && y >= 0 && y < 16 && (!gameBoard.board(x)(y).isFreeSpace() && gameBoard.board(x)(y).asInstanceOf[Field].stone.sort == 'p')) {
+    if (x >= 0 && x < 17 && y >= 0 && y < 16 && (!gameBoard.board(x)(y).isEmpty && gameBoard.board(x)(y).get.stone.sort == 'p')) {
       var retBool: Boolean = false
       for (s <- activePlayer.stones) {
-        if ((s.actualField.asInstanceOf[Field].x == gameBoard.board(x)(y).asInstanceOf[Field].x)
-          && (s.actualField.asInstanceOf[Field].y == gameBoard.board(x)(y).asInstanceOf[Field].y)) {
-          chosenPlayerStone = gameBoard.board(x)(y).asInstanceOf[Field].stone.asInstanceOf[PlayerStone]
+        if ((s.actualField.x == gameBoard.board(x)(y).get.x)
+          && (s.actualField.y == gameBoard.board(x)(y).get.y)) {
+          chosenPlayerStone = gameBoard.board(x)(y).get.stone.asInstanceOf[PlayerStone]
           retBool = true
         }
       }

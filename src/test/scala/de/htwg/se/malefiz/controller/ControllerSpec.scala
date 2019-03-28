@@ -140,8 +140,8 @@ class ControllerSpec extends WordSpec with Matchers {
 
       }
       "check win" in {
-        controller.gameBoard.board(8)(0).asInstanceOf[Field].stone =
-          PlayerStone(controller.gameBoard.board(8)(0), controller.gameBoard.board(8)(0), 1)
+        controller.gameBoard.board(8)(0).get.stone =
+          PlayerStone(controller.gameBoard.board(8)(0).get, controller.gameBoard.board(8)(0).get, 1)
         controller.state = BeforeEndOfTurn
         controller.endTurn()
         controller.state shouldBe PlayerWon
@@ -153,15 +153,15 @@ class ControllerSpec extends WordSpec with Matchers {
       }
       "beat a PlayerStone" in {
         controller.newGame(2)
-        val field1 = controller.gameBoard.board(14)(14).asInstanceOf[Field]
-        val field2 = controller.gameBoard.board(14)(13).asInstanceOf[Field]
+        val field1 = controller.gameBoard.board(14)(14).get
+        val field2 = controller.gameBoard.board(14)(13).get
         controller.activePlayer = controller.gameBoard.player1
         controller.diced = 1
         controller.state = ChoosePlayerStone
         controller.takeInput(2, 14)
         controller.state = ChooseTarget
         controller.gameBoard.forceMoveStone(field1, field2)
-        controller.gameBoard.board(14)(13).asInstanceOf[Field].avariable = true
+        controller.gameBoard.board(14)(13).get.avariable = true
         controller.takeInput(14, 13)
         controller.undo()
         controller.state shouldBe ChooseTarget
@@ -173,12 +173,12 @@ class ControllerSpec extends WordSpec with Matchers {
         controller.diced = 5
         controller.takeInput(2, 14)
         controller.takeInput(4, 11)
-        controller.gameBoard.board(4)(11).asInstanceOf[Field].stone.sort shouldBe 'p'
+        controller.gameBoard.board(4)(11).get.stone.sort shouldBe 'p'
 
         controller.undo()
-        controller.gameBoard.board(4)(11).asInstanceOf[Field].stone.sort shouldBe 'b'
+        controller.gameBoard.board(4)(11).get.stone.sort shouldBe 'b'
         controller.redo()
-        controller.gameBoard.board(4)(11).asInstanceOf[Field].stone.sort shouldBe 'p'
+        controller.gameBoard.board(4)(11).get.stone.sort shouldBe 'p'
       }
 
       "undo before end of turn" in {

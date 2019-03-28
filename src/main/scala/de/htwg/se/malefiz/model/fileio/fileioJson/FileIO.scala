@@ -41,14 +41,14 @@ class FileIO extends FileIOInterface {
         controller.gameBoard.player4.stones
 
     for (playerStone <- playerStones) {
-      if (playerStone.startField.asInstanceOf[Field].x == startFieldX && playerStone.startField.asInstanceOf[Field].y == startFieldY) {
+      if (playerStone.startField.x == startFieldX && playerStone.startField.y == startFieldY) {
         controller.setChoosenPlayerStone(playerStone)
       }
     }
 
     controller.setDestField(controller.gameBoard.board(
       (json \ "controller" \ "destField" \ "x").get.toString().toInt)(
-        (json \ "controller" \ "destField" \ "y").get.toString().toInt).asInstanceOf[Field])
+        (json \ "controller" \ "destField" \ "y").get.toString().toInt).get)
 
     controller.needToSetBlockStone = (json \ "controller" \ "needToSetBlockStone").get.toString().toBoolean
   }
@@ -62,7 +62,7 @@ class FileIO extends FileIOInterface {
       if (!(fieldNode \ "isFreeSpace").get.toString.toBoolean) {
         val x = (fieldNode \ "x").get.toString.toInt
         val y = (fieldNode \ "y").get.toString().toInt
-        controller.gameBoard.board(x)(y).asInstanceOf[Field].avariable = (fieldNode \ "avariable").get.toString.toBoolean
+        controller.gameBoard.board(x)(y).get.avariable = (fieldNode \ "avariable").get.toString.toBoolean
         (fieldNode \ "sort").get.toString.charAt(1) match {
           case 'p' =>
             val startFieldX = (fieldNode \ "startFieldX").get.toString.toInt
@@ -75,15 +75,15 @@ class FileIO extends FileIOInterface {
                 controller.gameBoard.player4.stones
 
             for (playerStone <- playerStones) {
-              if (playerStone.startField.asInstanceOf[Field].x == startFieldX && playerStone.startField.asInstanceOf[Field].y == startFieldY) {
-                playerStone.actualField = controller.gameBoard.board(x)(y)
-                controller.gameBoard.board(x)(y).asInstanceOf[Field].stone = playerStone
+              if (playerStone.startField.x == startFieldX && playerStone.startField.y == startFieldY) {
+                playerStone.actualField = controller.gameBoard.board(x)(y).get
+                controller.gameBoard.board(x)(y).get.stone = playerStone
               }
             }
           case 'b' =>
-            controller.gameBoard.board(x)(y).asInstanceOf[Field].stone = BlockStone()
+            controller.gameBoard.board(x)(y).get.stone = BlockStone()
           case 'f' =>
-            controller.gameBoard.board(x)(y).asInstanceOf[Field].stone = FreeStone()
+            controller.gameBoard.board(x)(y).get.stone = FreeStone()
         }
       }
     }
@@ -103,8 +103,8 @@ class FileIO extends FileIOInterface {
         "diced" -> JsNumber(controller.diced),
         "state" -> JsString(controller.state.toString),
         "choosenPlayerStone" -> Json.obj(
-          "startX" -> JsNumber(controller.getChoosenPlayerStone.startField.asInstanceOf[Field].x),
-          "startY" -> JsNumber(controller.getChoosenPlayerStone.startField.asInstanceOf[Field].y)),
+          "startX" -> JsNumber(controller.getChoosenPlayerStone.startField.x),
+          "startY" -> JsNumber(controller.getChoosenPlayerStone.startField.y)),
         "destField" -> Json.obj(
           "x" -> JsNumber(controller.getDestField.x),
           "y" -> JsNumber(controller.getDestField.y)),
@@ -119,12 +119,12 @@ class FileIO extends FileIOInterface {
   }
 
   def fieldToJson(gameBoard: GameBoardInterface, x: Int, y: Int): JsObject = {
-    if (!gameBoard.board(x)(y).isFreeSpace()) {
-      val field = gameBoard.board(x)(y).asInstanceOf[Field]
+    if (!gameBoard.board(x)(y).isEmpty) {
+      val field = gameBoard.board(x)(y).get
       val sort = field.stone.sort
       if (sort == 'p') {
-        val startFieldX = field.stone.asInstanceOf[PlayerStone].startField.asInstanceOf[Field].x
-        val startFieldY = field.stone.asInstanceOf[PlayerStone].startField.asInstanceOf[Field].y
+        val startFieldX = field.stone.asInstanceOf[PlayerStone].startField.x
+        val startFieldY = field.stone.asInstanceOf[PlayerStone].startField.y
         Json.obj(
           "isFreeSpace" -> JsBoolean(false),
           "x" -> JsNumber(x),
@@ -135,7 +135,7 @@ class FileIO extends FileIOInterface {
           "startFieldY" -> JsNumber(startFieldY))
       } else {
         Json.obj(
-          "isFreeSpace" -> JsBoolean(gameBoard.board(x)(y).isFreeSpace()),
+          "isFreeSpace" -> JsBoolean(gameBoard.board(x)(y).isEmpty),
           "x" -> JsNumber(x),
           "y" -> JsNumber(y),
           "sort" -> JsString(sort.toString),

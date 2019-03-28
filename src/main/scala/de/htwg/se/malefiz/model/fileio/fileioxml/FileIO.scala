@@ -29,7 +29,7 @@ class FileIO extends FileIOInterface {
     for (fieldNode <- fieldNodes) {
       val x = (fieldNode \\ "x").text.trim.toInt
       val y = (fieldNode \\ "y").text.trim.toInt
-      controller.gameBoard.board(x)(y).asInstanceOf[Field].avariable = (fieldNode \\ "avariable").text.trim.toBoolean
+      controller.gameBoard.board(x)(y).get.avariable = (fieldNode \\ "avariable").text.trim.toBoolean
 
       (fieldNode \\ "sort").text.trim.last match {
         case 'p' =>
@@ -44,15 +44,15 @@ class FileIO extends FileIOInterface {
               controller.gameBoard.player4.stones
 
           for (playerStone <- playerStones) {
-            if (playerStone.startField.asInstanceOf[Field].x == startFieldX && playerStone.startField.asInstanceOf[Field].y == startFieldY) {
-              playerStone.actualField = controller.gameBoard.board(x)(y)
-              controller.gameBoard.board(x)(y).asInstanceOf[Field].stone = playerStone
+            if (playerStone.startField.x == startFieldX && playerStone.startField.y == startFieldY) {
+              playerStone.actualField = controller.gameBoard.board(x)(y).get
+              controller.gameBoard.board(x)(y).get.stone = playerStone
             }
           }
         case 'b' =>
-          controller.gameBoard.board(x)(y).asInstanceOf[Field].stone = BlockStone()
+          controller.gameBoard.board(x)(y).get.stone = BlockStone()
         case 'f' =>
-          controller.gameBoard.board(x)(y).asInstanceOf[Field].stone = FreeStone()
+          controller.gameBoard.board(x)(y).get.stone = FreeStone()
       }
     }
   }
@@ -82,14 +82,14 @@ class FileIO extends FileIOInterface {
         controller.gameBoard.player4.stones
 
     for (playerStone <- playerStones) {
-      if (playerStone.startField.asInstanceOf[Field].x == startFieldX && playerStone.startField.asInstanceOf[Field].y == startFieldY) {
+      if (playerStone.startField.x == startFieldX && playerStone.startField.y == startFieldY) {
         controller.setChoosenPlayerStone(playerStone)
       }
     }
 
     controller.setDestField(controller.gameBoard.board(
       (controllerNode \\ "destField" \ "x").text.trim.toInt)(
-        (controllerNode \\ "destField" \ "y").text.trim.toInt).asInstanceOf[Field])
+        (controllerNode \\ "destField" \ "y").text.trim.toInt).get)
   }
 
   override def save(controller: ControllerInterface): Unit = {
@@ -110,10 +110,10 @@ class FileIO extends FileIOInterface {
         </state>
         <choosenPlayerStone>
           <startX>
-            { controller.getChoosenPlayerStone.startField.asInstanceOf[Field].x }
+            { controller.getChoosenPlayerStone.startField.x }
           </startX>
           <startY>
-            { controller.getChoosenPlayerStone.startField.asInstanceOf[Field].x }
+            { controller.getChoosenPlayerStone.startField.x }
           </startY>
         </choosenPlayerStone>
         <destField>
@@ -146,13 +146,13 @@ class FileIO extends FileIOInterface {
   }
 
   private def fieldToXml(board: GameBoardInterface, x: Int, y: Int) = {
-    if (!board.board(x)(y).isFreeSpace()) {
-      val field = board.board(x)(y).asInstanceOf[Field]
+    if (!board.board(x)(y).isEmpty) {
+      val field = board.board(x)(y).get
       val avariable = field.avariable
       val sort = field.stone.sort
       if (sort == 'p') {
-        val startFieldX = field.stone.asInstanceOf[PlayerStone].startField.asInstanceOf[Field].x
-        val startFieldY = field.stone.asInstanceOf[PlayerStone].startField.asInstanceOf[Field].y
+        val startFieldX = field.stone.asInstanceOf[PlayerStone].startField.x
+        val startFieldY = field.stone.asInstanceOf[PlayerStone].startField.y
         <field>
           <x>
             { x }
