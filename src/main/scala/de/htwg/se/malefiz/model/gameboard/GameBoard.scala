@@ -236,13 +236,7 @@ case class GameBoard @Inject()(@Named("DefaultSize") var playerCount: Int) exten
     board(x)(y).get.stone = Some(stone)
   }
 
-  def checkDestForBlockStone(x: Int, y: Int): Boolean = {
-    if (y < 12 && y > 0 && x < 17 && x >= 0 && board(x)(y).get.stone.isEmpty) {
-      true
-    } else {
-      false
-    }
-  }
+  def checkDestForBlockStone(x: Int, y: Int): Boolean = y < 12 && y > 0 && x < 17 && x >= 0 && board(x)(y).get.stone.isEmpty
 
   def setBlockStoneOnField(field: Field): Unit = board(field.x)(field.y).get.stone = Some(new BlockStone)
 
