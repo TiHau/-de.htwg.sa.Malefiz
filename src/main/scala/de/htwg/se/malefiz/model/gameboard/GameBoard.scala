@@ -218,10 +218,10 @@ case class GameBoard @Inject()(@Named("DefaultSize") var playerCount: Int) exten
     if (dest.y > 15 || dest.y < 0 || dest.x > 16 || dest.x < 0) {
     } else {
 
-      if (dest == current.stone.asInstanceOf[PlayerStone].startField) {
-        current.stone.asInstanceOf[PlayerStone].actualField = current.stone.asInstanceOf[PlayerStone].startField
+      if (dest == current.stone.get.asInstanceOf[PlayerStone].startField) {
+        current.stone.get.asInstanceOf[PlayerStone].actualField = current.stone.get.asInstanceOf[PlayerStone].startField
       } else {
-        current.stone.asInstanceOf[PlayerStone].actualField = dest
+        current.stone.get.asInstanceOf[PlayerStone].actualField = dest
       }
 
       dest.stone = current.stone
