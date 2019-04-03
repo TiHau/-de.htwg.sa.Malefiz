@@ -291,15 +291,7 @@ case class GameBoard @Inject()(@Named("DefaultSize") var playerCount: Int) exten
     }
   }
 
-  def unmarkPossibleMoves(): Unit = {
-    for (y <- 0 to 15) {
-      for (x <- 0 to 16) {
-        if (board(x)(y).isDefined) {
-          board(x)(y).get.avariable = false
-        }
-      }
-    }
-  }
+  def unmarkPossibleMoves(): Unit = (0 to 15).map(y => (0 to 16).map(x => if (board(x)(y).isDefined) board(x)(y).get.avariable = false))
 
   private def validField(x: Int, y: Int): Boolean = y <= 13 && y >= 0 && x <= 16 && x >=0 && board(x)(y).isDefined
 
