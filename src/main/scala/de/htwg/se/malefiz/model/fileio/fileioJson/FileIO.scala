@@ -97,59 +97,30 @@ class FileIO extends FileIOInterface {
 
   def gameToJson(controller: ControllerInterface): JsObject = {
     Json.obj(
-      "controller" -> Json.obj(
-        "activePlayer" -> JsNumber(controller.activePlayer.color),
-        "diced" -> JsNumber(controller.diced),
-        "state" -> JsString(controller.state.toString),
-        "choosenPlayerStone" -> Json.obj(
-          "startX" -> JsNumber(controller.getChoosenPlayerStone.startField.x),
-          "startY" -> JsNumber(controller.getChoosenPlayerStone.startField.y)),
-        "destField" -> Json.obj(
-          "x" -> JsNumber(controller.getDestField.x),
-          "y" -> JsNumber(controller.getDestField.y)),
-        "needToSetBlockStone" -> JsBoolean(controller.needToSetBlockStone)),
-      "board" -> Json.obj(
-        "fields" -> Json.toJson(
-          for {
-            x <- 0 to 16
-            y <- 0 to 15
-          } yield fieldToJson(controller.gameBoard, x, y)),
-        "playerCount" -> JsNumber(controller.gameBoard.playerCount)))
-  }
-
-  def fieldToJson(gameBoard: GameBoardInterface, x: Int, y: Int): JsObject = {
-    if (gameBoard.board(x)(y).isDefined) {
-      val field = gameBoard.board(x)(y).get
-
-      field.stone match {
-        case Some(stone: PlayerStone) =>
-          Json.obj(
-            "isFreeSpace" -> JsBoolean(false),
+      "activePlayer" -> JsNumber(controller.activePlayer.color),
+      "diced" -> JsNumber(controller.diced),
+      "playerCount" -> JsNumber(controller.gameBoard.playerCount),
+      "blockStones" -> Json.toJson(
+        (0 to 16) flatMap (x =>
+          (0 to 13) filter (y => controller.gameBoard.board(x)(y).isDefined)
+            filter (y => controller.gameBoard.board(x)(y).get.stone.isDefined)
+            filter (y => controller.gameBoard.board(x)(y).get.stone.get.isInstanceOf[BlockStone])
+            map (y => Json.obj("x" -> JsNumber(x), "y" -> JsNumber(y)))
+          )
+      ),
+      "playerStones" -> Json.toJson(
+        (0 to 16) flatMap (x =>
+          (0 to 15) filter (y => controller.gameBoard.board(x)(y).isDefined)
+            filter (y => controller.gameBoard.board(x)(y).get.stone.isDefined)
+            filter (y => controller.gameBoard.board(x)(y).get.stone.get.isInstanceOf[PlayerStone])
+            map (y => Json.obj(
             "x" -> JsNumber(x),
             "y" -> JsNumber(y),
-            "sort" -> JsString("p"),
-            "avariable" -> JsBoolean(field.avariable),
-            "startFieldX" -> JsNumber(stone.startField.x),
-            "startFieldY" -> JsNumber(stone.startField.y))
-        case Some(_: BlockStone) =>
-          Json.obj(
-            "isFreeSpace" -> JsBoolean(false),
-            "x" -> JsNumber(x),
-            "y" -> JsNumber(y),
-            "sort" -> JsString("b"),
-            "avariable" -> JsBoolean(field.avariable))
-        case _ =>
-          Json.obj(
-            "isFreeSpace" -> JsBoolean(false),
-            "x" -> JsNumber(x),
-            "y" -> JsNumber(y),
-            "sort" -> JsString("f"),
-            "avariable" -> JsBoolean(field.avariable))
-      }
-
-    } else {
-      Json.obj(
-        "isFreeSpace" -> JsBoolean(true))
-    }
+            "startFieldX" -> JsNumber(controller.gameBoard.board(x)(y).get.stone.get.asInstanceOf[PlayerStone].startField.x),
+            "startFieldY" -> JsNumber(controller.gameBoard.board(x)(y).get.stone.get.asInstanceOf[PlayerStone].startField.y),
+            "playerColor" -> JsNumber(controller.gameBoard.board(x)(y).get.stone.get.asInstanceOf[PlayerStone].playerColor)
+          ))
+          )
+      ))
   }
 }
