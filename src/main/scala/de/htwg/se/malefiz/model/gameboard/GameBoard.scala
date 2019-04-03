@@ -235,12 +235,8 @@ case class GameBoard @Inject() (@Named("DefaultSize") var playerCount: Int) exte
   }
 
   def checkDestForBlockStone(x: Int, y: Int): Boolean = {
-    if (y < 12 && y > 0 && x < 17 && x >= 0) {
-      if (board(x)(y).get.hasNoStoneOnIt) {
-        true
-      } else {
-        false
-      }
+    if (y < 12 && y > 0 && x < 17 && x >= 0 && board(x)(y).get.hasNoStoneOnIt) {
+      true
     } else {
       false
     }
