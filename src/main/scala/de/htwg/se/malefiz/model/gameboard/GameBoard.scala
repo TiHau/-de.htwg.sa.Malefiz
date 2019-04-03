@@ -299,7 +299,7 @@ case class GameBoard @Inject() (@Named("DefaultSize") var playerCount: Int) exte
   def unmarkPossibleMoves(): Unit = {
     for (y <- 0 to 15) {
       for (x <- 0 to 16) {
-        if (!board(x)(y).isEmpty) {
+        if (board(x)(y).isDefined) {
           board(x)(y).get.avariable = false
         }
       }
@@ -308,25 +308,15 @@ case class GameBoard @Inject() (@Named("DefaultSize") var playerCount: Int) exte
 
   private def validField(x: Int, y: Int): Boolean = {
     // check for a vailid field
-    if (y > 13 || y < 0) {
+    if (y > 13 || y < 0 || x > 16 || x < 0 || board(x)(y).isEmpty) {
       false
-    } else if (x > 16 || x < 0) {
-      false
-    } else if (board(x)(y).isEmpty) {
-      false
-    } else {
+    }  else {
       true
     }
   }
 
   def checkDestForPlayerStone(x: Int, y: Int): Boolean = {
-    if (y > 13 || y < 0) {
-      false
-    } else if (x > 16 || x < 0) {
-      false
-    } else if (board(x)(y).isEmpty) {
-      false
-    } else if (!board(x)(y).get.avariable) {
+    if (y > 13 || y < 0 || x > 16 || x < 0 || board(x)(y).isEmpty || !board(x)(y).get.avariable) {
       false
     } else {
       true
@@ -343,11 +333,11 @@ case class GameBoard @Inject() (@Named("DefaultSize") var playerCount: Int) exte
     }
   }
 
-  override def createBoard = {
+  override def createBoard:GameBoard = {
     if (playerCount > 4) {
-      playerCount = 4
+      playerCount = nu4
     } else if (playerCount < 2) {
-      playerCount = 2
+      playerCount = nu2
     }
     buildMalefitzGameBoard(board)
     setBlockStones(board)
