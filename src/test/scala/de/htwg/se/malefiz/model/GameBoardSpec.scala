@@ -34,9 +34,9 @@ class GameBoardSpec extends WordSpec with Matchers {
         var count = 0
         for (y <- 0 to 15) {
           for (x <- 0 to 16) {
-            if (!board.board(x)(y).isEmpty) {
+            if (board.board(x)(y).isDefined) {
               val field = board.board(x)(y).get
-              if (field.stone.sort == 'p') {
+              if (field.stone.isDefined && field.stone.get.isInstanceOf[PlayerStone]) {
                 count += 1
               }
             }

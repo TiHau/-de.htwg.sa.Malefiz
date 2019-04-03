@@ -15,16 +15,12 @@ class StoneSpec extends WordSpec with Matchers {
         stone.startField should be(Field(0, 0, null))
       }
       "have stonetype p" in {
-        stone.sort should be('p')
+        stone.isInstanceOf[PlayerStone] shouldBe true
       }
       stone.actualField = Field(1, 1, null)
-      stone.sort = 'p'
 
       "have a acctualField after change" in {
         stone.actualField should be(Field(1, 1, null))
-      }
-      "have a char after change" in {
-        stone.sort should be('p')
       }
 
     }
@@ -34,26 +30,16 @@ class StoneSpec extends WordSpec with Matchers {
       val stone: BlockStone = BlockStone()
 
       "have stonetype b" in {
-        stone.sort should be('b')
+        stone.isInstanceOf[BlockStone] shouldBe true
       }
-    }
-  }
-  "A FreeStone" when {
-    "new" should {
-      val stone: FreeStone = FreeStone()
-
-      "have stonetype f" in {
-        stone.sort should be('f')
-      }
-
     }
   }
   "A Stone" when {
     "new" should {
-      val stone: Stone = new Stone(' ')
+      val stone: Stone = new Stone()
 
       "have stonetype ' '" in {
-        stone.sort should be(' ')
+        stone.isInstanceOf[Stone] shouldBe true
       }
 
     }

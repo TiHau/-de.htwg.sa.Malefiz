@@ -216,12 +216,12 @@ case class Controller @Inject()() extends ControllerInterface with Publisher {
   }
 
   private def checkValidPlayerStone(x: Int, y: Int): Boolean = {
-    if (x >= 0 && x < 17 && y >= 0 && y < 16 && (!gameBoard.board(x)(y).isEmpty && gameBoard.board(x)(y).get.stone.sort == 'p')) {
+    if (x >= 0 && x < 17 && y >= 0 && y < 16 && (gameBoard.board(x)(y).isDefined && gameBoard.board(x)(y).get.stone.isDefined && gameBoard.board(x)(y).get.stone.get.isInstanceOf[PlayerStone])) {
       var retBool: Boolean = false
       for (s <- activePlayer.stones) {
         if ((s.actualField.x == gameBoard.board(x)(y).get.x)
           && (s.actualField.y == gameBoard.board(x)(y).get.y)) {
-          chosenPlayerStone = gameBoard.board(x)(y).get.stone.asInstanceOf[PlayerStone]
+          chosenPlayerStone = gameBoard.board(x)(y).get.stone.get.asInstanceOf[PlayerStone]
           retBool = true
         }
       }

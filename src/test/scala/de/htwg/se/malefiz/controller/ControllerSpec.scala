@@ -140,8 +140,7 @@ class ControllerSpec extends WordSpec with Matchers {
 
       }
       "check win" in {
-        controller.gameBoard.board(8)(0).get.stone =
-          PlayerStone(controller.gameBoard.board(8)(0).get, controller.gameBoard.board(8)(0).get, 1)
+        controller.gameBoard.board(8)(0).get.stone = Some(PlayerStone(controller.gameBoard.board(8)(0).get, controller.gameBoard.board(8)(0).get, 1))
         controller.state = BeforeEndOfTurn
         controller.endTurn()
         controller.state shouldBe PlayerWon
@@ -173,12 +172,12 @@ class ControllerSpec extends WordSpec with Matchers {
         controller.diced = 5
         controller.takeInput(2, 14)
         controller.takeInput(4, 11)
-        controller.gameBoard.board(4)(11).get.stone.sort shouldBe 'p'
+        controller.gameBoard.board(4)(11).get.stone.get.isInstanceOf[PlayerStone] shouldBe true
 
         controller.undo()
-        controller.gameBoard.board(4)(11).get.stone.sort shouldBe 'b'
+        controller.gameBoard.board(4)(11).get.stone.get.isInstanceOf[BlockStone] shouldBe true
         controller.redo()
-        controller.gameBoard.board(4)(11).get.stone.sort shouldBe 'p'
+        controller.gameBoard.board(4)(11).get.stone.get.isInstanceOf[PlayerStone] shouldBe true
       }
 
       "undo before end of turn" in {
@@ -286,7 +285,7 @@ class ControllerSpec extends WordSpec with Matchers {
 
       "getter/setter tests" in {
         controller.newGame(4)
-        val testField = Field(8,0,FreeStone())
+        val testField = Field(8,0,None)
         controller.setDestField(testField)
         controller.getDestField shouldBe testField
 

@@ -1,23 +1,23 @@
 package de.htwg.se.malefiz.controller
 
 import de.htwg.se.malefiz.util.Command
-import de.htwg.se.malefiz.model.gameboard.{ Field, FreeStone, PlayerStone, Stone }
+import de.htwg.se.malefiz.model.gameboard.{BlockStone, Field, PlayerStone, Stone}
 
 class MoveCommand(stone: PlayerStone, destField: Field, controller: ControllerInterface) extends Command {
 
   private val xStone = stone.actualField.x
   private val yStone = stone.actualField.y
   private val currentField = controller.gameBoard.board(xStone)(yStone).get
-  private var hitStone = new Stone('f')
+  private var hitStone: Option[Stone] = None
 
   override def doStep(): Unit = {
 
-    hitStone = controller.gameBoard.moveStone(currentField, destField).get
+    hitStone = controller.gameBoard.moveStone(currentField, destField)
 
-    hitStone.sort match {
-      case 'p' => controller.gameBoard.resetPlayerStone(hitStone.asInstanceOf[PlayerStone])
-      case 'f' =>
-      case 'b' => controller.needToSetBlockStone = true
+    hitStone match {
+      case Some(stone: PlayerStone) => controller.gameBoard.resetPlayerStone(stone)
+      case Some(_: BlockStone) => controller.needToSetBlockStone = true
+      case _ =>
     }
 
     controller.gameBoard.unmarkPossibleMoves()
@@ -29,11 +29,14 @@ class MoveCommand(stone: PlayerStone, destField: Field, controller: ControllerIn
 
     destField.stone = hitStone
 
-    if (hitStone.sort == 'p') {
-      val x = hitStone.asInstanceOf[PlayerStone].startField.x
-      val y = hitStone.asInstanceOf[PlayerStone].startField.y
-      controller.gameBoard.board(x)(y).get.stone = FreeStone()
-      hitStone.asInstanceOf[PlayerStone].actualField = destField
+    hitStone match {
+      case Some(stone: PlayerStone) => {
+        val x = stone.startField.x
+        val y = stone.startField.y
+        controller.gameBoard.board(x)(y).get.stone = None
+        stone.actualField = destField
+      }
+      case _ =>
     }
 
     controller.gameBoard.markPossibleMoves(stone, controller.activePlayer, controller.diced)

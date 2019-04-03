@@ -46,13 +46,13 @@ class FileIO extends FileIOInterface {
           for (playerStone <- playerStones) {
             if (playerStone.startField.x == startFieldX && playerStone.startField.y == startFieldY) {
               playerStone.actualField = controller.gameBoard.board(x)(y).get
-              controller.gameBoard.board(x)(y).get.stone = playerStone
+              controller.gameBoard.board(x)(y).get.stone = Some(playerStone)
             }
           }
         case 'b' =>
-          controller.gameBoard.board(x)(y).get.stone = BlockStone()
+          controller.gameBoard.board(x)(y).get.stone = Some(BlockStone())
         case 'f' =>
-          controller.gameBoard.board(x)(y).get.stone = FreeStone()
+          controller.gameBoard.board(x)(y).get.stone = None
       }
     }
   }
@@ -146,48 +146,60 @@ class FileIO extends FileIOInterface {
   }
 
   private def fieldToXml(board: GameBoardInterface, x: Int, y: Int) = {
-    if (!board.board(x)(y).isEmpty) {
+    if (board.board(x)(y).isDefined) {
       val field = board.board(x)(y).get
-      val avariable = field.avariable
-      val sort = field.stone.sort
-      if (sort == 'p') {
-        val startFieldX = field.stone.asInstanceOf[PlayerStone].startField.x
-        val startFieldY = field.stone.asInstanceOf[PlayerStone].startField.y
-        <field>
-          <x>
-            { x }
-          </x>
-          <y>
-            { y }
-          </y>
-          <sort>
-            { sort }
-          </sort>
-          <avariable>
-            { avariable }
-          </avariable>
-          <startFieldX>
-            { startFieldX }
-          </startFieldX>
-          <startFieldY>
-            { startFieldY }
-          </startFieldY>
-        </field>
-      } else {
-        <field>
-          <x>
-            { x }
-          </x>
-          <y>
-            { y }
-          </y>
-          <sort>
-            { sort }
-          </sort>
-          <avariable>
-            { avariable }
-          </avariable>
-        </field>
+      field.stone match {
+        case Some(stone: PlayerStone) =>
+          <field>
+            <x>
+              { x }
+            </x>
+            <y>
+              { y }
+            </y>
+            <sort>
+              { "p" }
+            </sort>
+            <avariable>
+              { field.avariable }
+            </avariable>
+            <startFieldX>
+              { stone.startField.x }
+            </startFieldX>
+            <startFieldY>
+              { stone.startField.y }
+            </startFieldY>
+          </field>
+        case Some(_:BlockStone) =>
+          <field>
+            <x>
+              { x }
+            </x>
+            <y>
+              { y }
+            </y>
+            <sort>
+              { "b" }
+            </sort>
+            <avariable>
+              { field.avariable }
+            </avariable>
+          </field>
+        case _ =>
+          <field>
+            <x>
+              { x }
+            </x>
+            <y>
+              { y }
+            </y>
+            <sort>
+              { "f" }
+            </sort>
+            <avariable>
+              { field.avariable }
+            </avariable>
+          </field>
       }
     }
   }

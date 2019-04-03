@@ -1,12 +1,11 @@
 package de.htwg.se.malefiz.model.fileio.fileioJson
 
-import java.nio.file.{ Files, Paths }
+import java.nio.file.{Files, Paths}
 
-import de.htwg.se.malefiz.controller.{ Controller, ControllerInterface, State }
+import de.htwg.se.malefiz.controller.{ControllerInterface, State}
 import de.htwg.se.malefiz.model.fileio.FileIOInterface
 import de.htwg.se.malefiz.model.gameboard._
 import play.api.libs.json._
-import de.htwg.se.malefiz.controller.State._
 
 import scala.io.Source
 
@@ -24,10 +23,10 @@ class FileIO extends FileIOInterface {
   private def loadController(json: JsValue, controller: ControllerInterface): Unit = {
     val activeColor = (json \ "controller" \ "activePlayer").get.toString().toInt
     activeColor match {
-      case 1 =>  controller.activePlayer = controller.gameBoard.player1
-      case 2 =>  controller.activePlayer = controller.gameBoard.player2
-      case 3 =>  controller.activePlayer = controller.gameBoard.player3
-      case _ =>  controller.activePlayer = controller.gameBoard.player4
+      case 1 => controller.activePlayer = controller.gameBoard.player1
+      case 2 => controller.activePlayer = controller.gameBoard.player2
+      case 3 => controller.activePlayer = controller.gameBoard.player3
+      case _ => controller.activePlayer = controller.gameBoard.player4
     }
 
     controller.diced = (json \ "controller" \ "diced").get.toString().toInt
@@ -48,7 +47,7 @@ class FileIO extends FileIOInterface {
 
     controller.setDestField(controller.gameBoard.board(
       (json \ "controller" \ "destField" \ "x").get.toString().toInt)(
-        (json \ "controller" \ "destField" \ "y").get.toString().toInt).get)
+      (json \ "controller" \ "destField" \ "y").get.toString().toInt).get)
 
     controller.needToSetBlockStone = (json \ "controller" \ "needToSetBlockStone").get.toString().toBoolean
   }
@@ -77,13 +76,13 @@ class FileIO extends FileIOInterface {
             for (playerStone <- playerStones) {
               if (playerStone.startField.x == startFieldX && playerStone.startField.y == startFieldY) {
                 playerStone.actualField = controller.gameBoard.board(x)(y).get
-                controller.gameBoard.board(x)(y).get.stone = playerStone
+                controller.gameBoard.board(x)(y).get.stone = Some(playerStone)
               }
             }
           case 'b' =>
-            controller.gameBoard.board(x)(y).get.stone = BlockStone()
+            controller.gameBoard.board(x)(y).get.stone = Some(BlockStone())
           case 'f' =>
-            controller.gameBoard.board(x)(y).get.stone = FreeStone()
+            controller.gameBoard.board(x)(y).get.stone = None
         }
       }
     }
@@ -119,28 +118,35 @@ class FileIO extends FileIOInterface {
   }
 
   def fieldToJson(gameBoard: GameBoardInterface, x: Int, y: Int): JsObject = {
-    if (!gameBoard.board(x)(y).isEmpty) {
+    if (gameBoard.board(x)(y).isDefined) {
       val field = gameBoard.board(x)(y).get
-      val sort = field.stone.sort
-      if (sort == 'p') {
-        val startFieldX = field.stone.asInstanceOf[PlayerStone].startField.x
-        val startFieldY = field.stone.asInstanceOf[PlayerStone].startField.y
-        Json.obj(
-          "isFreeSpace" -> JsBoolean(false),
-          "x" -> JsNumber(x),
-          "y" -> JsNumber(y),
-          "sort" -> JsString(sort.toString),
-          "avariable" -> JsBoolean(field.avariable),
-          "startFieldX" -> JsNumber(startFieldX),
-          "startFieldY" -> JsNumber(startFieldY))
-      } else {
-        Json.obj(
-          "isFreeSpace" -> JsBoolean(gameBoard.board(x)(y).isEmpty),
-          "x" -> JsNumber(x),
-          "y" -> JsNumber(y),
-          "sort" -> JsString(sort.toString),
-          "avariable" -> JsBoolean(field.avariable))
+
+      field.stone match {
+        case Some(stone: PlayerStone) =>
+          Json.obj(
+            "isFreeSpace" -> JsBoolean(false),
+            "x" -> JsNumber(x),
+            "y" -> JsNumber(y),
+            "sort" -> JsString("p"),
+            "avariable" -> JsBoolean(field.avariable),
+            "startFieldX" -> JsNumber(stone.startField.x),
+            "startFieldY" -> JsNumber(stone.startField.y))
+        case Some(_: BlockStone) =>
+          Json.obj(
+            "isFreeSpace" -> JsBoolean(false),
+            "x" -> JsNumber(x),
+            "y" -> JsNumber(y),
+            "sort" -> JsString("b"),
+            "avariable" -> JsBoolean(field.avariable))
+        case _ =>
+          Json.obj(
+            "isFreeSpace" -> JsBoolean(false),
+            "x" -> JsNumber(x),
+            "y" -> JsNumber(y),
+            "sort" -> JsString("f"),
+            "avariable" -> JsBoolean(field.avariable))
       }
+
     } else {
       Json.obj(
         "isFreeSpace" -> JsBoolean(true))
