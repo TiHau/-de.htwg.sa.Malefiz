@@ -301,22 +301,10 @@ case class GameBoard @Inject()(@Named("DefaultSize") var playerCount: Int) exten
     }
   }
 
-  private def validField(x: Int, y: Int): Boolean = {
-    // check for a vailid field
-    if (y > 13 || y < 0 || x > 16 || x < 0 || board(x)(y).isEmpty) {
-      false
-    } else {
-      true
-    }
-  }
+  private def validField(x: Int, y: Int): Boolean = y <= 13 && y >= 0 && x <= 16 && x >=0 && board(x)(y).isDefined
 
-  def checkDestForPlayerStone(x: Int, y: Int): Boolean = {
-    if (y > 13 || y < 0 || x > 16 || x < 0 || board(x)(y).isEmpty || !board(x)(y).get.avariable) {
-      false
-    } else {
-      true
-    }
-  }
+  def checkDestForPlayerStone(x: Int, y: Int): Boolean = validField(x,y) && board(x)(y).get.avariable
+
   //wenn ein Stein im Zielfeld steht muss es ein Spielerstein sein => Sieg
   def checkWin: Boolean = board(nu8)(nu0).get.stone.isDefined
 
