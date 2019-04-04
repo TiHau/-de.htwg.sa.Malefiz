@@ -294,12 +294,10 @@ class ControllerSpec extends WordSpec with Matchers {
 
       "save and load" in {
         controller.newGame(4)
-        val oldState: State.Value = controller.state
         val oldDiced: Int = controller.diced
         val oldPlayer: Player = controller.activePlayer
         controller.saveGame()
         controller.loadSavedGame()
-        controller.state shouldBe oldState
         controller.diced shouldBe oldDiced
         controller.activePlayer shouldBe oldPlayer
       }

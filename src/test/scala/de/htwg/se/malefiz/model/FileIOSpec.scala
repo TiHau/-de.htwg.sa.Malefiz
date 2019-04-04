@@ -64,7 +64,6 @@ class FileIOSpec extends WordSpec with Matchers {
         fileIO.save(controller)
         controller.setPlayerCount(4)
         fileIO.load(controller)
-        Files.exists(Paths.get("saveFile.json")) || Files.exists(Paths.get("saveFile.xml")) shouldBe true
         controller.gameBoard.playerCount shouldBe 3
 
       }
