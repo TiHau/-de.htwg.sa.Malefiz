@@ -91,9 +91,7 @@ class FileIO extends FileIOInterface {
           (0 to 13) filter (y => controller.gameBoard.board(x)(y).isDefined)
             filter (y => controller.gameBoard.board(x)(y).get.stone.isDefined)
             filter (y => controller.gameBoard.board(x)(y).get.stone.get.isInstanceOf[BlockStone])
-            map (y => Json.obj("x" -> JsNumber(x), "y" -> JsNumber(y)))
-          )
-      ),
+            map (y => Json.obj("x" -> JsNumber(x), "y" -> JsNumber(y))))),
       "playerStones" -> Json.toJson(
         (0 to 16) flatMap (x =>
           (0 to 15) filter (y => controller.gameBoard.board(x)(y).isDefined)
@@ -104,9 +102,6 @@ class FileIO extends FileIOInterface {
             "y" -> JsNumber(y),
             "startX" -> JsNumber(controller.gameBoard.board(x)(y).get.stone.get.asInstanceOf[PlayerStone].startX),
             "startY" -> JsNumber(controller.gameBoard.board(x)(y).get.stone.get.asInstanceOf[PlayerStone].startY),
-            "playerColor" -> JsNumber(controller.gameBoard.board(x)(y).get.stone.get.asInstanceOf[PlayerStone].playerColor)
-          ))
-          )
-      ))
+            "playerColor" -> JsNumber(controller.gameBoard.board(x)(y).get.stone.get.asInstanceOf[PlayerStone].playerColor))))))
   }
 }

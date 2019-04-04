@@ -289,9 +289,9 @@ case class GameBoard @Inject()(@Named("DefaultSize") var playerCount: Int) exten
 
   def unmarkPossibleMoves(): Unit = board.foreach(_.foreach(field => if (field.isDefined) field.get.avariable = false))
 
-  private def validField(x: Int, y: Int): Boolean = y <= 13 && y >= 0 && x <= 16 && x >=0 && board(x)(y).isDefined
+  private def validField(x: Int, y: Int): Boolean = y <= 13 && y >= 0 && x <= 16 && x >= 0 && board(x)(y).isDefined
 
-  def checkDestForPlayerStone(x: Int, y: Int): Boolean = validField(x,y) && board(x)(y).get.avariable
+  def checkDestForPlayerStone(x: Int, y: Int): Boolean = validField(x, y) && board(x)(y).get.avariable
 
   //wenn ein Stein im Zielfeld steht muss es ein Spielerstein sein => Sieg
   def checkWin: Boolean = board(nu8)(nu0).get.stone.isDefined

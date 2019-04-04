@@ -70,9 +70,8 @@ class FileIOSpec extends WordSpec with Matchers {
       }
       "non existing file" in {
 
-        if (Files.exists(Paths.get("saveFile.json"))) {
+        if (Files.exists(Paths.get("saveFile.json")))
           Files.delete(Paths.get("saveFile.json"))
-        } else if (Files.exists(Paths.get("saveFile.xml"))) { Files.delete(Paths.get("saveFile.xml")) }
         controller.setPlayerCount(4)
         fileIO.load(controller)
         controller.gameBoard.playerCount shouldBe 4

@@ -1,6 +1,6 @@
 package de.htwg.se.malefiz.controller
 
-import com.google.inject.{Guice, Injector}
+import com.google.inject.{ Guice, Injector }
 import de.htwg.se.malefiz.MalefizModule
 import de.htwg.se.malefiz.controller.State._
 import de.htwg.se.malefiz.model.gameboard._
@@ -263,29 +263,27 @@ class ControllerSpec extends WordSpec with Matchers {
       "when input comes in in SetPlayerCount State" in {
         controller.newGame(4)
         controller.state = SetPlayerCount
-        controller.takeInput(0,0)
+        controller.takeInput(0, 0)
         controller.state shouldBe SetPlayerCount
       }
 
       "when input comes in in EndTurn state" in {
         controller.newGame(4)
         controller.state = EndTurn
-        controller.takeInput(0,0)
+        controller.takeInput(0, 0)
         controller.state shouldBe EndTurn
       }
-
 
       "when input comes in in PlayerWon state" in {
         controller.newGame(4)
         controller.state = PlayerWon
-        controller.takeInput(0,0)
+        controller.takeInput(0, 0)
         controller.state shouldBe PlayerWon
       }
 
-
       "getter/setter tests" in {
         controller.newGame(4)
-        val testField = Field(8,0,None)
+        val testField = Field(8, 0, None)
         controller.setDestField(testField)
         controller.getDestField shouldBe testField
 

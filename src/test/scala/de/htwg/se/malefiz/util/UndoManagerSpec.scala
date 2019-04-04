@@ -11,11 +11,11 @@ class UndoManagerSpec extends WordSpec with Matchers {
       var undoManager = new UndoManager()
       "undo with empty stack" in {
         undoManager.undoStep()
-        undoManager.isRedoStackEmpty() shouldBe (true)
+        undoManager.isRedoStackEmpty shouldBe (true)
       }
       "redo with empty Stack" in {
         undoManager.redoStep()
-        undoManager.isRedoStackEmpty() shouldBe (true)
+        undoManager.isRedoStackEmpty shouldBe (true)
       }
     }
   }
