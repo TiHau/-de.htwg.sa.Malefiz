@@ -5,8 +5,8 @@ import de.htwg.se.malefiz.model.gameboard.{BlockStone, Field, PlayerStone, Stone
 
 class MoveCommand(stone: PlayerStone, destField: Field, controller: ControllerInterface) extends Command {
 
-  private val xStone = stone.actualField.x
-  private val yStone = stone.actualField.y
+  private val xStone = stone.x
+  private val yStone = stone.y
   private val currentField = controller.gameBoard.board(xStone)(yStone).get
   private var hitStone: Option[Stone] = None
 
@@ -31,10 +31,11 @@ class MoveCommand(stone: PlayerStone, destField: Field, controller: ControllerIn
 
     hitStone match {
       case Some(stone: PlayerStone) => {
-        val x = stone.startField.x
-        val y = stone.startField.y
+        val x = stone.startX
+        val y = stone.startY
         controller.gameBoard.board(x)(y).get.stone = None
-        stone.actualField = destField
+        stone.x = destField.x
+        stone.y = destField.y
       }
       case _ =>
     }

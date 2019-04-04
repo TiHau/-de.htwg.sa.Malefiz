@@ -23,15 +23,16 @@ class UndoManager {
   def redoStep(): Unit = {
     redoStack match {
       case Nil =>
-      case head :: stack => {
-        head.redoStep
+      case head :: stack =>
+        head.redoStep()
         redoStack = stack
         undoStack = head :: undoStack
-      }
     }
   }
 
-  def isRedoStackEmpty(): Boolean = redoStack.isEmpty
+  def isRedoStackEmpty: Boolean = redoStack.isEmpty
+
+  def isUndoStackEmpty: Boolean = undoStack.isEmpty
 
   def clear(): Unit = {
     undoStack = Nil

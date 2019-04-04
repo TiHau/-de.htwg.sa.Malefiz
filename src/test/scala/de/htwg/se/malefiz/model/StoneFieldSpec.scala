@@ -1,12 +1,14 @@
 package de.htwg.se.malefiz.model.gameboard
+
 import org.scalatest._
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
+
 @RunWith(classOf[JUnitRunner])
 class StoneFieldSpec extends WordSpec with Matchers {
   "A Field" when {
     "new" should {
-      val field: Field = Field(0, 0, Some(PlayerStone(Field(0, 0, null), Field(0, 0, null), 1)))
+      val field: Field = Field(0, 0, Some(PlayerStone(0, 0, 0, 0, 1)))
 
       "have a x coordinate" in {
         field.x should be(0)

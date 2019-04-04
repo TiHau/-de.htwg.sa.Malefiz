@@ -206,7 +206,8 @@ case class GameBoard @Inject()(@Named("DefaultSize") var playerCount: Int) exten
     if (validField(dest.x, dest.y) && board(dest.x)(dest.y).get.avariable) {
       val save = dest.stone
       dest.stone = current.stone
-      dest.stone.get.asInstanceOf[PlayerStone].actualField = dest
+      dest.stone.get.asInstanceOf[PlayerStone].x = dest.x
+      dest.stone.get.asInstanceOf[PlayerStone].y = dest.y
       current.stone = None
       save
     } else {
@@ -218,10 +219,12 @@ case class GameBoard @Inject()(@Named("DefaultSize") var playerCount: Int) exten
     if (dest.y > 15 || dest.y < 0 || dest.x > 16 || dest.x < 0) {
     } else {
 
-      if (dest == current.stone.get.asInstanceOf[PlayerStone].startField) {
-        current.stone.get.asInstanceOf[PlayerStone].actualField = current.stone.get.asInstanceOf[PlayerStone].startField
+      if (dest.x == current.stone.get.asInstanceOf[PlayerStone].startX && dest.y == current.stone.get.asInstanceOf[PlayerStone].startY) {
+        current.stone.get.asInstanceOf[PlayerStone].x = current.stone.get.asInstanceOf[PlayerStone].startX
+        current.stone.get.asInstanceOf[PlayerStone].y = current.stone.get.asInstanceOf[PlayerStone].startY
       } else {
-        current.stone.get.asInstanceOf[PlayerStone].actualField = dest
+        current.stone.get.asInstanceOf[PlayerStone].x = dest.x
+        current.stone.get.asInstanceOf[PlayerStone].y = dest.y
       }
 
       dest.stone = current.stone
@@ -230,10 +233,9 @@ case class GameBoard @Inject()(@Named("DefaultSize") var playerCount: Int) exten
   }
 
   def resetPlayerStone(stone: PlayerStone): Unit = {
-    stone.actualField = stone.startField
-    val x = stone.startField.x
-    val y = stone.startField.y
-    board(x)(y).get.stone = Some(stone)
+    stone.x = stone.startX
+    stone.y = stone.startY
+    board(stone.x)(stone.y).get.stone = Some(stone)
   }
 
   def checkDestForBlockStone(x: Int, y: Int): Boolean = y < 12 && y > 0 && x < 17 && x >= 0 && board(x)(y).get.stone.isEmpty
@@ -243,13 +245,13 @@ case class GameBoard @Inject()(@Named("DefaultSize") var playerCount: Int) exten
   def removeStoneOnField(field: Field): Unit = board(field.x)(field.y).get.stone = None
 
   def markPossibleMoves(stone: PlayerStone, player: Player, diced: Int): Unit = {
-    if (stone.actualField == stone.startField) {
-      val x = player.stones(0).startField.x
-      val y = player.stones(0).startField.y
+    if (stone.isOnStart) {
+      val x = player.stones(0).startX
+      val y = player.stones(0).startY
       markPossibleMovesR(x, y, diced, ' ', player.color)
     } else {
-      val x = stone.actualField.x
-      val y = stone.actualField.y
+      val x = stone.x
+      val y = stone.y
       markPossibleMovesR(x, y, diced, ' ', player.color)
     }
   }
@@ -303,29 +305,29 @@ case class GameBoard @Inject()(@Named("DefaultSize") var playerCount: Int) exten
     buildMalefitzGameBoard(board)
     setBlockStones(board)
 
-    player1.stones(nu2) = PlayerStone(board(nu1)(nu14).get, board(nu1)(nu14).get, player1.color)
-    player1.stones(nu1) = PlayerStone(board(nu1)(nu15).get, board(nu1)(nu15).get, player1.color)
-    player1.stones(nu0) = PlayerStone(board(nu2)(nu14).get, board(nu2)(nu14).get, player1.color)
-    player1.stones(nu3) = PlayerStone(board(nu3)(nu14).get, board(nu3)(nu14).get, player1.color)
-    player1.stones(nu4) = PlayerStone(board(nu3)(nu15).get, board(nu3)(nu15).get, player1.color)
+    player1.stones(nu2) = PlayerStone(nu1, nu14, nu1, nu14, player1.color)
+    player1.stones(nu1) = PlayerStone(nu1, nu15, nu1, nu15, player1.color)
+    player1.stones(nu0) = PlayerStone(nu2, nu14, nu2, nu14, player1.color)
+    player1.stones(nu3) = PlayerStone(nu3, nu14, nu3, nu14, player1.color)
+    player1.stones(nu4) = PlayerStone(nu3, nu15, nu3, nu15, player1.color)
 
-    player2.stones(nu2) = PlayerStone(board(nu5)(nu14).get, board(nu5)(nu14).get, player2.color)
-    player2.stones(nu1) = PlayerStone(board(nu5)(nu15).get, board(nu5)(nu15).get, player2.color)
-    player2.stones(nu0) = PlayerStone(board(nu6)(nu14).get, board(nu6)(nu14).get, player2.color)
-    player2.stones(nu3) = PlayerStone(board(nu7)(nu14).get, board(nu7)(nu14).get, player2.color)
-    player2.stones(nu4) = PlayerStone(board(nu7)(nu15).get, board(nu7)(nu15).get, player2.color)
+    player2.stones(nu2) = PlayerStone(nu5, nu14, nu5, nu14, player2.color)
+    player2.stones(nu1) = PlayerStone(nu5, nu15, nu5, nu15, player2.color)
+    player2.stones(nu0) = PlayerStone(nu6, nu14, nu6, nu14, player2.color)
+    player2.stones(nu3) = PlayerStone(nu7, nu14, nu7, nu14, player2.color)
+    player2.stones(nu4) = PlayerStone(nu7, nu15, nu7, nu15, player2.color)
 
-    player3.stones(nu2) = PlayerStone(board(nu9)(nu14).get, board(nu9)(nu14).get, player3.color)
-    player3.stones(nu1) = PlayerStone(board(nu9)(nu15).get, board(nu9)(nu15).get, player3.color)
-    player3.stones(nu0) = PlayerStone(board(nu10)(nu14).get, board(nu10)(nu14).get, player3.color)
-    player3.stones(nu3) = PlayerStone(board(nu11)(nu14).get, board(nu11)(nu14).get, player3.color)
-    player3.stones(nu4) = PlayerStone(board(nu11)(nu15).get, board(nu11)(nu15).get, player3.color)
+    player3.stones(nu2) = PlayerStone(nu9, nu14, nu9, nu14, player3.color)
+    player3.stones(nu1) = PlayerStone(nu9, nu15, nu9, nu15, player3.color)
+    player3.stones(nu0) = PlayerStone(nu10, nu14, nu10, nu14, player3.color)
+    player3.stones(nu3) = PlayerStone(nu11, nu14, nu11, nu14, player3.color)
+    player3.stones(nu4) = PlayerStone(nu11, nu15, nu11, nu15, player3.color)
 
-    player4.stones(nu2) = PlayerStone(board(nu13)(nu14).get, board(nu13)(nu14).get, player4.color)
-    player4.stones(nu1) = PlayerStone(board(nu13)(nu15).get, board(nu13)(nu15).get, player4.color)
-    player4.stones(nu0) = PlayerStone(board(nu14)(nu14).get, board(nu14)(nu14).get, player4.color)
-    player4.stones(nu3) = PlayerStone(board(nu15)(nu14).get, board(nu15)(nu14).get, player4.color)
-    player4.stones(nu4) = PlayerStone(board(nu15)(nu15).get, board(nu15)(nu15).get, player4.color)
+    player4.stones(nu2) = PlayerStone(nu13, nu14, nu13, nu14, player4.color)
+    player4.stones(nu1) = PlayerStone(nu13, nu15, nu13, nu15, player4.color)
+    player4.stones(nu0) = PlayerStone(nu14, nu14, nu14, nu14, player4.color)
+    player4.stones(nu3) = PlayerStone(nu15, nu14, nu15, nu14, player4.color)
+    player4.stones(nu4) = PlayerStone(nu15, nu15, nu15, nu15, player4.color)
 
     setPlayerStones(board, playerCount)
     this
