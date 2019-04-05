@@ -32,72 +32,38 @@ case class GameBoard @Inject()(@Named("DefaultSize") var playerCount: Int) exten
       }
     }
     for (y <- nu0 to nu15) {
-
       y match {
-        case 0 => board(nu8)(y) = Some(Field(nu8, y, None))
-        case 1 => for (i <- nu0 to nu16) {
-          board(i)(y) = Some(Field(i, y, None))
-        }
+        case 0 =>  defineField(nu8, y)
+        case 1 => (nu0 to nu16).foreach(i=> defineField(i, y))
         case 2 =>
-          board(nu0)(y) = Some(Field(nu0, y, None))
-          board(nu16)(y) = Some(Field(nu16, y, None))
-        case 3 => for (i <- nu0 to nu16)
-          board(i)(y) = Some(Field(i, y, None))
-        case 4 => board(nu8)(y) = Some(Field(nu8, y, None))
-        case 5 => for (i <- nu0 to nu16)
-          if (i >= nu6 && i <= nu10) {
-            board(i)(y) = Some(Field(i, y, None))
-          }
+          defineField(nu0,y)
+          defineField(nu16,y)
+        case 3 => (nu0 to nu16).foreach(i=> defineField(i, y))
+        case 4 => defineField(nu8,y)
+        case 5 => (nu6 to nu10).foreach(i=> defineField(i, y))
         case 6 =>
-          board(nu6)(y) = Some(Field(nu6, y, None))
-          board(nu10)(y) = Some(Field(nu10, y, None))
-
-        case 7 => for (i <- nu0 to nu16) {
-          if (i >= nu4 && i <= nu12) {
-            board(i)(y) = Some(Field(i, y, None))
-          }
-        }
-        case 8 =>
-          board(nu12)(y) = Some(Field(nu12, y, None))
-          board(nu4)(y) = Some(Field(nu4, y, None))
-
-        case 9 => for (i <- nu0 to nu16) {
-          if (i >= nu2 && i <= nu14) {
-            board(i)(y) = Some(Field(i, y, None))
-          }
-        }
+          defineField(nu6, y)
+          defineField(nu10, y)
+        case 7 => (nu4 to nu12).foreach(i=> defineField(i, y))
+        case 8 => defineField(nu12,y)
+                            defineField(nu4,y)
+        case 9 => (nu2 to nu14).foreach(i=> defineField(i, y))
         case 10 =>
-          board(nu2)(y) = Some(Field(nu2, y, None))
-          board(nu6)(y) = Some(Field(nu6, y, None))
-          board(nu10)(y) = Some(Field(nu10, y, None))
-          board(nu14)(y) = Some(Field(nu14, y, None))
-
-        case 11 => for (i <- nu0 to nu16) {
-          board(i)(y) = Some(Field(i, y, None))
-        }
-        case 12 => for (i <- nu0 to nu16) {
-          if (i % nu4 == nu0) {
-            board(i)(y) = Some(Field(i, y, None))
-          }
-        }
-        case 13 => for (i <- nu0 to nu16) {
-          board(i)(y) = Some(Field(i, y, None))
-        }
-        case 14 => for (i <- nu0 to nu16) {
-          if ((i >= nu1 && i <= nu3) || (i >= nu5 && i <= nu7) || (i >= nu9 && i <= nu11) || (i >= nu13 && i <= nu15)) {
-            board(i)(y) = Some(Field(i, y, None))
-          }
-        }
-        case 15 => for (i <- nu0 to nu16) {
-          if (!(i % nu2 == nu0)) {
-            board(i)(y) = Some(Field(i, y, None))
-          }
-        }
-
+          defineField(nu2, y)
+          defineField(nu6, y)
+          defineField(nu10, y)
+          defineField(nu14, y)
+        case 11 => (nu0 to nu16).foreach(i=> defineField(i, y))
+        case 12 => (nu0 to nu16).foreach(i=> if (i % nu4 == nu0) {defineField(i, y)})
+        case 13 => (nu0 to nu16).foreach(i=> defineField(i, y))
+        case 14 => (nu0 to nu16).foreach(i=> if ((i >= nu1 && i <= nu3) || (i >= nu5 && i <= nu7) || (i >= nu9 && i <= nu11) || (i >= nu13 && i <= nu15)) {defineField(i, y)})
+        case 15 => (nu0 to nu16).foreach(i=>  if (!(i % nu2 == nu0)) {defineField(i, y)})
       }
     }
     board
   }
+
+  private def defineField(x:Int,y:Int)= board(x)(y) = Some(Field(x, y, None))
 
   override def toString: String = {
     val jsb = new mutable.StringBuilder()
