@@ -26,11 +26,7 @@ case class GameBoard @Inject()(@Named("DefaultSize") var playerCount: Int) exten
   private val nu16 = 16
 
   private def buildMalefitzGameBoard(board: Array[Array[Option[Field]]]): Array[Array[Option[Field]]] = {
-    for (y <- nu0 to nu15) {
-      for (x <- nu0 to nu16) {
-        board(x)(y) = None
-      }
-    }
+    (0 to 15).foreach(y => (0 to 16).foreach(x => board(x)(y) = None))
     for (y <- nu0 to nu15)
       y match {
         case 0 => defineField(nu8, y)
@@ -62,7 +58,7 @@ case class GameBoard @Inject()(@Named("DefaultSize") var playerCount: Int) exten
     board
   }
 
-  private def defineField(x: Int, y: Int) = board(x)(y) = Some(Field(x, y, None))
+  private def defineField(x: Int, y: Int) :Unit = board(x)(y) = Some(Field(x, y, None))
 
   override def toString: String = {
     val jsb = new mutable.StringBuilder()
