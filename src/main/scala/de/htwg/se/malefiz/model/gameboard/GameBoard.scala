@@ -31,39 +31,38 @@ case class GameBoard @Inject()(@Named("DefaultSize") var playerCount: Int) exten
         board(x)(y) = None
       }
     }
-    for (y <- nu0 to nu15) {
+    for (y <- nu0 to nu15)
       y match {
-        case 0 =>  defineField(nu8, y)
-        case 1 => (nu0 to nu16).foreach(i=> defineField(i, y))
+        case 0 => defineField(nu8, y)
+        case 1 => (nu0 to nu16).foreach(i => defineField(i, y))
         case 2 =>
-          defineField(nu0,y)
-          defineField(nu16,y)
-        case 3 => (nu0 to nu16).foreach(i=> defineField(i, y))
-        case 4 => defineField(nu8,y)
-        case 5 => (nu6 to nu10).foreach(i=> defineField(i, y))
+          defineField(nu0, y)
+          defineField(nu16, y)
+        case 3 => (nu0 to nu16).foreach(i => defineField(i, y))
+        case 4 => defineField(nu8, y)
+        case 5 => (nu6 to nu10).foreach(i => defineField(i, y))
         case 6 =>
           defineField(nu6, y)
           defineField(nu10, y)
-        case 7 => (nu4 to nu12).foreach(i=> defineField(i, y))
-        case 8 => defineField(nu12,y)
-                            defineField(nu4,y)
-        case 9 => (nu2 to nu14).foreach(i=> defineField(i, y))
+        case 7 => (nu4 to nu12).foreach(i => defineField(i, y))
+        case 8 => defineField(nu12, y)
+          defineField(nu4, y)
+        case 9 => (nu2 to nu14).foreach(i => defineField(i, y))
         case 10 =>
           defineField(nu2, y)
           defineField(nu6, y)
           defineField(nu10, y)
           defineField(nu14, y)
-        case 11 => (nu0 to nu16).foreach(i=> defineField(i, y))
-        case 12 => (nu0 to nu16).foreach(i=> if (i % nu4 == nu0) {defineField(i, y)})
-        case 13 => (nu0 to nu16).foreach(i=> defineField(i, y))
-        case 14 => (nu0 to nu16).foreach(i=> if ((i >= nu1 && i <= nu3) || (i >= nu5 && i <= nu7) || (i >= nu9 && i <= nu11) || (i >= nu13 && i <= nu15)) {defineField(i, y)})
-        case 15 => (nu0 to nu16).foreach(i=>  if (!(i % nu2 == nu0)) {defineField(i, y)})
+        case 11 => (nu0 to nu16).foreach(i => defineField(i, y))
+        case 12 => (nu0 to nu16).filter(i => i % nu4 == nu0).foreach(i => defineField(i, y))
+        case 13 => (nu0 to nu16).foreach(i => defineField(i, y))
+        case 14 => (nu1 to nu15).filter(i => i % nu4 != nu0).foreach(i => defineField(i, y))
+        case 15 => (nu0 to nu16).filter(i => i % nu2 != nu0).foreach(i => defineField(i, y))
       }
-    }
     board
   }
 
-  private def defineField(x:Int,y:Int)= board(x)(y) = Some(Field(x, y, None))
+  private def defineField(x: Int, y: Int) = board(x)(y) = Some(Field(x, y, None))
 
   override def toString: String = {
     val jsb = new mutable.StringBuilder()
@@ -253,9 +252,9 @@ case class GameBoard @Inject()(@Named("DefaultSize") var playerCount: Int) exten
 
   def unmarkPossibleMoves(): Unit = (0 to 15).map(y => (0 to 16).map(x => if (board(x)(y).isDefined) board(x)(y).get.avariable = false))
 
-  private def validField(x: Int, y: Int): Boolean = y <= 13 && y >= 0 && x <= 16 && x >=0 && board(x)(y).isDefined
+  private def validField(x: Int, y: Int): Boolean = y <= 13 && y >= 0 && x <= 16 && x >= 0 && board(x)(y).isDefined
 
-  def checkDestForPlayerStone(x: Int, y: Int): Boolean = validField(x,y) && board(x)(y).get.avariable
+  def checkDestForPlayerStone(x: Int, y: Int): Boolean = validField(x, y) && board(x)(y).get.avariable
 
   //wenn ein Stein im Zielfeld steht muss es ein Spielerstein sein => Sieg
   def checkWin: Boolean = board(nu8)(nu0).get.stone.isDefined
