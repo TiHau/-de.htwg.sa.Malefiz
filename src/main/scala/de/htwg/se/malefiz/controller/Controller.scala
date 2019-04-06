@@ -23,9 +23,20 @@ case class Controller @Inject()() extends ControllerInterface with Publisher {
   private var chosenPlayerStone = gameBoard.player1.stones(0)
   private var destField = gameBoard.board(8)(0).get
 
-  override def loadSavedGame(): Unit = fileIO.load(this)
+  override def loadSavedGame(): Unit = {
+    state = ChoosePlayerStone
+    undoManager.clear()
+    fileIO.load(this)
+    notifyObservers()
+  }
 
-  override def saveGame(): Unit = fileIO.save(this)
+  override def saveGame(): Unit = {
+    while (!undoManager.isUndoStackEmpty)
+      undo()
+    undoManager.clear()
+    fileIO.save(this)
+    notifyObservers()
+  }
 
   def newGame(playerCount: Int): Unit = {
     gameBoard = playerCount match {
@@ -72,7 +83,7 @@ case class Controller @Inject()() extends ControllerInterface with Publisher {
   }
 
   def redo(): Unit = {
-    if (!undoManager.isRedoStackEmpty()) {
+    if (!undoManager.isRedoStackEmpty) {
       logger.info("Active Player pressed redo")
       undoManager.redoStep()
       val oldState = state
@@ -218,8 +229,8 @@ case class Controller @Inject()() extends ControllerInterface with Publisher {
     if (x >= 0 && x < 17 && y >= 0 && y < 16 && (gameBoard.board(x)(y).isDefined && gameBoard.board(x)(y).get.stone.isDefined && gameBoard.board(x)(y).get.stone.get.isInstanceOf[PlayerStone])) {
       var retBool: Boolean = false
       for (s <- activePlayer.stones) {
-        if ((s.actualField.x == gameBoard.board(x)(y).get.x)
-          && (s.actualField.y == gameBoard.board(x)(y).get.y)) {
+        if ((s.x == gameBoard.board(x)(y).get.x)
+          && (s.y == gameBoard.board(x)(y).get.y)) {
           chosenPlayerStone = gameBoard.board(x)(y).get.stone.get.asInstanceOf[PlayerStone]
           retBool = true
         }

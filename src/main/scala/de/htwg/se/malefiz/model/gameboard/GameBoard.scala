@@ -123,7 +123,8 @@ case class GameBoard @Inject()(@Named("DefaultSize") var playerCount: Int) exten
     if (validField(dest.x, dest.y) && board(dest.x)(dest.y).get.avariable) {
       val save = dest.stone
       dest.stone = current.stone
-      dest.stone.get.asInstanceOf[PlayerStone].actualField = dest
+      dest.stone.get.asInstanceOf[PlayerStone].x = dest.x
+      dest.stone.get.asInstanceOf[PlayerStone].y = dest.y
       current.stone = None
       save
     } else {
@@ -136,7 +137,8 @@ case class GameBoard @Inject()(@Named("DefaultSize") var playerCount: Int) exten
       if (dest == current.stone.get.asInstanceOf[PlayerStone].startField) {
         current.stone.get.asInstanceOf[PlayerStone].actualField = current.stone.get.asInstanceOf[PlayerStone].startField
       } else {
-        current.stone.get.asInstanceOf[PlayerStone].actualField = dest
+        current.stone.get.asInstanceOf[PlayerStone].x = dest.x
+        current.stone.get.asInstanceOf[PlayerStone].y = dest.y
       }
       dest.stone = current.stone
       current.stone = None

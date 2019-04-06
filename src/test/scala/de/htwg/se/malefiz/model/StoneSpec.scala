@@ -3,24 +3,28 @@ package de.htwg.se.malefiz.model.gameboard
 import org.scalatest._
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
+
 @RunWith(classOf[JUnitRunner])
 class StoneSpec extends WordSpec with Matchers {
   "A PlayerStone" when {
     "new" should {
-      val stone: PlayerStone = PlayerStone(Field(0, 0, null), Field(0, 0, null), 1)
+      val stone: PlayerStone = PlayerStone(0, 0, 0, 0, 1)
       "have a Player" in {
         stone.playerColor should be(1)
       }
       "have a startField" in {
-        stone.startField should be(Field(0, 0, null))
+        stone.startX shouldBe 0
+        stone.startY shouldBe 0
       }
       "have stonetype p" in {
         stone.isInstanceOf[PlayerStone] shouldBe true
       }
-      stone.actualField = Field(1, 1, null)
+      stone.x = 1
+      stone.y = 1
 
       "have a acctualField after change" in {
-        stone.actualField should be(Field(1, 1, null))
+        stone.x shouldBe 1
+        stone.y shouldBe 1
       }
 
     }

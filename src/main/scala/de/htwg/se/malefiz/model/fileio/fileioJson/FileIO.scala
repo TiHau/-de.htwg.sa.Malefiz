@@ -1,8 +1,9 @@
 package de.htwg.se.malefiz.model.fileio.fileioJson
 
+import java.io.{File, PrintWriter}
 import java.nio.file.{Files, Paths}
 
-import de.htwg.se.malefiz.controller.{ControllerInterface, State}
+import de.htwg.se.malefiz.controller.ControllerInterface
 import de.htwg.se.malefiz.model.fileio.FileIOInterface
 import de.htwg.se.malefiz.model.gameboard._
 import play.api.libs.json._
@@ -14,82 +15,67 @@ class FileIO extends FileIOInterface {
     if (Files.exists(Paths.get("saveFile.json"))) {
       val source: String = Source.fromFile("saveFile.json").getLines.mkString
       val json: JsValue = Json.parse(source)
-      loadBoard(json, controller)
-      loadController(json, controller)
-      controller.notifyObservers()
+      gameFromJson(json, controller)
     }
   }
 
-  private def loadController(json: JsValue, controller: ControllerInterface): Unit = {
-    val activeColor = (json \ "controller" \ "activePlayer").get.toString().toInt
-    activeColor match {
+  private def gameFromJson(json: JsValue, controller: ControllerInterface): Unit = {
+    controller.setPlayerCount((json \ "playerCount").get.toString().toInt)
+    controller.diced = (json \ "diced").get.toString().toInt
+
+    (json \ "activePlayer").get.toString().toInt match {
       case 1 => controller.activePlayer = controller.gameBoard.player1
       case 2 => controller.activePlayer = controller.gameBoard.player2
       case 3 => controller.activePlayer = controller.gameBoard.player3
       case _ => controller.activePlayer = controller.gameBoard.player4
     }
 
-    controller.diced = (json \ "controller" \ "diced").get.toString().toInt
-    controller.state = State.fromString((json \ "controller" \ "state").get.toString().drop(1).dropRight(1)).get
-    val startFieldX = (json \ "controller" \ "choosenPlayerStone" \ "startX").get.toString().toInt
-    val startFieldY = (json \ "controller" \ "choosenPlayerStone" \ "startY").get.toString().toInt
-    val playerStones =
-      controller.gameBoard.player1.stones ++
-        controller.gameBoard.player2.stones ++
-        controller.gameBoard.player3.stones ++
-        controller.gameBoard.player4.stones
+    controller.gameBoard.board.foreach(_.foreach(field => if (field.isDefined) field.get.stone = None))
 
-    for (playerStone <- playerStones) {
-      if (playerStone.startField.x == startFieldX && playerStone.startField.y == startFieldY) {
-        controller.setChoosenPlayerStone(playerStone)
+    (json \ "blockStones").as[JsArray].value.foreach(blockStone => {
+      val x = (blockStone \ "x").get.toString().toInt
+      val y = (blockStone \ "y").get.toString().toInt
+      controller.gameBoard.board(x)(y).get.stone = Some(BlockStone())
+    })
+
+    (json \ "playerStones").as[JsArray].value.foreach(playerStone => {
+      val x = (playerStone \ "x").get.toString().toInt
+      val y = (playerStone \ "y").get.toString().toInt
+      val startX = (playerStone \ "startX").get.toString().toInt
+      val startY = (playerStone \ "startY").get.toString().toInt
+      val playerColor = (playerStone \ "playerColor").get.toString().toInt
+
+      playerColor match {
+        case 1 =>
+          controller.gameBoard.player1.stones.filter(stone => stone.startX == startX && stone.startY == startY).foreach(stone => {
+            stone.x = x
+            stone.y = y
+            controller.gameBoard.board(x)(y).get.stone = Some(stone)
+          })
+        case 2 =>
+          controller.gameBoard.player2.stones.filter(stone => stone.startX == startX && stone.startY == startY).foreach(stone => {
+            stone.x = x
+            stone.y = y
+            controller.gameBoard.board(x)(y).get.stone = Some(stone)
+          })
+        case 3 =>
+          controller.gameBoard.player3.stones.filter(stone => stone.startX == startX && stone.startY == startY).foreach(stone => {
+            stone.x = x
+            stone.y = y
+            controller.gameBoard.board(x)(y).get.stone = Some(stone)
+          })
+        case 4 =>
+          controller.gameBoard.player4.stones.filter(stone => stone.startX == startX && stone.startY == startY).foreach(stone => {
+            stone.x = x
+            stone.y = y
+            controller.gameBoard.board(x)(y).get.stone = Some(stone)
+          })
+        case _ =>
       }
-    }
-
-    controller.setDestField(controller.gameBoard.board(
-      (json \ "controller" \ "destField" \ "x").get.toString().toInt)(
-      (json \ "controller" \ "destField" \ "y").get.toString().toInt).get)
-
-    controller.needToSetBlockStone = (json \ "controller" \ "needToSetBlockStone").get.toString().toBoolean
-  }
-
-  private def loadBoard(json: JsValue, controller: ControllerInterface): Unit = {
-    val playerCount = json \ "board" \ "playerCount"
-    controller.setPlayerCount(playerCount.get.toString().toInt)
-    val jsV: JsValue = Json.parse("" + (json \ "board" \\ "fields").head + "")
-    val fieldNodes = jsV.validate[List[JsValue]].get
-    for (fieldNode <- fieldNodes) {
-      if (!(fieldNode \ "isFreeSpace").get.toString.toBoolean) {
-        val x = (fieldNode \ "x").get.toString.toInt
-        val y = (fieldNode \ "y").get.toString().toInt
-        controller.gameBoard.board(x)(y).get.avariable = (fieldNode \ "avariable").get.toString.toBoolean
-        (fieldNode \ "sort").get.toString.charAt(1) match {
-          case 'p' =>
-            val startFieldX = (fieldNode \ "startFieldX").get.toString.toInt
-            val startFieldY = (fieldNode \ "startFieldY").get.toString.toInt
-
-            val playerStones =
-              controller.gameBoard.player1.stones ++
-                controller.gameBoard.player2.stones ++
-                controller.gameBoard.player3.stones ++
-                controller.gameBoard.player4.stones
-
-            for (playerStone <- playerStones) {
-              if (playerStone.startField.x == startFieldX && playerStone.startField.y == startFieldY) {
-                playerStone.actualField = controller.gameBoard.board(x)(y).get
-                controller.gameBoard.board(x)(y).get.stone = Some(playerStone)
-              }
-            }
-          case 'b' =>
-            controller.gameBoard.board(x)(y).get.stone = Some(BlockStone())
-          case 'f' =>
-            controller.gameBoard.board(x)(y).get.stone = None
-        }
-      }
-    }
+    })
   }
 
   override def save(controller: ControllerInterface): Unit = {
-    import java.io._
     val pw = new PrintWriter(new File("saveFile.json"))
     pw.write(Json.prettyPrint(gameToJson(controller)))
     pw.close()
@@ -116,8 +102,8 @@ class FileIO extends FileIOInterface {
             map (y => Json.obj(
             "x" -> JsNumber(x),
             "y" -> JsNumber(y),
-            "startFieldX" -> JsNumber(controller.gameBoard.board(x)(y).get.stone.get.asInstanceOf[PlayerStone].startField.x),
-            "startFieldY" -> JsNumber(controller.gameBoard.board(x)(y).get.stone.get.asInstanceOf[PlayerStone].startField.y),
+            "startX" -> JsNumber(controller.gameBoard.board(x)(y).get.stone.get.asInstanceOf[PlayerStone].startX),
+            "startY" -> JsNumber(controller.gameBoard.board(x)(y).get.stone.get.asInstanceOf[PlayerStone].startY),
             "playerColor" -> JsNumber(controller.gameBoard.board(x)(y).get.stone.get.asInstanceOf[PlayerStone].playerColor)
           ))
           )
