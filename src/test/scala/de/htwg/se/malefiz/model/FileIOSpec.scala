@@ -21,7 +21,7 @@ class FileIOSpec extends WordSpec with Matchers {
       }
 
       "have no existing File" in {
-        Files.exists(Paths.get("saveFile.json")) && Files.exists(Paths.get("saveFile.xml")) shouldBe false
+        Files.exists(Paths.get("saveFile.json")) shouldBe false
       }
 
 
