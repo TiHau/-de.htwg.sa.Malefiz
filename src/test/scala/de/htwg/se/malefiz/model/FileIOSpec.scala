@@ -24,44 +24,7 @@ class FileIOSpec extends WordSpec with Matchers {
         Files.exists(Paths.get("saveFile.json")) && Files.exists(Paths.get("saveFile.xml")) shouldBe false
       }
 
-      "should can save and load then file exists and restore count with player 3" in {
-        controller.setPlayerCount(2)
-        controller.saveGame()
-        controller.setPlayerCount(4)
-        controller.loadSavedGame()
-        Files.exists(Paths.get("saveFile.json")) shouldBe true
-        controller.gameBoard.playerCount shouldBe 2
 
-      }
-      "should can save and load then file exists and restore count with player 2" in {
-        controller.activePlayer = controller.gameBoard.player2
-        controller.setPlayerCount(3)
-        controller.saveGame()
-        controller.setPlayerCount(4)
-        controller.loadSavedGame()
-        Files.exists(Paths.get("saveFile.json")) || Files.exists(Paths.get("saveFile.xml")) shouldBe true
-        controller.gameBoard.playerCount shouldBe 3
-
-      }
-      "should can save and load then file exists and restore count with player 1" in {
-        controller.activePlayer = controller.gameBoard.player1
-        controller.setPlayerCount(2)
-        controller.saveGame()
-        controller.setPlayerCount(4)
-        controller.loadSavedGame()
-        Files.exists(Paths.get("saveFile.json")) || Files.exists(Paths.get("saveFile.xml")) shouldBe true
-        controller.gameBoard.playerCount shouldBe 2
-
-      }
-      "should can save and load then file exists and restore count with player 4" in {
-        controller.activePlayer = controller.gameBoard.player4
-        controller.setPlayerCount(3)
-        controller.saveGame()
-        controller.setPlayerCount(4)
-        controller.loadSavedGame()
-        controller.gameBoard.playerCount shouldBe 3
-
-      }
     }
   }
 }
