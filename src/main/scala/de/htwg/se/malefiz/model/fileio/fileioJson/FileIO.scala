@@ -30,12 +30,13 @@ class FileIO extends FileIOInterface {
       case _ => controller.activePlayer = controller.gameBoard.player4
     }
 
-    controller.gameBoard.board.foreach(_.foreach(field => if (field.isDefined) field.get.stone = None))
+    val cb = controller.gameBoard.board.seq
+    cb.filter(f=> controller.gameBoard.board(f._1).isDefined).foreach(f=>controller.gameBoard.board(f._1)=None)
 
     (json \ "blockStones").as[JsArray].value.foreach(blockStone => {
       val x = (blockStone \ "x").get.toString().toInt
       val y = (blockStone \ "y").get.toString().toInt
-      controller.gameBoard.board(x)(y).get.stone = Some(BlockStone())
+      controller.gameBoard.board((x,y)).get.stone = Some(BlockStone())
     })
 
     (json \ "playerStones").as[JsArray].value.foreach(playerStone => {
@@ -50,25 +51,25 @@ class FileIO extends FileIOInterface {
           controller.gameBoard.player1.stones.filter(stone => stone.startX == startX && stone.startY == startY).foreach(stone => {
             stone.x = x
             stone.y = y
-            controller.gameBoard.board(x)(y).get.stone = Some(stone)
+            controller.gameBoard.board((x,y)).get.stone = Some(stone)
           })
         case 2 =>
           controller.gameBoard.player2.stones.filter(stone => stone.startX == startX && stone.startY == startY).foreach(stone => {
             stone.x = x
             stone.y = y
-            controller.gameBoard.board(x)(y).get.stone = Some(stone)
+            controller.gameBoard.board((x, y)).get.stone = Some(stone)
           })
         case 3 =>
           controller.gameBoard.player3.stones.filter(stone => stone.startX == startX && stone.startY == startY).foreach(stone => {
             stone.x = x
             stone.y = y
-            controller.gameBoard.board(x)(y).get.stone = Some(stone)
+            controller.gameBoard.board((x, y)).get.stone = Some(stone)
           })
         case 4 =>
           controller.gameBoard.player4.stones.filter(stone => stone.startX == startX && stone.startY == startY).foreach(stone => {
             stone.x = x
             stone.y = y
-            controller.gameBoard.board(x)(y).get.stone = Some(stone)
+            controller.gameBoard.board((x, y)).get.stone = Some(stone)
           })
         case _ =>
       }
@@ -88,20 +89,20 @@ class FileIO extends FileIOInterface {
       "playerCount" -> JsNumber(controller.gameBoard.playerCount),
       "blockStones" -> Json.toJson(
         (0 to 16) flatMap (x =>
-          (0 to 13) filter (y => controller.gameBoard.board(x)(y).isDefined)
-            filter (y => controller.gameBoard.board(x)(y).get.stone.isDefined)
-            filter (y => controller.gameBoard.board(x)(y).get.stone.get.isInstanceOf[BlockStone])
+          (0 to 13) filter (y => controller.gameBoard.board((x,y)).isDefined)
+            filter (y => controller.gameBoard.board((x,y)).get.stone.isDefined)
+            filter (y => controller.gameBoard.board((x,y)).get.stone.get.isInstanceOf[BlockStone])
             map (y => Json.obj("x" -> JsNumber(x), "y" -> JsNumber(y))))),
       "playerStones" -> Json.toJson(
         (0 to 16) flatMap (x =>
-          (0 to 15) filter (y => controller.gameBoard.board(x)(y).isDefined)
-            filter (y => controller.gameBoard.board(x)(y).get.stone.isDefined)
-            filter (y => controller.gameBoard.board(x)(y).get.stone.get.isInstanceOf[PlayerStone])
+          (0 to 15) filter (y => controller.gameBoard.board((x,y)).isDefined)
+            filter (y => controller.gameBoard.board((x,y)).get.stone.isDefined)
+            filter (y => controller.gameBoard.board((x,y)).get.stone.get.isInstanceOf[PlayerStone])
             map (y => Json.obj(
             "x" -> JsNumber(x),
             "y" -> JsNumber(y),
-            "startX" -> JsNumber(controller.gameBoard.board(x)(y).get.stone.get.asInstanceOf[PlayerStone].startX),
-            "startY" -> JsNumber(controller.gameBoard.board(x)(y).get.stone.get.asInstanceOf[PlayerStone].startY),
-            "playerColor" -> JsNumber(controller.gameBoard.board(x)(y).get.stone.get.asInstanceOf[PlayerStone].playerColor))))))
+            "startX" -> JsNumber(controller.gameBoard.board((x, y)).get.stone.get.asInstanceOf[PlayerStone].startX),
+            "startY" -> JsNumber(controller.gameBoard.board((x, y)).get.stone.get.asInstanceOf[PlayerStone].startY),
+            "playerColor" -> JsNumber(controller.gameBoard.board((x, y)).get.stone.get.asInstanceOf[PlayerStone].playerColor))))))
   }
 }

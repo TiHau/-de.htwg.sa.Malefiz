@@ -1,5 +1,7 @@
 package de.htwg.se.malefiz.model.gameboard
 
+import scala.collection.immutable.HashMap
+import scala.collection.mutable
 import scala.swing.Publisher
 
 trait GameBoardInterface extends Publisher {
@@ -30,7 +32,7 @@ trait GameBoardInterface extends Publisher {
   /**
    * Das Spielfeld
    */
-  val board: Array[Array[Option[Field]]] = Array.ofDim[Option[Field]](x, y)
+  val board: mutable.Map[(Int,Int),Option[Field]] = mutable.HashMap.empty[(Int,Int),Option[Field]]
 
   /**
    * Initialisiert Felder neu
