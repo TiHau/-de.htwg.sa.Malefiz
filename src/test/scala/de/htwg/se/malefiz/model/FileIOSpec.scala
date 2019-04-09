@@ -67,14 +67,6 @@ class FileIOSpec extends WordSpec with Matchers {
         controller.gameBoard.playerCount shouldBe 3
 
       }
-      "non existing file" in {
-
-        if (Files.exists(Paths.get("saveFile.json")))
-          Files.delete(Paths.get("saveFile.json"))
-        controller.setPlayerCount(4)
-        fileIO.load(controller)
-        controller.gameBoard.playerCount shouldBe 4
-      }
     }
   }
 }
