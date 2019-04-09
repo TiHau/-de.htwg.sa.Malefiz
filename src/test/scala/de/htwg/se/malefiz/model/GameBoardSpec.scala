@@ -13,14 +13,12 @@ class GameBoardSpec extends WordSpec with Matchers {
   "A GameBoard" when {
     "initialized" should {
       val board = injector.instance[GameBoardInterface](Names.named("default")).createBoard
-
-      "have empty space" in {
-        board.board((0,0)).isEmpty should be(true)
-      }
       "have no field with null" in {
         for (y <- 0 to 15) {
           for (x <- 0 to 16) {
-            board.board((x, y)) shouldNot be(null)
+            if(board.board.contains((x,y))) {
+              board.board((x, y)) shouldNot be(null)
+            }
           }
         }
       }
@@ -34,7 +32,7 @@ class GameBoardSpec extends WordSpec with Matchers {
         var count = 0
         for (y <- 0 to 15) {
           for (x <- 0 to 16) {
-            if (board.board((x,y)).isDefined) {
+            if (board.board.contains((x,y))) {
               val field = board.board((x, y)).get
               if (field.stone.isDefined && field.stone.get.isInstanceOf[PlayerStone]) {
                 count += 1

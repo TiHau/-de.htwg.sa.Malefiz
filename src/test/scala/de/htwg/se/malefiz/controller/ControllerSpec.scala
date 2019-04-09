@@ -16,7 +16,7 @@ class ControllerSpec extends WordSpec with Matchers {
       val controller = injector.getInstance(classOf[ControllerInterface])
       val player = Player(1)
       "can change player count specific" in {
-        controller.newGame(2) equals (controller.gameBoard.playerCount)
+        controller.newGame(2) equals controller.gameBoard.playerCount
       }
 
     }
@@ -147,7 +147,7 @@ class ControllerSpec extends WordSpec with Matchers {
       }
       "invalid PlayerStone" in {
         controller.state = ChoosePlayerStone
-        controller.takeInput(0, 0)
+        controller.takeInput(13, 13)
         controller.state shouldBe ChoosePlayerStone
       }
       "beat a PlayerStone" in {
