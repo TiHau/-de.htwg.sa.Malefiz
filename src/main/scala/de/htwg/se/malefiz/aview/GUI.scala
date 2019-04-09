@@ -27,13 +27,11 @@ class GUI(controller: ControllerInterface) extends Frame with Observer {
         val rectY = posY / ((size.height - 110) / 16)
         controller.takeInput(rectX, rectY)
 
-      case KeyPressed(_, Key.Enter, _, _) => {
+      case KeyPressed(_, Key.Enter, _, _) =>
         controller.endTurn()
-      }
-      case KeyPressed(_, Key.BackSpace, _, _) => {
+      case KeyPressed(_, Key.BackSpace, _, _) =>
         controller.undo()
         repaint()
-      }
     }
 
     override def paint(g: Graphics2D): Unit = {
@@ -67,43 +65,41 @@ class GUI(controller: ControllerInterface) extends Frame with Observer {
       val currentGB = controller.gameBoard.toString.replace(" ", "#").replace("###", "   ").trim
       var check = 0
       var count = 0
-      for (c <- currentGB) {
-        c match {
-          case '|' =>
-            check += 1
-            if (check == 3) {
-              drawOvalSmall()
-              check = 0
-              x += 1
-            } else if (check == 1) {
-              drawRect(new Color(244, 164, 96))
-              drawOvalNormal(Color.BLACK)
-            }
-          case '\n' =>
-            y += 1
-            x = 0
+      currentGB.foreach {
+        case '|' =>
+          check += 1
+          if (check == 3) {
+            drawOvalSmall()
             check = 0
-          case ' ' =>
-            check += 1
-            if (check == 3) {
-              drawRect(new Color(244, 164, 96))
-              check = 0
-              x += 1
-            }
-          case '-' => setStoneColorWithoutBackground(Color.WHITE)
-          case 'o' => setStoneColorWithoutBackground(Color.BLACK)
-          case '1' => setStoneColorWithoutBackground(Color.RED)
-          case '2' => setStoneColorWithoutBackground(Color.GREEN)
-          case '3' => setStoneColorWithoutBackground(Color.YELLOW)
-          case '4' => setStoneColorWithoutBackground(Color.BLUE)
-          case 'x' => setStoneColorWithBackgroundPainting(new Color(238, 118, 0))
-          case 'G' => setStoneColorWithAlternateBackgroundPainting(Color.RED)
-          case 'K' => setStoneColorWithAlternateBackgroundPainting(Color.BLUE)
-          case 'J' => setStoneColorWithAlternateBackgroundPainting(Color.YELLOW)
-          case 'H' => setStoneColorWithAlternateBackgroundPainting(Color.GREEN)
-          case 'B' => setStoneColorWithBackgroundPainting(Color.WHITE)
-          case _ =>
-        }
+            x += 1
+          } else if (check == 1) {
+            drawRect(new Color(244, 164, 96))
+            drawOvalNormal(Color.BLACK)
+          }
+        case '\n' =>
+          y += 1
+          x = 0
+          check = 0
+        case ' ' =>
+          check += 1
+          if (check == 3) {
+            drawRect(new Color(244, 164, 96))
+            check = 0
+            x += 1
+          }
+        case '-' => setStoneColorWithoutBackground(Color.WHITE)
+        case 'o' => setStoneColorWithoutBackground(Color.BLACK)
+        case '1' => setStoneColorWithoutBackground(Color.RED)
+        case '2' => setStoneColorWithoutBackground(Color.GREEN)
+        case '3' => setStoneColorWithoutBackground(Color.YELLOW)
+        case '4' => setStoneColorWithoutBackground(Color.BLUE)
+        case 'x' => setStoneColorWithBackgroundPainting(new Color(238, 118, 0))
+        case 'G' => setStoneColorWithAlternateBackgroundPainting(Color.RED)
+        case 'K' => setStoneColorWithAlternateBackgroundPainting(Color.BLUE)
+        case 'J' => setStoneColorWithAlternateBackgroundPainting(Color.YELLOW)
+        case 'H' => setStoneColorWithAlternateBackgroundPainting(Color.GREEN)
+        case 'B' => setStoneColorWithBackgroundPainting(Color.WHITE)
+        case _ =>
       }
 
       def setStoneColorWithoutBackground(color: Color): Unit = {
@@ -115,18 +111,14 @@ class GUI(controller: ControllerInterface) extends Frame with Observer {
 
       def setStoneColorWithBackgroundPainting(color: Color): Unit = {
         if (check == 1) {
-          g.setColor(new Color(238, 118, 0))
-          g.fillOval(20 + ((size.width - 50) / 17) * x, 100 + ((size.height - 110) / 16) * y,
-            ((size.width - 50) / 17) - 2, ((size.height - 110) / 16) - 2)
+          drawOvalNormal(new Color(238, 118, 0))
           check += 1
           g.setColor(color)
         }
       }
       def setStoneColorWithAlternateBackgroundPainting(color: Color): Unit = {
         if (check == 1) {
-          g.setColor(Color.MAGENTA)
-          g.fillOval(20 + ((size.width - 50) / 17) * x, 100 + ((size.height - 110) / 16) * y,
-            ((size.width - 50) / 17) - 2, ((size.height - 110) / 16) - 2)
+          drawOvalNormal(Color.MAGENTA)
           check += 1
           g.setColor(color)
         }
