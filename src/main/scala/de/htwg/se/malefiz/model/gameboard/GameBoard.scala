@@ -24,9 +24,7 @@ case class GameBoard @Inject() (@Named("DefaultSize") var playerCount: Int) exte
   private val nu14 = 14
   private val nu15 = 15
   private val nu16 = 16
-
-  private def buildMalefitzGameBoard(board: Array[Array[Option[Field]]]): Array[Array[Option[Field]]] = {
-    def defineField(x: Int, y: Int): Unit = board(x)(y) = Some(Field(x, y, None))
+  override def createBoard: GameBoard = {
     (nu0 to nu15).foreach(y => (nu0 to nu16).foreach(x => board(x)(y) = None))
     (nu0 to nu15).foreach {
       case y @ (0 | 4) => defineField(nu8, y)
@@ -53,8 +51,39 @@ case class GameBoard @Inject() (@Named("DefaultSize") var playerCount: Int) exte
       case y @ 14 => (nu1 to nu15).filter(i => i % nu4 != nu0).foreach(i => defineField(i, y))
       case y @ 15 => (nu0 to nu16).filter(i => i % nu2 != nu0).foreach(i => defineField(i, y))
     }
-    board
+    (1 to 5).filter(y => y != 2).foreach(y => defineBlockStone(nu8, y))
+    defineBlockStone(nu6, nu7)
+    defineBlockStone(nu10, nu7)
+    (0 to 16).filter(i => i % 4 == 0).foreach(x => defineBlockStone(x, nu11))
+    definePlayerStoneArray(nu1, player1)
+    definePlayerStoneArray(nu5, player2)
+    definePlayerStoneArray(nu9, player3)
+    definePlayerStoneArray(nu13, player4)
+    definePlayerStones(nu1, player1)
+    definePlayerStones(nu13, player4)
+    if (playerCount >= 3) {
+      definePlayerStones(nu5, player2)
+      if (playerCount == 4) definePlayerStones(nu9, player3)
+    }
+    def definePlayerStoneArray(xStart: Int, player: Player): Unit = {
+      player.stones(nu2) = PlayerStone(xStart, nu14, xStart, nu14, player.color)
+      player.stones(nu1) = PlayerStone(xStart, nu15, xStart, nu15, player.color)
+      player.stones(nu0) = PlayerStone(xStart + 1, nu14, xStart + 1, nu14, player.color)
+      player.stones(nu3) = PlayerStone(xStart + 2, nu14, xStart + 2, nu14, player.color)
+      player.stones(nu4) = PlayerStone(xStart + 2, nu15, xStart + 2, nu15, player.color)
+    }
+    def defineField(x: Int, y: Int): Unit = board(x)(y) = Some(Field(x, y, None))
+    def defineBlockStone(x: Int, y: Int): Unit = board(x)(y) = Some(Field(x, y, Some(BlockStone())))
+    def definePlayerStones(xFirst: Int, player: Player): Unit = {
+      board(xFirst)(nu14) = Some(Field(xFirst, nu14, Some(player.stones(nu2))))
+      board(xFirst)(nu15) = Some(Field(xFirst, nu15, Some(player.stones(nu1))))
+      board(xFirst + 1)(nu14) = Some(Field(xFirst + 1, nu14, Some(player.stones(nu0))))
+      board(xFirst + 2)(nu14) = Some(Field(xFirst + 2, nu14, Some(player.stones(nu3))))
+      board(xFirst + 2)(nu15) = Some(Field(xFirst + 2, nu15, Some(player.stones(nu4))))
+    }
+    this
   }
+
 
   override def toString: String = {
     val jsb = new mutable.StringBuilder()
@@ -92,32 +121,8 @@ case class GameBoard @Inject() (@Named("DefaultSize") var playerCount: Int) exte
     jsb.toString()
   }
 
-  private def setBlockStones(board: Array[Array[Option[Field]]]): Array[Array[Option[Field]]] = {
-    def defineBlockStone(x: Int, y: Int): Unit = board(x)(y) = Some(Field(x, y, Some(BlockStone())))
-    (1 to 5).filter(y => y != 2).foreach(y => defineBlockStone(nu8, y))
-    defineBlockStone(nu6, nu7)
-    defineBlockStone(nu10, nu7)
-    (0 to 16).filter(i => i % 4 == 0).foreach(x => defineBlockStone(x, nu11))
-    board
-  }
 
-  private def setPlayerStones(board: Array[Array[Option[Field]]], playerCount: Int): Array[Array[Option[Field]]] = {
-    def definePlayerStones(xFirst: Int, player: Player): Unit = {
-      board(xFirst)(nu14) = Some(Field(xFirst, nu14, Some(player.stones(nu2))))
-      board(xFirst)(nu15) = Some(Field(xFirst, nu15, Some(player.stones(nu1))))
-      board(xFirst + 1)(nu14) = Some(Field(xFirst + 1, nu14, Some(player.stones(nu0))))
-      board(xFirst + 2)(nu14) = Some(Field(xFirst + 2, nu14, Some(player.stones(nu3))))
-      board(xFirst + 2)(nu15) = Some(Field(xFirst + 2, nu15, Some(player.stones(nu4))))
-    }
 
-    definePlayerStones(nu1, player1)
-    definePlayerStones(nu13, player4)
-    if (playerCount >= 3) {
-      definePlayerStones(nu5, player2)
-      if (playerCount == 4) definePlayerStones(nu9, player3)
-    }
-    board
-  }
 
   def moveStone(current: Field, dest: Field): Option[Stone] = {
     if (validField(dest.x, dest.y) && board(dest.x)(dest.y).get.avariable) {
@@ -207,25 +212,5 @@ case class GameBoard @Inject() (@Named("DefaultSize") var playerCount: Int) exte
   //wenn ein Stein im Zielfeld steht muss es ein Spielerstein sein => Sieg
   def checkWin: Boolean = board(nu8)(nu0).get.stone.isDefined
 
-  override def createBoard: GameBoard = {
-    if (playerCount > 4) playerCount = nu4 else if (playerCount < 2) playerCount = nu2
-    buildMalefitzGameBoard(board)
-    setBlockStones(board)
 
-    def definePlayerStoneArray(xStart: Int, player: Player): Unit = {
-      player.stones(nu2) = PlayerStone(xStart, nu14, xStart, nu14, player.color)
-      player.stones(nu1) = PlayerStone(xStart, nu15, xStart, nu15, player.color)
-      player.stones(nu0) = PlayerStone(xStart + 1, nu14, xStart + 1, nu14, player.color)
-      player.stones(nu3) = PlayerStone(xStart + 2, nu14, xStart + 2, nu14, player.color)
-      player.stones(nu4) = PlayerStone(xStart + 2, nu15, xStart + 2, nu15, player.color)
-    }
-
-    definePlayerStoneArray(nu1, player1)
-    definePlayerStoneArray(nu5, player2)
-    definePlayerStoneArray(nu9, player3)
-    definePlayerStoneArray(nu13, player4)
-
-    setPlayerStones(board, playerCount)
-    this
-  }
 }
