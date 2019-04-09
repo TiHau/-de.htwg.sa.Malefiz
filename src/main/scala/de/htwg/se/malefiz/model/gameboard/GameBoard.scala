@@ -25,7 +25,6 @@ case class GameBoard @Inject() (@Named("DefaultSize") var playerCount: Int) exte
   private val nu15 = 15
   private val nu16 = 16
   override def createBoard: GameBoard = {
-    (nu0 to nu15).foreach(y => (nu0 to nu16).foreach(x => board +=((x,y)-> None)))
     (nu0 to nu15).foreach {
       case y @ (0 | 4) => defineField(nu8, y)
       case y @ (1 | 3) => (nu0 to nu16).foreach(i => defineField(i, y))
@@ -90,7 +89,7 @@ case class GameBoard @Inject() (@Named("DefaultSize") var playerCount: Int) exte
     (nu0 to nu15).foreach(y => {
       if (y < 10) jsb.append(y + "  ") else jsb.append(y + " ")
       (nu0 to nu16).foreach(i => {
-        if (board((i,y)).isEmpty) jsb.append("   ")
+        if (!board.contains((i,y))) jsb.append("   ")
         else {
           val s: Field = board((i,y)).get
           s.stone match {
@@ -208,7 +207,7 @@ case class GameBoard @Inject() (@Named("DefaultSize") var playerCount: Int) exte
     tmpB.filter(f=>board(f._1).isDefined).foreach(f=> board(f._1).get.avariable = false)
   }
 
-  private def validField(x: Int, y: Int): Boolean = y <= 13 && y >= 0 && x <= 16 && x >= 0 && board((x, y)).isDefined
+  private def validField(x: Int, y: Int): Boolean = y <= 13 && y >= 0 && x <= 16 && x >= 0 && board.contains((x, y))
 
   def checkDestForPlayerStone(x: Int, y: Int): Boolean = validField(x, y) && board((x, y)).get.avariable
 
