@@ -31,7 +31,7 @@ class FileIO extends FileIOInterface {
     }
 
     val cb = controller.gameBoard.board.seq
-    cb.filter(f=> controller.gameBoard.board(f._1).isDefined).foreach(f=>controller.gameBoard.board(f._1)=None)
+    cb.foreach(f=>if(controller.gameBoard.board(f._1).isDefined)controller.gameBoard.board(f._1).get.stone = None)
 
     (json \ "blockStones").as[JsArray].value.foreach(blockStone => {
       val x = (blockStone \ "x").get.toString().toInt
