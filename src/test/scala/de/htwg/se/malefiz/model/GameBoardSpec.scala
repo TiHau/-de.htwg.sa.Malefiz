@@ -16,7 +16,7 @@ class GameBoardSpec extends WordSpec with Matchers {
       "have no field with null" in {
         for (y <- 0 to 15) {
           for (x <- 0 to 16) {
-            if(board.board.contains((x,y))) {
+            if (board.board.contains((x, y))) {
               board.board((x, y)) shouldNot be(null)
             }
           }
@@ -32,8 +32,8 @@ class GameBoardSpec extends WordSpec with Matchers {
         var count = 0
         for (y <- 0 to 15) {
           for (x <- 0 to 16) {
-            if (board.board.contains((x,y))) {
-              val field = board.board((x, y)).get
+            if (board.board.contains((x, y))) {
+              val field = board.board((x, y))
               if (field.stone.isDefined && field.stone.get.isInstanceOf[PlayerStone]) {
                 count += 1
               }
@@ -70,7 +70,7 @@ class GameBoardSpec extends WordSpec with Matchers {
     "move Stone" should {
       val board = injector.instance[GameBoardInterface](Names.named("default")).createBoard
       "Returns Option None" in {
-        board.moveStone(board.board((3, 14)).get, board.board((8, 0)).get) should be(None)
+        board.moveStone(board.board((3, 14)), board.board((8, 0))) should be(None)
       }
     }
   }
