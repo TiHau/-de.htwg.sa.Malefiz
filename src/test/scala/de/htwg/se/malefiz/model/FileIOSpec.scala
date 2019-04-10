@@ -11,9 +11,7 @@ import org.scalatest.{ Matchers, WordSpec }
 class FileIOSpec extends WordSpec with Matchers {
 
   "A FileIO Json" when {
-    val injector: Injector = Guice.createInjector(new MalefizModule)
-    val controller: ControllerInterface = injector.getInstance(classOf[ControllerInterface])
-  "when saved and load" when{
+
       val injector: Injector = Guice.createInjector(new MalefizModule)
       val controller: ControllerInterface = injector.getInstance(classOf[ControllerInterface])
       "save load" should {
@@ -26,6 +24,6 @@ class FileIOSpec extends WordSpec with Matchers {
         }
 
       }
-    }
+
   }
 }
