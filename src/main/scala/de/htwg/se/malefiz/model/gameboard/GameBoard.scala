@@ -157,7 +157,7 @@ case class GameBoard @Inject() (@Named("DefaultSize") var playerCount: Int) exte
       if (board((x, y)).stone.isDefined && board((x, y)).stone.get.isInstanceOf[PlayerStone] && board((x, y)).stone.get.asInstanceOf[PlayerStone].playerColor == playerColor) {
         return
       }
-      board((x, y)).avariable = true
+      board((x, y)) = board((x, y)).copy(avariable = true)
     } else {
       // If there is a blocking stone on the way dont go on
       if (board((x, y)).stone.isDefined && board((x, y)).stone.get.isInstanceOf[BlockStone]) {
@@ -184,7 +184,7 @@ case class GameBoard @Inject() (@Named("DefaultSize") var playerCount: Int) exte
 
   def unmarkPossibleMoves(): Unit = {
     val tmpB = board.seq
-    tmpB.foreach(f => board(f._1).avariable = false)
+    tmpB.foreach(f => board(f._1) = board(f._1).copy(avariable = false))
   }
 
   private def validField(x: Int, y: Int): Boolean = y <= 13 && y >= 0 && x <= 16 && x >= 0 && board.contains((x, y))
