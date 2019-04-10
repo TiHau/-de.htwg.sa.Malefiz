@@ -1,7 +1,7 @@
 package de.htwg.se.malefiz.controller
 
 import com.google.inject.name.Names
-import com.google.inject.{ Guice, Inject, Injector }
+import com.google.inject.{Guice, Inject, Injector}
 import com.typesafe.scalalogging.Logger
 import de.htwg.se.malefiz.MalefizModule
 import de.htwg.se.malefiz.controller.State._
@@ -22,7 +22,11 @@ case class Controller @Inject() () extends ControllerInterface with Publisher {
   private val undoManager = new UndoManager()
   private var chosenPlayerStone = gameBoard.player1.stones(0)
   private var destField = gameBoard.board((8, 0))
+  private var state: State.Value = Print
 
+  override def getState(): State.Value = state
+
+  override def setState(newState: State.Value): Unit = state = newState
   override def loadSavedGame(): Unit = {
     state = ChoosePlayerStone
     undoManager.clear()

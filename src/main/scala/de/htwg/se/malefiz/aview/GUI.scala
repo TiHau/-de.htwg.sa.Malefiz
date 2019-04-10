@@ -11,8 +11,6 @@ import de.htwg.se.malefiz.controller.State._
 
 class GUI(controller: ControllerInterface) extends Frame with Observer {
   private val dim = Toolkit.getDefaultToolkit.getScreenSize
-  private val screenX = dim.width
-  private val screenY = dim.height
   private var message = "Ask Count First"
   controller.add(this)
   contents = new FlowPanel() {
@@ -21,34 +19,22 @@ class GUI(controller: ControllerInterface) extends Frame with Observer {
     listenTo(this.keys)
     reactions += {
       case MouseClicked(_, point, _, _, _) =>
-        val posX = point.x - 20
-        val posY = point.y - 100
-        val rectX = posX / ((size.width - 50) / 17)
-        val rectY = posY / ((size.height - 110) / 16)
-        controller.takeInput(rectX, rectY)
-
+        controller.takeInput((point.x - 20) / ((size.width - 50) / 17), (point.y - 100) / ((size.height - 110) / 16))
       case KeyPressed(_, Key.Enter, _, _) =>
         controller.endTurn()
       case KeyPressed(_, Key.BackSpace, _, _) =>
         controller.undo()
-        repaint()
     }
 
     override def paint(g: Graphics2D): Unit = {
       //Background
       background = Color.WHITE
-      var activePlayerColorString = ""
-      val activePlayerColorasInt = controller.activePlayer.color
-      if (activePlayerColorasInt == 1) {
-        activePlayerColorString = "Red"
-      } else if (activePlayerColorasInt == 2) {
-        activePlayerColorString = "Green"
-      } else if (activePlayerColorasInt == 3) {
-        activePlayerColorString = "Yellow"
-      } else {
-        activePlayerColorString = "Blue"
+      val activePlayerColorString : String = controller.activePlayer.color match {
+        case 1 => "Red"
+        case 2 => "Green"
+        case 3 => "Yellow"
+        case _ => "Blue"
       }
-
       g.setFont(new Font("TimesRoman", Font.BOLD, size.width / 60))
       g.drawString("Player: " + activePlayerColorString, 40, 40)
       g.drawString("" + message, size.width / 3, 40)
@@ -187,41 +173,35 @@ class GUI(controller: ControllerInterface) extends Frame with Observer {
   override def closeOperation(): Unit = sys.exit(0)
 
   override def update(): Unit = {
-    controller.state match {
-      case State.Print => repaint()
-      case State.SetBlockStone =>
+    controller.getState match {
+      case Print | EndTurn => repaint()
+      case SetBlockStone =>
         message = "Set a BlockStone"
         repaint()
-
-      case State.ChoosePlayerStone =>
+      case ChoosePlayerStone =>
         message = "Chose one of your Stones"
         repaint()
-
-      case State.ChooseTarget =>
+      case ChooseTarget =>
         message = "Chose a Target Field"
         repaint()
-
-      case State.PlayerWon =>
+      case PlayerWon =>
         val wonUI = new WinUI
         wonUI.visible = true
         repaint()
-
-      case State.SetPlayerCount =>
+      case SetPlayerCount =>
         val countUI = new CountUI
         countUI.visible = true
         repaint()
-      case State.BeforeEndOfTurn =>
+      case BeforeEndOfTurn =>
         message = "Press Enter to end your turn or Backspace to undo"
         repaint()
-
-      case EndTurn => repaint()
     }
   }
 
   private class CountUI extends MainFrame {
     title = "Playercount"
     preferredSize = new Dimension(320, 70)
-    location = new Point(screenX / 3, screenY / 3)
+    location = new Point(dim.width / 3, dim.height / 3)
     contents = new FlowPanel() {
       contents += Button("2 Player") {
         controller.newGame(2)
@@ -239,20 +219,15 @@ class GUI(controller: ControllerInterface) extends Frame with Observer {
   }
 
   private class WinUI extends MainFrame {
-    var activePlayerColorString = ""
-    var activePlayerColorasInt: Int = controller.activePlayer.color
-    if (activePlayerColorasInt == 1) {
-      activePlayerColorString = "Red"
-    } else if (activePlayerColorasInt == 2) {
-      activePlayerColorString = "Green"
-    } else if (activePlayerColorasInt == 3) {
-      activePlayerColorString = "Yellow"
-    } else {
-      activePlayerColorString = "Blue"
+    val activePlayerColorString : String = controller.activePlayer.color match {
+      case 1 => "Red"
+      case 2 => "Green"
+      case 3 => "Yellow"
+      case _ => "Blue"
     }
     title = "Victory"
     preferredSize = new Dimension(400, 120)
-    location = new Point(screenX / 3, screenY / 3)
+    location = new Point(dim.width / 3, dim.height / 3)
     contents = new FlowPanel() {
       contents += new Label("Player " + activePlayerColorString + " Won the Game!")
       contents += Button("Exit") {

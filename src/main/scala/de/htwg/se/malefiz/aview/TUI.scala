@@ -64,7 +64,7 @@ case class TUI(controller: ControllerInterface) extends Observer {
   }
 
   override def update(): Unit = {
-    controller.state match {
+    controller.getState match {
       case State.Print => printGameBoard()
       case State.SetBlockStone =>
         logger.info("Set destination for hit Blockstone(First Input X then Y)\n")
