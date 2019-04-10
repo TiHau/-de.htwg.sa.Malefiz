@@ -7,7 +7,7 @@ class MoveCommand(stone: PlayerStone, destField: Field, controller: ControllerIn
 
   private val xStone = stone.x
   private val yStone = stone.y
-  private val currentField = controller.gameBoard.board((xStone,yStone)).get
+  private val currentField = controller.gameBoard.board((xStone, yStone)).get
   private var hitStone: Option[Stone] = None
 
   override def doStep(): Unit = {

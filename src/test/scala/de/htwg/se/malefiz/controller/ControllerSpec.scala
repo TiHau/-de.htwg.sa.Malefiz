@@ -140,7 +140,7 @@ class ControllerSpec extends WordSpec with Matchers {
 
       }
       "check win" in {
-        controller.gameBoard.board((8,0)).get.stone = Some(PlayerStone(8, 0, 8, 0, 1))
+        controller.gameBoard.board((8, 0)).get.stone = Some(PlayerStone(8, 0, 8, 0, 1))
         controller.state = BeforeEndOfTurn
         controller.endTurn()
         controller.state shouldBe PlayerWon
@@ -161,7 +161,7 @@ class ControllerSpec extends WordSpec with Matchers {
         controller.state = ChooseTarget
         controller.gameBoard.forceMoveStone(field1, field2)
 
-        controller.gameBoard.board((14, 13)).get.avariable = true
+        controller.gameBoard.board((14, 13)).get.available = true
         controller.takeInput(14, 13)
         controller.undo()
         controller.state shouldBe ChooseTarget

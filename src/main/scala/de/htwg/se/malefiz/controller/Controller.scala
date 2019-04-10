@@ -1,7 +1,7 @@
 package de.htwg.se.malefiz.controller
 
 import com.google.inject.name.Names
-import com.google.inject.{Guice, Inject, Injector}
+import com.google.inject.{ Guice, Inject, Injector }
 import com.typesafe.scalalogging.Logger
 import de.htwg.se.malefiz.MalefizModule
 import de.htwg.se.malefiz.controller.State._
@@ -12,7 +12,7 @@ import net.codingwell.scalaguice.InjectorExtensions._
 
 import scala.swing.Publisher
 
-case class Controller @Inject()() extends ControllerInterface with Publisher {
+case class Controller @Inject() () extends ControllerInterface with Publisher {
   val injector: Injector = Guice.createInjector(new MalefizModule)
   var gameBoard: GameBoardInterface = injector.instance[GameBoardInterface](Names.named("default")).createBoard
   activePlayer = gameBoard.player3
@@ -208,7 +208,7 @@ case class Controller @Inject()() extends ControllerInterface with Publisher {
 
   def setTargetForPlayerStone(x: Int, y: Int): Boolean = {
     if (gameBoard.checkDestForPlayerStone(x, y)) {
-      destField = gameBoard.board((x,y)).get
+      destField = gameBoard.board((x, y)).get
       true
     } else {
       false
