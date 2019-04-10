@@ -7,87 +7,70 @@ import scala.collection.mutable
 import scala.swing.Publisher
 
 case class GameBoard @Inject() (@Named("DefaultSize") var playerCount: Int) extends GameBoardInterface with Publisher {
-  private val nu0 = 0
-  private val nu1 = 1
-  private val nu2 = 2
-  private val nu3 = 3
-  private val nu4 = 4
-  private val nu5 = 5
-  private val nu6 = 6
-  private val nu7 = 7
-  private val nu8 = 8
-  private val nu9 = 9
-  private val nu10 = 10
-  private val nu11 = 11
-  private val nu12 = 12
-  private val nu13 = 13
-  private val nu14 = 14
-  private val nu15 = 15
-  private val nu16 = 16
   override def createBoard: GameBoard = {
-    (nu0 to nu15).foreach {
-      case y @ (0 | 4) => defineField(nu8, y)
-      case y @ (1 | 3) => (nu0 to nu16).foreach(i => defineField(i, y))
+    (0 to 15).foreach {
+      case y @ (0 | 4) => defineField(8, y)
+      case y @ (1 | 3) => (0 to 16).foreach(i => defineField(i, y))
       case y @ 2 =>
-        defineField(nu0, y)
-        defineField(nu16, y)
-      case y @ 5 => (nu6 to nu10).foreach(i => defineField(i, y))
+        defineField(0, y)
+        defineField(16, y)
+      case y @ 5 => (6 to 10).foreach(i => defineField(i, y))
       case y @ 6 =>
-        defineField(nu6, y)
-        defineField(nu10, y)
-      case y @ 7 => (nu4 to nu12).foreach(i => defineField(i, y))
+        defineField(6, y)
+        defineField(10, y)
+      case y @ 7 => (4 to 12).foreach(i => defineField(i, y))
       case y @ 8 =>
-        defineField(nu12, y)
-        defineField(nu4, y)
-      case y @ 9 => (nu2 to nu14).foreach(i => defineField(i, y))
+        defineField(12, y)
+        defineField(4, y)
+      case y @ 9 => (2 to 14).foreach(i => defineField(i, y))
       case y @ 10 =>
-        defineField(nu2, y)
-        defineField(nu6, y)
-        defineField(nu10, y)
-        defineField(nu14, y)
-      case y @ (11 | 13) => (nu0 to nu16).foreach(i => defineField(i, y))
-      case y @ 12 => (nu0 to nu16).filter(i => i % nu4 == nu0).foreach(i => defineField(i, y))
-      case y @ 14 => (nu1 to nu15).filter(i => i % nu4 != nu0).foreach(i => defineField(i, y))
-      case y @ 15 => (nu0 to nu16).filter(i => i % nu2 != nu0).foreach(i => defineField(i, y))
+        defineField(2, y)
+        defineField(6, y)
+        defineField(10, y)
+        defineField(14, y)
+      case y @ (11 | 13) => (0 to 16).foreach(i => defineField(i, y))
+      case y @ 12 => (0 to 16).filter(i => i % 4 == 0).foreach(i => defineField(i, y))
+      case y @ 14 => (1 to 15).filter(i => i % 4 != 0).foreach(i => defineField(i, y))
+      case y @ 15 => (0 to 16).filter(i => i % 2 != 0).foreach(i => defineField(i, y))
     }
-    (1 to 5).filter(y => y != 2).foreach(y => defineBlockStone(nu8, y))
-    defineBlockStone(nu6, nu7)
-    defineBlockStone(nu10, nu7)
-    (0 to 16).filter(i => i % 4 == 0).foreach(x => defineBlockStone(x, nu11))
-    definePlayerStoneArray(nu1, player1)
-    definePlayerStoneArray(nu5, player2)
-    definePlayerStoneArray(nu9, player3)
-    definePlayerStoneArray(nu13, player4)
-    definePlayerStones(nu1, player1)
-    definePlayerStones(nu13, player4)
+    (1 to 5).filter(y => y != 2).foreach(y => defineBlockStone(8, y))
+    defineBlockStone(6, 7)
+    defineBlockStone(10, 7)
+    (0 to 16).filter(i => i % 4 == 0).foreach(x => defineBlockStone(x, 11))
+    definePlayerStoneArray(1, player1)
+    definePlayerStoneArray(5, player2)
+    definePlayerStoneArray(9, player3)
+    definePlayerStoneArray(13, player4)
+    definePlayerStones(1, player1)
+    definePlayerStones(13, player4)
     if (playerCount >= 3) {
-      definePlayerStones(nu5, player2)
-      if (playerCount == 4) definePlayerStones(nu9, player3)
+      definePlayerStones(5, player2)
+      if (playerCount == 4) definePlayerStones(9, player3)
     }
     def definePlayerStoneArray(xStart: Int, player: Player): Unit = {
-      player.stones(nu2) = PlayerStone(xStart, nu14, xStart, nu14, player.color)
-      player.stones(nu1) = PlayerStone(xStart, nu15, xStart, nu15, player.color)
-      player.stones(nu0) = PlayerStone(xStart + 1, nu14, xStart + 1, nu14, player.color)
-      player.stones(nu3) = PlayerStone(xStart + 2, nu14, xStart + 2, nu14, player.color)
-      player.stones(nu4) = PlayerStone(xStart + 2, nu15, xStart + 2, nu15, player.color)
+      player.stones(2) = PlayerStone(xStart, 14, xStart, 14, player.color)
+      player.stones(1) = PlayerStone(xStart, 15, xStart, 15, player.color)
+      player.stones(0) = PlayerStone(xStart + 1, 14, xStart + 1, 14, player.color)
+      player.stones(3) = PlayerStone(xStart + 2, 14, xStart + 2, 14, player.color)
+      player.stones(4) = PlayerStone(xStart + 2, 15, xStart + 2, 15, player.color)
     }
     def defineField(x: Int, y: Int): Unit = board.update((x, y), Field(x, y, None))
     def defineBlockStone(x: Int, y: Int): Unit = board.update((x, y), Field(x, y, Some(BlockStone())))
     def definePlayerStones(xFirst: Int, player: Player): Unit = {
-      board.update((xFirst, nu14), Field(xFirst, nu14, Some(player.stones(nu2))))
-      board.update((xFirst, nu15), Field(xFirst, nu15, Some(player.stones(nu1))))
-      board.update((xFirst + 1, nu14), Field(xFirst + 1, nu14, Some(player.stones(nu0))))
-      board.update((xFirst + 2, nu14), Field(xFirst + 2, nu14, Some(player.stones(nu3))))
-      board.update((xFirst + 2, nu15), Field(xFirst + 2, nu15, Some(player.stones(nu4))))
+      board.update((xFirst, 14), Field(xFirst, 14, Some(player.stones(2))))
+      board.update((xFirst, 15), Field(xFirst, 15, Some(player.stones(1))))
+      board.update((xFirst + 1, 14), Field(xFirst + 1, 14, Some(player.stones(0))))
+      board.update((xFirst + 2, 14), Field(xFirst + 2, 14, Some(player.stones(3))))
+      board.update((xFirst + 2, 15), Field(xFirst + 2, 15, Some(player.stones(4))))
     }
     this
   }
 
   override def toString: String = {
     val jsb = new mutable.StringBuilder()
-    (nu0 to nu15).foreach(y => {
+    (0 to 15).foreach(y => {
       if (y < 10) jsb.append(y + "  ") else jsb.append(y + " ")
-      (nu0 to nu16).foreach(i => {
+      (0 to 16).foreach(i => {
         if (!board.contains((i, y))) jsb.append("   ")
         else {
           val s: Field = board((i, y))
@@ -210,6 +193,6 @@ case class GameBoard @Inject() (@Named("DefaultSize") var playerCount: Int) exte
   def checkDestForPlayerStone(x: Int, y: Int): Boolean = validField(x, y) && board((x, y)).available
 
   //wenn ein Stein im Zielfeld steht muss es ein Spielerstein sein => Sieg
-  def checkWin: Boolean = board((nu8, nu0)).stone.isDefined
+  def checkWin: Boolean = board((8, 0)).stone.isDefined
 
 }
