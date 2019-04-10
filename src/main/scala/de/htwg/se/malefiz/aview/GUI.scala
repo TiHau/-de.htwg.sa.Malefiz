@@ -173,29 +173,22 @@ class GUI(controller: ControllerInterface) extends Frame with Observer {
   override def closeOperation(): Unit = sys.exit(0)
 
   override def update(): Unit = {
-    controller.getState match {
-      case Print | EndTurn => repaint()
-      case SetBlockStone =>
-        message = "Set a BlockStone"
-        repaint()
-      case ChoosePlayerStone =>
-        message = "Chose one of your Stones"
-        repaint()
-      case ChooseTarget =>
-        message = "Chose a Target Field"
-        repaint()
+    message = controller.getState match {
+      case Print | EndTurn => message
+      case SetBlockStone => "Set a BlockStone"
+      case ChoosePlayerStone => "Chose one of your Stones"
+      case ChooseTarget => "Chose a Target Field"
       case PlayerWon =>
         val wonUI = new WinUI
         wonUI.visible = true
-        repaint()
+        message
       case SetPlayerCount =>
         val countUI = new CountUI
         countUI.visible = true
-        repaint()
-      case BeforeEndOfTurn =>
-        message = "Press Enter to end your turn or Backspace to undo"
-        repaint()
+        message
+      case BeforeEndOfTurn => "Press Enter to end your turn or Backspace to undo"
     }
+    repaint()
   }
 
   private class CountUI extends MainFrame {
