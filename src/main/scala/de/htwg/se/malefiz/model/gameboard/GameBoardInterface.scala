@@ -9,6 +9,8 @@ trait GameBoardInterface extends Publisher {
   private val two = 2
   private val three = 3
   private val four = 4
+  private val x = 17
+  private val y = 16
 
   /**
    * Spieler 1
@@ -30,7 +32,7 @@ trait GameBoardInterface extends Publisher {
   /**
    * Das Spielfeld
    */
-  val board: mutable.Map[(Int, Int), Field] = mutable.HashMap.empty[(Int, Int), Field]
+  val board: mutable.Map[(Int,Int),Option[Field]] = mutable.HashMap.empty[(Int,Int),Option[Field]]
 
   /**
    * Initialisiert Felder neu

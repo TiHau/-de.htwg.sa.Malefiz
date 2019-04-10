@@ -7,7 +7,7 @@ class MoveCommand(stone: PlayerStone, destField: Field, controller: ControllerIn
 
   private val xStone = stone.x
   private val yStone = stone.y
-  private val currentField = controller.gameBoard.board((xStone, yStone))
+  private val currentField = controller.gameBoard.board((xStone,yStone)).get
   private var hitStone: Option[Stone] = None
 
   override def doStep(): Unit = {
@@ -30,12 +30,13 @@ class MoveCommand(stone: PlayerStone, destField: Field, controller: ControllerIn
     destField.stone = hitStone
 
     hitStone match {
-      case Some(stone: PlayerStone) =>
+      case Some(stone: PlayerStone) => {
         val x = stone.startX
         val y = stone.startY
-        controller.gameBoard.board((x, y)).stone = None
+        controller.gameBoard.board((x, y)).get.stone = None
         stone.x = destField.x
         stone.y = destField.y
+      }
       case _ =>
     }
 
