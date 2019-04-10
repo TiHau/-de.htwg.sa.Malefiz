@@ -32,7 +32,7 @@ trait GameBoardInterface extends Publisher {
   /**
    * Das Spielfeld
    */
-  val board: mutable.Map[(Int, Int), Option[Field]] = mutable.HashMap.empty[(Int, Int), Option[Field]]
+  val board: mutable.Map[(Int, Int), Field] = mutable.HashMap.empty[(Int, Int), Field]
 
   /**
    * Initialisiert Felder neu
