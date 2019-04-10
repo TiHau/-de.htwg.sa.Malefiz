@@ -30,13 +30,12 @@ class MoveCommand(stone: PlayerStone, destField: Field, controller: ControllerIn
     destField.stone = hitStone
 
     hitStone match {
-      case Some(stone: PlayerStone) => {
+      case Some(stone: PlayerStone) =>
         val x = stone.startX
         val y = stone.startY
         controller.gameBoard.board((x, y)).stone = None
         stone.x = destField.x
         stone.y = destField.y
-      }
       case _ =>
     }
 

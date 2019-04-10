@@ -1,4 +1,4 @@
 package de.htwg.se.malefiz.model.gameboard
 
-case class Field(var x: Int, var y: Int, var stone: Option[Stone], var available: Boolean = false)
+case class Field(x: Int, y: Int, var stone: Option[Stone], var available: Boolean = false)
 
