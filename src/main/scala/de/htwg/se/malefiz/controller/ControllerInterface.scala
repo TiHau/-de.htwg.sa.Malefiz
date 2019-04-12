@@ -11,9 +11,10 @@ trait ControllerInterface extends Observable with Publisher {
   private val six = 6
 
   /**
-   * Der aktuelle Spielzustand
+   * Der aktuelle Spielzustand wird geliefert oder gesetzt
    */
-  var state: State.Value = Print
+  def getState: State.Value
+  def setState(newState: State.Value):Unit
   /**
    * Boolen wert der festlegt ob ein Blockstein gesetzt werden muss
    */

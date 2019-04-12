@@ -20,7 +20,7 @@ class StoneFieldSpec extends WordSpec with Matchers {
         field.stone.get.isInstanceOf[PlayerStone] shouldBe true
       }
       "avariable false" in {
-        field.avariable shouldBe false
+        field.available shouldBe false
       }
       "is empty false" in {
         field.stone.isEmpty shouldBe false

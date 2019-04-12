@@ -16,7 +16,7 @@ class ControllerSpec extends WordSpec with Matchers {
       val controller = injector.getInstance(classOf[ControllerInterface])
       val player = Player(1)
       "can change player count specific" in {
-        controller.newGame(2) equals (controller.gameBoard.playerCount)
+        controller.newGame(2) equals controller.gameBoard.playerCount
       }
 
     }
@@ -26,7 +26,7 @@ class ControllerSpec extends WordSpec with Matchers {
       val controller = injector.getInstance(classOf[ControllerInterface])
       "can reset" in {
         controller.reset()
-        controller.state shouldBe SetPlayerCount
+        controller.getState shouldBe SetPlayerCount
       }
 
     }
@@ -41,129 +41,130 @@ class ControllerSpec extends WordSpec with Matchers {
       }
       "take input" in {
         controller.takeInput(3, 14)
-        controller.state shouldBe Print
+        controller.getState shouldBe Print
       }
       "redo does nothing" in {
         controller.takeInput(3, 14)
         controller.redo()
-        controller.state shouldBe Print
+        controller.getState shouldBe Print
       }
 
       "chose Player" in {
-        controller.state = ChoosePlayerStone
+        controller.setState(ChoosePlayerStone)
         controller.diced = 1
         controller.takeInput(10, 14)
         controller.undo()
-        controller.state shouldBe ChoosePlayerStone
+        controller.getState shouldBe ChoosePlayerStone
         controller.undo()
-        controller.state shouldBe ChoosePlayerStone
+        controller.getState shouldBe ChoosePlayerStone
         controller.redo()
-        controller.state shouldBe ChooseTarget
+        controller.getState shouldBe ChooseTarget
       }
       "choose Target" in {
         controller.takeInput(10, 13)
         controller.undo()
-        controller.state shouldBe ChooseTarget
+        controller.getState shouldBe ChooseTarget
         controller.redo()
-        controller.state shouldBe BeforeEndOfTurn
+        controller.getState shouldBe BeforeEndOfTurn
       }
       "chose Player not start" in {
-        controller.state = ChoosePlayerStone
+        controller.setState(ChoosePlayerStone)
         controller.diced = 1
         controller.takeInput(10, 13)
         controller.undo()
-        controller.state shouldBe ChoosePlayerStone
+        controller.getState shouldBe ChoosePlayerStone
         controller.redo()
-        controller.state shouldBe ChooseTarget
+        controller.getState shouldBe ChooseTarget
       }
       "choose Target not start" in {
         controller.takeInput(11, 13)
         controller.undo()
-        controller.state shouldBe ChooseTarget
+        controller.getState shouldBe ChooseTarget
         controller.redo()
-        controller.state shouldBe BeforeEndOfTurn
+        controller.getState shouldBe BeforeEndOfTurn
       }
       "before end of turn" in {
-        controller.state = BeforeEndOfTurn
+        controller.setState(BeforeEndOfTurn)
         controller.takeInput(3, 14)
-        controller.state shouldBe BeforeEndOfTurn
+        controller.getState shouldBe BeforeEndOfTurn
       }
       "end move" in {
         controller.endTurn()
-        controller.state shouldBe ChoosePlayerStone
+        controller.getState shouldBe ChoosePlayerStone
       }
       "print" in {
-        controller.state = Print
+        controller.setState(Print)
         controller.takeInput(3, 14)
-        controller.state shouldBe Print
+        controller.getState shouldBe Print
       }
       "setBlockStone" in {
-        controller.state = SetBlockStone
+        controller.setState(SetBlockStone)
         controller.takeInput(4, 1)
         controller.undo()
-        controller.state shouldBe SetBlockStone
+        controller.getState shouldBe SetBlockStone
         controller.redo()
-        controller.state shouldBe BeforeEndOfTurn
+        controller.getState shouldBe BeforeEndOfTurn
       }
       "befor end of turn" in {
-        controller.state = BeforeEndOfTurn
+        controller.setState(BeforeEndOfTurn)
         controller.takeInput(4, 1)
-        controller.state shouldBe BeforeEndOfTurn
+        controller.getState shouldBe BeforeEndOfTurn
       }
 
       "change player from 3 to 4" in {
-        controller.state = BeforeEndOfTurn
+        controller.setState(BeforeEndOfTurn)
         controller.endTurn()
         controller.activePlayer shouldBe controller.gameBoard.player4
       }
       "change player from 4 to 2" in {
-        controller.state = BeforeEndOfTurn
+        controller.setState(BeforeEndOfTurn)
         controller.endTurn()
         controller.activePlayer shouldBe controller.gameBoard.player2
       }
       "change player from 1 to 3" in {
-        controller.state = BeforeEndOfTurn
+        controller.setState(BeforeEndOfTurn)
         controller.endTurn()
         controller.activePlayer shouldBe controller.gameBoard.player3
       }
       "change player from 2 to 1" in {
-        controller.state = BeforeEndOfTurn
+        controller.setState(BeforeEndOfTurn)
         controller.endTurn()
         controller.activePlayer shouldBe controller.gameBoard.player1
       }
       "change player from 4 to 1 with Playercount = 2" in {
         controller.newGame(2)
         controller.activePlayer = controller.gameBoard.player4
-        controller.state = BeforeEndOfTurn
+        controller.setState(BeforeEndOfTurn)
         controller.endTurn()
         controller.activePlayer shouldBe controller.gameBoard.player1
 
       }
       "check win" in {
-        controller.gameBoard.board(8)(0).get.stone = Some(PlayerStone(8, 0, 8, 0, 1))
-        controller.state = BeforeEndOfTurn
+        controller.gameBoard.board((8, 0)).stone = Some(PlayerStone(8, 0, 8, 0, 1))
+        controller.setState(BeforeEndOfTurn)
         controller.endTurn()
-        controller.state shouldBe PlayerWon
+        controller.getState shouldBe PlayerWon
       }
       "invalid PlayerStone" in {
-        controller.state = ChoosePlayerStone
-        controller.takeInput(0, 0)
-        controller.state shouldBe ChoosePlayerStone
+        controller.setState(ChoosePlayerStone)
+        controller.takeInput(13, 13)
+        controller.getState shouldBe ChoosePlayerStone
       }
       "beat a PlayerStone" in {
         controller.newGame(2)
-        val field1 = controller.gameBoard.board(14)(14).get
-        val field2 = controller.gameBoard.board(14)(13).get
+        val field1 = controller.gameBoard.board((14, 14))
+        val field2 = controller.gameBoard.board((14, 13))
         controller.activePlayer = controller.gameBoard.player1
         controller.diced = 1
-        controller.state = ChoosePlayerStone
+        controller.setState(ChoosePlayerStone)
         controller.takeInput(2, 14)
-        controller.state = ChooseTarget
+        controller.setState(ChooseTarget)
         controller.gameBoard.forceMoveStone(field1, field2)
-        controller.gameBoard.board(14)(13).get.avariable = true
+
+        controller.gameBoard.board((14, 13)).available = true
         controller.takeInput(14, 13)
         controller.undo()
-        controller.state shouldBe ChooseTarget
+        controller.getState shouldBe ChooseTarget
       }
 
       "beat a BlockStone" in {
@@ -172,113 +173,113 @@ class ControllerSpec extends WordSpec with Matchers {
         controller.diced = 5
         controller.takeInput(2, 14)
         controller.takeInput(4, 11)
-        controller.gameBoard.board(4)(11).get.stone.get.isInstanceOf[PlayerStone] shouldBe true
+        controller.gameBoard.board((4, 11)).stone.get.isInstanceOf[PlayerStone] shouldBe true
 
         controller.undo()
-        controller.gameBoard.board(4)(11).get.stone.get.isInstanceOf[BlockStone] shouldBe true
+        controller.gameBoard.board((4, 11)).stone.get.isInstanceOf[BlockStone] shouldBe true
         controller.redo()
-        controller.gameBoard.board(4)(11).get.stone.get.isInstanceOf[PlayerStone] shouldBe true
+        controller.gameBoard.board((4, 11)).stone.get.isInstanceOf[PlayerStone] shouldBe true
       }
 
       "undo before end of turn" in {
         controller.newGame(2)
         controller.activePlayer = controller.gameBoard.player1
         controller.diced = 1
-        controller.state = ChoosePlayerStone
+        controller.setState(ChoosePlayerStone)
         controller.takeInput(3, 14)
-        controller.state shouldBe ChooseTarget
+        controller.getState shouldBe ChooseTarget
         controller.takeInput(2, 13)
-        controller.state shouldBe BeforeEndOfTurn
+        controller.getState shouldBe BeforeEndOfTurn
         controller.redo()
-        controller.state shouldBe BeforeEndOfTurn
+        controller.getState shouldBe BeforeEndOfTurn
         controller.undo()
-        controller.state shouldBe ChooseTarget
+        controller.getState shouldBe ChooseTarget
         controller.redo()
-        controller.state shouldBe BeforeEndOfTurn
+        controller.getState shouldBe BeforeEndOfTurn
       }
 
       "set invalid playerstone target" in {
         controller.newGame(2)
-        controller.state = ChooseTarget
+        controller.setState(ChooseTarget)
         controller.takeInput(0, 15)
-        controller.state shouldBe ChooseTarget
+        controller.getState shouldBe ChooseTarget
       }
 
       "set invalid bockstone target" in {
         controller.newGame(2)
-        controller.state = SetBlockStone
+        controller.setState(SetBlockStone)
         controller.takeInput(0, 15)
-        controller.state shouldBe SetBlockStone
+        controller.getState shouldBe SetBlockStone
       }
 
       "input in state beforeEndOfTurn" in {
         controller.newGame(2)
-        controller.state = BeforeEndOfTurn
+        controller.setState(BeforeEndOfTurn)
         controller.takeInput(0, 15)
-        controller.state shouldBe BeforeEndOfTurn
+        controller.getState shouldBe BeforeEndOfTurn
       }
 
       "input while state is print" in {
         controller.newGame(2)
-        controller.state = Print
+        controller.setState(Print)
         controller.takeInput(2, 14)
-        controller.state shouldBe Print
+        controller.getState shouldBe Print
       }
 
       "when a new Games with 3 Players starts" in {
         controller.newGame(3)
-        controller.state shouldBe ChoosePlayerStone
+        controller.getState shouldBe ChoosePlayerStone
         controller.activePlayer shouldBe controller.gameBoard.player4
         controller.needToSetBlockStone shouldBe false
       }
 
       "when a new Game with 4 Players starts" in {
         controller.newGame(4)
-        controller.state shouldBe ChoosePlayerStone
+        controller.getState shouldBe ChoosePlayerStone
         controller.activePlayer shouldBe controller.gameBoard.player2
         controller.needToSetBlockStone shouldBe false
       }
 
       "when a new playerCount of 2 is set" in {
         controller.setPlayerCount(2)
-        controller.state shouldBe ChoosePlayerStone
+        controller.getState shouldBe ChoosePlayerStone
         controller.activePlayer shouldBe controller.gameBoard.player2
         controller.needToSetBlockStone shouldBe false
       }
 
       "when a new playerCount of 3 is set" in {
         controller.setPlayerCount(3)
-        controller.state shouldBe ChoosePlayerStone
+        controller.getState shouldBe ChoosePlayerStone
         controller.activePlayer shouldBe controller.gameBoard.player2
         controller.needToSetBlockStone shouldBe false
       }
 
       "when a new playerCount of 4 is set" in {
         controller.setPlayerCount(4)
-        controller.state shouldBe ChoosePlayerStone
+        controller.getState shouldBe ChoosePlayerStone
         controller.activePlayer shouldBe controller.gameBoard.player2
         controller.needToSetBlockStone shouldBe false
       }
 
       "when input comes in in SetPlayerCount State" in {
         controller.newGame(4)
-        controller.state = SetPlayerCount
+        controller.setState(SetPlayerCount)
         controller.takeInput(0, 0)
-        controller.state shouldBe SetPlayerCount
+        controller.getState shouldBe SetPlayerCount
       }
 
       "when input comes in in EndTurn state" in {
         controller.newGame(4)
-        controller.state = EndTurn
+        controller.setState(EndTurn)
         controller.takeInput(0, 0)
-        controller.state shouldBe EndTurn
+        controller.getState shouldBe EndTurn
       }
 
       "when input comes in in PlayerWon state" in {
         controller.newGame(4)
-        controller.state = PlayerWon
+        controller.setState(PlayerWon)
         controller.takeInput(0, 0)
-        controller.state shouldBe PlayerWon
+        controller.getState shouldBe PlayerWon
       }
 
       "getter/setter tests" in {

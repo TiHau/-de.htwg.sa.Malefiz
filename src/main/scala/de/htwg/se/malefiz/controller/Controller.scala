@@ -12,7 +12,7 @@ import net.codingwell.scalaguice.InjectorExtensions._
 
 import scala.swing.Publisher
 
-case class Controller @Inject()() extends ControllerInterface with Publisher {
+case class Controller @Inject() () extends ControllerInterface with Publisher {
   val injector: Injector = Guice.createInjector(new MalefizModule)
   var gameBoard: GameBoardInterface = injector.instance[GameBoardInterface](Names.named("default")).createBoard
   activePlayer = gameBoard.player3
@@ -21,8 +21,12 @@ case class Controller @Inject()() extends ControllerInterface with Publisher {
   private val fileIO = injector.instance[FileIOInterface]
   private val undoManager = new UndoManager()
   private var chosenPlayerStone = gameBoard.player1.stones(0)
-  private var destField = gameBoard.board(8)(0).get
+  private var destField = gameBoard.board((8, 0))
+  private var state: State.Value = Print
 
+  override def getState: State.Value = state
+
+  override def setState(newState: State.Value): Unit = state = newState
   override def loadSavedGame(): Unit = {
     state = ChoosePlayerStone
     undoManager.clear()
@@ -62,24 +66,17 @@ case class Controller @Inject()() extends ControllerInterface with Publisher {
     val oldState = state
     state = Print
     notifyObservers()
-    oldState match {
-      case ChooseTarget =>
-        state = ChoosePlayerStone
-        notifyObservers()
+    state = oldState match {
+      case ChooseTarget | ChoosePlayerStone => ChoosePlayerStone
       case BeforeEndOfTurn =>
         if (needToSetBlockStone) {
-          state = SetBlockStone
+          SetBlockStone
         } else {
-          state = ChooseTarget
+          ChooseTarget
         }
-        notifyObservers()
-      case SetBlockStone =>
-        state = ChooseTarget
-        notifyObservers()
-      case ChoosePlayerStone =>
-        state = ChoosePlayerStone
-        notifyObservers()
+      case SetBlockStone => ChooseTarget
     }
+    notifyObservers()
   }
 
   def redo(): Unit = {
@@ -133,8 +130,6 @@ case class Controller @Inject()() extends ControllerInterface with Publisher {
 
   def takeInput(x: Int, y: Int): Unit = {
     state match {
-      case Print =>
-      case SetPlayerCount =>
       case ChoosePlayerStone =>
         if (checkValidPlayerStone(x, y)) {
           chooseStone()
@@ -147,9 +142,7 @@ case class Controller @Inject()() extends ControllerInterface with Publisher {
         if (setTargetForBlockStone(x, y)) {
           setBlockStone()
         }
-      case PlayerWon =>
-      case BeforeEndOfTurn =>
-      case EndTurn =>
+      case _ =>
     }
   }
 
@@ -188,9 +181,8 @@ case class Controller @Inject()() extends ControllerInterface with Publisher {
     }
   }
 
-  private def dice(): Unit = {
-    diced = scala.util.Random.nextInt(six) + 1
-  }
+  private def dice(): Unit = diced = scala.util.Random.nextInt(six) + 1
+
 
   private def changePlayer(): Unit = {
     if (activePlayer.color == 1) {
@@ -208,7 +200,7 @@ case class Controller @Inject()() extends ControllerInterface with Publisher {
 
   def setTargetForPlayerStone(x: Int, y: Int): Boolean = {
     if (gameBoard.checkDestForPlayerStone(x, y)) {
-      destField = gameBoard.board(x)(y).get
+      destField = gameBoard.board((x, y))
       true
     } else {
       false
@@ -217,7 +209,7 @@ case class Controller @Inject()() extends ControllerInterface with Publisher {
 
   private def setTargetForBlockStone(x: Int, y: Int): Boolean = {
     if (gameBoard.checkDestForBlockStone(x, y)) {
-      destField = gameBoard.board(x)(y).get
+      destField = gameBoard.board((x, y))
       true
     } else {
       false
@@ -226,15 +218,12 @@ case class Controller @Inject()() extends ControllerInterface with Publisher {
   }
 
   private def checkValidPlayerStone(x: Int, y: Int): Boolean = {
-    if (x >= 0 && x < 17 && y >= 0 && y < 16 && (gameBoard.board(x)(y).isDefined && gameBoard.board(x)(y).get.stone.isDefined && gameBoard.board(x)(y).get.stone.get.isInstanceOf[PlayerStone])) {
+    if (x >= 0 && x < 17 && y >= 0 && y < 16 && (gameBoard.board.contains((x, y))
+      && gameBoard.board((x, y)).stone.isDefined && gameBoard.board((x, y)).stone.get.isInstanceOf[PlayerStone])) {
       var retBool: Boolean = false
-      for (s <- activePlayer.stones) {
-        if ((s.x == gameBoard.board(x)(y).get.x)
-          && (s.y == gameBoard.board(x)(y).get.y)) {
-          chosenPlayerStone = gameBoard.board(x)(y).get.stone.get.asInstanceOf[PlayerStone]
-          retBool = true
-        }
-      }
+      activePlayer.stones.filter(s=>s.x == gameBoard.board((x, y)).x && s.y == gameBoard.board((x, y)).y)
+        .foreach(s=>{chosenPlayerStone = gameBoard.board((x, y)).stone.get.asInstanceOf[PlayerStone]
+        retBool = true})
       retBool
     } else {
       false
