@@ -93,9 +93,7 @@ case class GameBoard @Inject() (@Named("DefaultSize") var playerCount: Int) exte
 
     if (validField(dest.x, dest.y) && board((dest.x, dest.y)).available) {
       val save = dest.stone
-      board((dest.x, dest.y)) = board((dest.x, dest.y)).copy(stone = current.stone)
-      board((dest.x, dest.y)).stone.get.asInstanceOf[PlayerStone].x = dest.x
-      board((dest.x, dest.y)).stone.get.asInstanceOf[PlayerStone].y = dest.y
+      board((dest.x, dest.y)) = board((dest.x, dest.y)).copy(stone = Some(current.stone.get.asInstanceOf[PlayerStone].copy(x = dest.x, y = dest.y)))
       board((current.x, current.y)) = board((current.x, current.y)).copy(stone = None)
       save
     } else {
@@ -107,22 +105,16 @@ case class GameBoard @Inject() (@Named("DefaultSize") var playerCount: Int) exte
     if (board.contains((dest.x, dest.y))) {
       val ps: PlayerStone = current.stone.get.asInstanceOf[PlayerStone]
       if (dest.x == ps.startX && dest.y == ps.startY) {
-        ps.x = ps.startX
-        ps.y = ps.startY
+        board((dest.x, dest.y)) = board((dest.x, dest.y)).copy(stone = Some(ps.copy(x = ps.startX, y = ps.startY)))
       } else {
-        ps.x = dest.x
-        ps.y = dest.y
+        board((dest.x, dest.y)) = board((dest.x, dest.y)).copy(stone = Some(ps.copy(x = dest.x, y = dest.y)))
       }
-      board((dest.x, dest.y)) = board((dest.x, dest.y)).copy(stone = current.stone)
       board((current.x, current.y)) = board((current.x, current.y)).copy(stone = None)
     }
   }
 
-  def resetPlayerStone(stone: PlayerStone): Unit = {
-    stone.x = stone.startX
-    stone.y = stone.startY
-    board((stone.startX, stone.startY)) = board((stone.startX, stone.startY)).copy(stone = Some(stone))
-  }
+  def resetPlayerStone(stone: PlayerStone): Unit = board((stone.startX, stone.startY)) =
+    board((stone.startX, stone.startY)).copy(stone = Some(stone.copy(x = stone.startX, y = stone.startY)))
 
   def checkDestForBlockStone(x: Int, y: Int): Boolean = y < 12 && board.contains((x, y)) && board((x, y)).stone.isEmpty
 
