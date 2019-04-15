@@ -29,7 +29,7 @@ class GUI(controller: ControllerInterface) extends Frame with Observer {
     override def paint(g: Graphics2D): Unit = {
       //Background
       background = Color.WHITE
-      val activePlayerColorString : String = controller.activePlayer.color match {
+      val activePlayerColorString: String = controller.activePlayer.color match {
         case 1 => "Red"
         case 2 => "Green"
         case 3 => "Yellow"
@@ -212,7 +212,7 @@ class GUI(controller: ControllerInterface) extends Frame with Observer {
   }
 
   private class WinUI extends MainFrame {
-    val activePlayerColorString : String = controller.activePlayer.color match {
+    val activePlayerColorString: String = controller.activePlayer.color match {
       case 1 => "Red"
       case 2 => "Green"
       case 3 => "Yellow"

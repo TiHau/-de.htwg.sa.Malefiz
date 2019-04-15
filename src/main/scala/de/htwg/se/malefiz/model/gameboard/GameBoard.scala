@@ -8,60 +8,47 @@ import scala.swing.Publisher
 
 case class GameBoard @Inject() (@Named("DefaultSize") var playerCount: Int) extends GameBoardInterface with Publisher {
   override def createBoard: GameBoard = {
-    (0 to 15).foreach {
-      case y @ (0 | 4) => defineField(8, y)
-      case y @ (1 | 3) => (0 to 16).foreach(i => defineField(i, y))
-      case y @ 2 =>
-        defineField(0, y)
-        defineField(16, y)
-      case y @ 5 => (6 to 10).foreach(i => defineField(i, y))
-      case y @ 6 =>
-        defineField(6, y)
-        defineField(10, y)
-      case y @ 7 => (4 to 12).foreach(i => defineField(i, y))
-      case y @ 8 =>
-        defineField(12, y)
-        defineField(4, y)
-      case y @ 9 => (2 to 14).foreach(i => defineField(i, y))
-      case y @ 10 =>
-        defineField(2, y)
-        defineField(6, y)
-        defineField(10, y)
-        defineField(14, y)
-      case y @ (11 | 13) => (0 to 16).foreach(i => defineField(i, y))
-      case y @ 12 => (0 to 16).filter(i => i % 4 == 0).foreach(i => defineField(i, y))
-      case y @ 14 => (1 to 15).filter(i => i % 4 != 0).foreach(i => defineField(i, y))
-      case y @ 15 => (0 to 16).filter(i => i % 2 != 0).foreach(i => defineField(i, y))
-    }
+    defineField(8, 0)
+    defineField(8, 4)
+    (0 to 16).foreach(i => defineField(i, 1))
+    (0 to 16).foreach(i => defineField(i, 3))
+    defineField(0, 2)
+    defineField(16, 2)
+    (6 to 10).foreach(i => defineField(i, 5))
+    defineField(6, 6)
+    defineField(10, 6)
+    (4 to 12).foreach(i => defineField(i, 7))
+    defineField(12, 8)
+    defineField(4, 8)
+    (2 to 14).foreach(i => defineField(i, 9))
+    defineField(2, 10)
+    defineField(6, 10)
+    defineField(10, 10)
+    defineField(14, 10)
+    (0 to 16).foreach(i => defineField(i, 11))
+    (0 to 16).foreach(i => defineField(i, 13))
+    (0 to 16).filter(i => i % 4 == 0).foreach(i => defineField(i, 12))
+    (1 to 15).filter(i => i % 4 != 0).foreach(i => defineField(i, 14))
+    (0 to 16).filter(i => i % 2 != 0).foreach(i => defineField(i, 15))
     (1 to 5).filter(y => y != 2).foreach(y => defineBlockStone(8, y))
     defineBlockStone(6, 7)
     defineBlockStone(10, 7)
     (0 to 16).filter(i => i % 4 == 0).foreach(x => defineBlockStone(x, 11))
-    definePlayerStoneArray(1, player1)
-    definePlayerStoneArray(5, player2)
-    definePlayerStoneArray(9, player3)
-    definePlayerStoneArray(13, player4)
     definePlayerStones(1, player1)
     definePlayerStones(13, player4)
     if (playerCount >= 3) {
       definePlayerStones(5, player2)
       if (playerCount == 4) definePlayerStones(9, player3)
     }
-    def definePlayerStoneArray(xStart: Int, player: Player): Unit = {
-      player.stones(2) = PlayerStone(xStart, 14, xStart, 14, player.color)
-      player.stones(1) = PlayerStone(xStart, 15, xStart, 15, player.color)
-      player.stones(0) = PlayerStone(xStart + 1, 14, xStart + 1, 14, player.color)
-      player.stones(3) = PlayerStone(xStart + 2, 14, xStart + 2, 14, player.color)
-      player.stones(4) = PlayerStone(xStart + 2, 15, xStart + 2, 15, player.color)
-    }
+
     def defineField(x: Int, y: Int): Unit = board.update((x, y), Field(x, y, None))
     def defineBlockStone(x: Int, y: Int): Unit = board.update((x, y), Field(x, y, Some(BlockStone())))
     def definePlayerStones(xFirst: Int, player: Player): Unit = {
-      board.update((xFirst, 14), Field(xFirst, 14, Some(player.stones(2))))
-      board.update((xFirst, 15), Field(xFirst, 15, Some(player.stones(1))))
-      board.update((xFirst + 1, 14), Field(xFirst + 1, 14, Some(player.stones(0))))
-      board.update((xFirst + 2, 14), Field(xFirst + 2, 14, Some(player.stones(3))))
-      board.update((xFirst + 2, 15), Field(xFirst + 2, 15, Some(player.stones(4))))
+      board.update((xFirst, 14), Field(xFirst, 14, Some(PlayerStone(xFirst, 14, xFirst, 14, player.color))))
+      board.update((xFirst, 15), Field(xFirst, 15, Some(PlayerStone(xFirst, 15, xFirst, 15, player.color))))
+      board.update((xFirst + 1, 14), Field(xFirst + 1, 14, Some(PlayerStone(xFirst + 1, 14, xFirst + 1, 14, player.color))))
+      board.update((xFirst + 2, 14), Field(xFirst + 2, 14, Some(PlayerStone(xFirst + 2, 14, xFirst + 2, 14, player.color))))
+      board.update((xFirst + 2, 15), Field(xFirst + 2, 15, Some(PlayerStone(xFirst + 2, 15, xFirst + 2, 15, player.color))))
     }
     this
   }
@@ -106,10 +93,8 @@ case class GameBoard @Inject() (@Named("DefaultSize") var playerCount: Int) exte
 
     if (validField(dest.x, dest.y) && board((dest.x, dest.y)).available) {
       val save = dest.stone
-      dest.stone = current.stone
-      dest.stone.get.asInstanceOf[PlayerStone].x = dest.x
-      dest.stone.get.asInstanceOf[PlayerStone].y = dest.y
-      current.stone = None
+      board((dest.x, dest.y)) = board((dest.x, dest.y)).copy(stone = Some(current.stone.get.asInstanceOf[PlayerStone].copy(x = dest.x, y = dest.y)))
+      board((current.x, current.y)) = board((current.x, current.y)).copy(stone = None)
       save
     } else {
       None
@@ -117,35 +102,29 @@ case class GameBoard @Inject() (@Named("DefaultSize") var playerCount: Int) exte
   }
 
   def forceMoveStone(current: Field, dest: Field): Unit = {
-    if (dest.y < 16 && dest.y >= 0 && dest.x < 17 && dest.x >= 0) {
+    if (board.contains((dest.x, dest.y))) {
       val ps: PlayerStone = current.stone.get.asInstanceOf[PlayerStone]
       if (dest.x == ps.startX && dest.y == ps.startY) {
-        ps.x = ps.startX
-        ps.y = ps.startY
+        board((dest.x, dest.y)) = board((dest.x, dest.y)).copy(stone = Some(ps.copy(x = ps.startX, y = ps.startY)))
       } else {
-        ps.x = dest.x
-        ps.y = dest.y
+        board((dest.x, dest.y)) = board((dest.x, dest.y)).copy(stone = Some(ps.copy(x = dest.x, y = dest.y)))
       }
-      dest.stone = current.stone
-      current.stone = None
+      board((current.x, current.y)) = board((current.x, current.y)).copy(stone = None)
     }
   }
 
-  def resetPlayerStone(stone: PlayerStone): Unit = {
-    stone.x = stone.startX
-    stone.y = stone.startY
-    board((stone.startX, stone.startY)).stone = Some(stone)
-  }
+  def resetPlayerStone(stone: PlayerStone): Unit = board((stone.startX, stone.startY)) =
+    board((stone.startX, stone.startY)).copy(stone = Some(stone.copy(x = stone.startX, y = stone.startY)))
 
-  def checkDestForBlockStone(x: Int, y: Int): Boolean = y < 12 && y > 0 && x < 17 && x >= 0 && board((x, y)).stone.isEmpty
+  def checkDestForBlockStone(x: Int, y: Int): Boolean = y < 12 && board.contains((x, y)) && board((x, y)).stone.isEmpty
 
-  def setBlockStoneOnField(field: Field): Unit = board((field.x, field.y)).stone = Some(new BlockStone)
+  def setBlockStoneOnField(field: Field): Unit = board((field.x, field.y)) = board((field.x, field.y)).copy(stone = Some(BlockStone()))
 
-  def removeStoneOnField(field: Field): Unit = board((field.x, field.y)).stone = None
+  def removeStoneOnField(field: Field): Unit = board((field.x, field.y)) = board((field.x, field.y)).copy(stone = None)
 
   def markPossibleMoves(stone: PlayerStone, player: Player, diced: Int): Unit = {
     if (stone.isOnStart) {
-      markPossibleMovesR(player.stones(0).startX, player.stones(0).startY, diced, ' ', player.color)
+      markPossibleMovesR(player.start._1, player.start._2, diced, ' ', player.color)
     } else {
       markPossibleMovesR(stone.x, stone.y, diced, ' ', player.color)
     }
@@ -158,7 +137,7 @@ case class GameBoard @Inject() (@Named("DefaultSize") var playerCount: Int) exte
         return
       }
 
-      board((x, y)).available = true
+      board((x, y)) = board((x, y)).copy(available = true)
     } else {
       // If there is a blocking stone on the way dont go on
       if (board((x, y)).stone.isDefined && board((x, y)).stone.get.isInstanceOf[BlockStone]) {
@@ -185,10 +164,10 @@ case class GameBoard @Inject() (@Named("DefaultSize") var playerCount: Int) exte
 
   def unmarkPossibleMoves(): Unit = {
     val tmpB = board.seq
-    tmpB.foreach(f => board(f._1).available = false)
+    tmpB.foreach(f => board(f._1) = board(f._1).copy(available = false))
   }
 
-  private def validField(x: Int, y: Int): Boolean = y <= 13 && y >= 0 && x <= 16 && x >= 0 && board.contains((x, y))
+  private def validField(x: Int, y: Int): Boolean = y <= 13 && board.contains((x, y))
 
   def checkDestForPlayerStone(x: Int, y: Int): Boolean = validField(x, y) && board((x, y)).available
 

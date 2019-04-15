@@ -14,7 +14,7 @@ trait ControllerInterface extends Observable with Publisher {
    * Der aktuelle Spielzustand wird geliefert oder gesetzt
    */
   def getState: State.Value
-  def setState(newState: State.Value):Unit
+  def setState(newState: State.Value): Unit
   /**
    * Boolen wert der festlegt ob ein Blockstein gesetzt werden muss
    */
@@ -22,7 +22,7 @@ trait ControllerInterface extends Observable with Publisher {
   /**
    * Der Spieler der aktuell am Zug ist
    */
-  var activePlayer: Player = Player(six)
+  var activePlayer: Player = _
   /**
    * Die gewürfelte Zahl
    */

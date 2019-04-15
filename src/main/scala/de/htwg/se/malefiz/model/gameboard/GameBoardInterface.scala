@@ -15,19 +15,19 @@ trait GameBoardInterface extends Publisher {
   /**
    * Spieler 1
    */
-  val player1 = Player(one)
+  val player1 = Player(one, (2, 14))
   /**
    * Spieler 2
    */
-  val player2 = Player(two)
+  val player2 = Player(two, (6, 14))
   /**
    * Spieler 3
    */
-  val player3 = Player(three)
+  val player3 = Player(three, (10, 14))
   /**
    * Spieler 4
    */
-  val player4 = Player(four)
+  val player4 = Player(four, (14, 14))
 
   /**
    * Das Spielfeld
