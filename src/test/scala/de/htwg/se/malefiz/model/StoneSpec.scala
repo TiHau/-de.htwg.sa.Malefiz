@@ -19,13 +19,16 @@ class StoneSpec extends WordSpec with Matchers {
       "have stonetype p" in {
         stone.isInstanceOf[PlayerStone] shouldBe true
       }
+      "sit on start field" in {
+        stone.isOnStart shouldBe true
+      }
+
       val stone2 = stone.copy(x = 1, y = 1)
 
       "have a acctualField after change" in {
         stone2.x shouldBe 1
         stone2.y shouldBe 1
       }
-
     }
   }
   "A BlockStone" when {
