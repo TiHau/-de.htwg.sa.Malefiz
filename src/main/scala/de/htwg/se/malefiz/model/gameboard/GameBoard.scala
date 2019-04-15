@@ -8,31 +8,28 @@ import scala.swing.Publisher
 
 case class GameBoard @Inject() (@Named("DefaultSize") var playerCount: Int) extends GameBoardInterface with Publisher {
   override def createBoard: GameBoard = {
-    (0 to 15).foreach {
-      case y @ (0 | 4) => defineField(8, y)
-      case y @ (1 | 3) => (0 to 16).foreach(i => defineField(i, y))
-      case y @ 2 =>
-        defineField(0, y)
-        defineField(16, y)
-      case y @ 5 => (6 to 10).foreach(i => defineField(i, y))
-      case y @ 6 =>
-        defineField(6, y)
-        defineField(10, y)
-      case y @ 7 => (4 to 12).foreach(i => defineField(i, y))
-      case y @ 8 =>
-        defineField(12, y)
-        defineField(4, y)
-      case y @ 9 => (2 to 14).foreach(i => defineField(i, y))
-      case y @ 10 =>
-        defineField(2, y)
-        defineField(6, y)
-        defineField(10, y)
-        defineField(14, y)
-      case y @ (11 | 13) => (0 to 16).foreach(i => defineField(i, y))
-      case y @ 12 => (0 to 16).filter(i => i % 4 == 0).foreach(i => defineField(i, y))
-      case y @ 14 => (1 to 15).filter(i => i % 4 != 0).foreach(i => defineField(i, y))
-      case y @ 15 => (0 to 16).filter(i => i % 2 != 0).foreach(i => defineField(i, y))
-    }
+    defineField(8, 0)
+    defineField(8, 4)
+    (0 to 16).foreach(i => defineField(i, 1))
+    (0 to 16).foreach(i => defineField(i, 3))
+    defineField(0, 2)
+    defineField(16, 2)
+    (6 to 10).foreach(i => defineField(i, 5))
+    defineField(6, 6)
+    defineField(10, 6)
+    (4 to 12).foreach(i => defineField(i, 7))
+    defineField(12, 8)
+    defineField(4, 8)
+    (2 to 14).foreach(i => defineField(i, 9))
+    defineField(2, 10)
+    defineField(6, 10)
+    defineField(10, 10)
+    defineField(14, 10)
+    (0 to 16).foreach(i => defineField(i, 11))
+    (0 to 16).foreach(i => defineField(i, 13))
+    (0 to 16).filter(i => i % 4 == 0).foreach(i => defineField(i, 12))
+    (1 to 15).filter(i => i % 4 != 0).foreach(i => defineField(i, 14))
+    (0 to 16).filter(i => i % 2 != 0).foreach(i => defineField(i, 15))
     (1 to 5).filter(y => y != 2).foreach(y => defineBlockStone(8, y))
     defineBlockStone(6, 7)
     defineBlockStone(10, 7)
