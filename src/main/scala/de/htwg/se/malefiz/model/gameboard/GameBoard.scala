@@ -117,7 +117,7 @@ case class GameBoard @Inject() (@Named("DefaultSize") var playerCount: Int) exte
   }
 
   def forceMoveStone(current: Field, dest: Field): Unit = {
-    if (dest.y < 16 && dest.y >= 0 && dest.x < 17 && dest.x >= 0) {
+    if (board.contains((dest.x, dest.y))) {
       val ps: PlayerStone = current.stone.get.asInstanceOf[PlayerStone]
       if (dest.x == ps.startX && dest.y == ps.startY) {
         ps.x = ps.startX
@@ -137,7 +137,7 @@ case class GameBoard @Inject() (@Named("DefaultSize") var playerCount: Int) exte
     board((stone.startX, stone.startY)).stone = Some(stone)
   }
 
-  def checkDestForBlockStone(x: Int, y: Int): Boolean = y < 12 && y > 0 && x < 17 && x >= 0 && board((x, y)).stone.isEmpty
+  def checkDestForBlockStone(x: Int, y: Int): Boolean = y < 12 && board.contains((x, y)) && board((x, y)).stone.isEmpty
 
   def setBlockStoneOnField(field: Field): Unit = board((field.x, field.y)).stone = Some(new BlockStone)
 
@@ -188,7 +188,7 @@ case class GameBoard @Inject() (@Named("DefaultSize") var playerCount: Int) exte
     tmpB.foreach(f => board(f._1).available = false)
   }
 
-  private def validField(x: Int, y: Int): Boolean = y <= 13 && y >= 0 && x <= 16 && x >= 0 && board.contains((x, y))
+  private def validField(x: Int, y: Int): Boolean = y <= 13 && board.contains((x, y))
 
   def checkDestForPlayerStone(x: Int, y: Int): Boolean = validField(x, y) && board((x, y)).available
 

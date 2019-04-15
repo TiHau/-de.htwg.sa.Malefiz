@@ -14,7 +14,7 @@ trait ControllerInterface extends Observable with Publisher {
    * Der aktuelle Spielzustand wird geliefert oder gesetzt
    */
   def getState: State.Value
-  def setState(newState: State.Value):Unit
+  def setState(newState: State.Value): Unit
   /**
    * Boolen wert der festlegt ob ein Blockstein gesetzt werden muss
    */

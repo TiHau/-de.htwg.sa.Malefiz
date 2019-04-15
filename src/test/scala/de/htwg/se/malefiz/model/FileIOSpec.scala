@@ -12,18 +12,18 @@ class FileIOSpec extends WordSpec with Matchers {
 
   "A FileIO Json" when {
 
-      val injector: Injector = Guice.createInjector(new MalefizModule)
-      val controller: ControllerInterface = injector.getInstance(classOf[ControllerInterface])
-      "save load" should {
-        controller.activePlayer = controller.gameBoard.player3
-        controller.saveGame()
-        controller.activePlayer = controller.gameBoard.player1
-        controller.loadSavedGame()
-        "have player nr 3" in {
-          controller.activePlayer.color shouldBe 3
-        }
-
+    val injector: Injector = Guice.createInjector(new MalefizModule)
+    val controller: ControllerInterface = injector.getInstance(classOf[ControllerInterface])
+    "save load" should {
+      controller.activePlayer = controller.gameBoard.player3
+      controller.saveGame()
+      controller.activePlayer = controller.gameBoard.player1
+      controller.loadSavedGame()
+      "have player nr 3" in {
+        controller.activePlayer.color shouldBe 3
       }
+
+    }
 
   }
 }

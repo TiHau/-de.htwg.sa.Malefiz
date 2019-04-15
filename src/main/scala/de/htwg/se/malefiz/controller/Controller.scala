@@ -1,7 +1,7 @@
 package de.htwg.se.malefiz.controller
 
 import com.google.inject.name.Names
-import com.google.inject.{Guice, Inject, Injector}
+import com.google.inject.{ Guice, Inject, Injector }
 import com.typesafe.scalalogging.Logger
 import de.htwg.se.malefiz.MalefizModule
 import de.htwg.se.malefiz.controller.State._
@@ -183,7 +183,6 @@ case class Controller @Inject() () extends ControllerInterface with Publisher {
 
   private def dice(): Unit = diced = scala.util.Random.nextInt(six) + 1
 
-
   private def changePlayer(): Unit = {
     if (activePlayer.color == 1) {
       activePlayer = gameBoard.player4
@@ -218,12 +217,14 @@ case class Controller @Inject() () extends ControllerInterface with Publisher {
   }
 
   private def checkValidPlayerStone(x: Int, y: Int): Boolean = {
-    if (x >= 0 && x < 17 && y >= 0 && y < 16 && (gameBoard.board.contains((x, y))
-      && gameBoard.board((x, y)).stone.isDefined && gameBoard.board((x, y)).stone.get.isInstanceOf[PlayerStone])) {
+    if (gameBoard.board.contains((x, y))
+      && gameBoard.board((x, y)).stone.isDefined && gameBoard.board((x, y)).stone.get.isInstanceOf[PlayerStone]) {
       var retBool: Boolean = false
-      activePlayer.stones.filter(s=>s.x == gameBoard.board((x, y)).x && s.y == gameBoard.board((x, y)).y)
-        .foreach(s=>{chosenPlayerStone = gameBoard.board((x, y)).stone.get.asInstanceOf[PlayerStone]
-        retBool = true})
+      activePlayer.stones.filter(s => s.x == gameBoard.board((x, y)).x && s.y == gameBoard.board((x, y)).y)
+        .foreach(s => {
+          chosenPlayerStone = gameBoard.board((x, y)).stone.get.asInstanceOf[PlayerStone]
+          retBool = true
+        })
       retBool
     } else {
       false
