@@ -31,12 +31,12 @@ class FileIO extends FileIOInterface {
     }
 
     val cb = controller.gameBoard.board.seq
-    cb.foreach(f => controller.gameBoard.board(f._1).stone = None)
+    cb.foreach(f => controller.gameBoard.board(f._1) = controller.gameBoard.board(f._1).copy(stone = None))
 
     (json \ "blockStones").as[JsArray].value.foreach(blockStone => {
       val x = (blockStone \ "x").get.toString().toInt
       val y = (blockStone \ "y").get.toString().toInt
-      controller.gameBoard.board((x, y)).stone = Some(BlockStone())
+      controller.gameBoard.board((x, y)) = controller.gameBoard.board((x, y)).copy(stone = Some(BlockStone()))
     })
 
     (json \ "playerStones").as[JsArray].value.foreach(playerStone => {
@@ -45,7 +45,7 @@ class FileIO extends FileIOInterface {
       val startX = (playerStone \ "startX").get.toString().toInt
       val startY = (playerStone \ "startY").get.toString().toInt
       val playerColor = (playerStone \ "playerColor").get.toString().toInt
-      controller.gameBoard.board((x, y)).stone = Some(PlayerStone(startX, startY, x, y, playerColor))
+      controller.gameBoard.board((x, y)) = controller.gameBoard.board((x, y)).copy(stone = Some(PlayerStone(startX, startY, x, y, playerColor)))
     })
   }
 

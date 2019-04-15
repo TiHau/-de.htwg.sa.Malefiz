@@ -93,10 +93,10 @@ case class GameBoard @Inject() (@Named("DefaultSize") var playerCount: Int) exte
 
     if (validField(dest.x, dest.y) && board((dest.x, dest.y)).available) {
       val save = dest.stone
-      dest.stone = current.stone
-      dest.stone.get.asInstanceOf[PlayerStone].x = dest.x
-      dest.stone.get.asInstanceOf[PlayerStone].y = dest.y
-      current.stone = None
+      board((dest.x, dest.y)) = board((dest.x, dest.y)).copy(stone = current.stone)
+      board((dest.x, dest.y)).stone.get.asInstanceOf[PlayerStone].x = dest.x
+      board((dest.x, dest.y)).stone.get.asInstanceOf[PlayerStone].y = dest.y
+      board((current.x, current.y)) = board((current.x, current.y)).copy(stone = None)
       save
     } else {
       None
@@ -113,22 +113,22 @@ case class GameBoard @Inject() (@Named("DefaultSize") var playerCount: Int) exte
         ps.x = dest.x
         ps.y = dest.y
       }
-      dest.stone = current.stone
-      current.stone = None
+      board((dest.x, dest.y)) = board((dest.x, dest.y)).copy(stone = current.stone)
+      board((current.x, current.y)) = board((current.x, current.y)).copy(stone = None)
     }
   }
 
   def resetPlayerStone(stone: PlayerStone): Unit = {
     stone.x = stone.startX
     stone.y = stone.startY
-    board((stone.startX, stone.startY)).stone = Some(stone)
+    board((stone.startX, stone.startY)) = board((stone.startX, stone.startY)).copy(stone = Some(stone))
   }
 
   def checkDestForBlockStone(x: Int, y: Int): Boolean = y < 12 && board.contains((x, y)) && board((x, y)).stone.isEmpty
 
-  def setBlockStoneOnField(field: Field): Unit = board((field.x, field.y)).stone = Some(new BlockStone)
+  def setBlockStoneOnField(field: Field): Unit = board((field.x, field.y)) = board((field.x, field.y)).copy(stone = Some(BlockStone()))
 
-  def removeStoneOnField(field: Field): Unit = board((field.x, field.y)).stone = None
+  def removeStoneOnField(field: Field): Unit = board((field.x, field.y)) = board((field.x, field.y)).copy(stone = None)
 
   def markPossibleMoves(stone: PlayerStone, player: Player, diced: Int): Unit = {
     if (stone.isOnStart) {
