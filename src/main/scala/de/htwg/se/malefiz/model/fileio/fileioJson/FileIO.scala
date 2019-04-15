@@ -45,34 +45,7 @@ class FileIO extends FileIOInterface {
       val startX = (playerStone \ "startX").get.toString().toInt
       val startY = (playerStone \ "startY").get.toString().toInt
       val playerColor = (playerStone \ "playerColor").get.toString().toInt
-
-      playerColor match {
-        case 1 =>
-          controller.gameBoard.player1.stones.filter(stone => stone.startX == startX && stone.startY == startY).foreach(stone => {
-            stone.x = x
-            stone.y = y
-            controller.gameBoard.board((x, y)).stone = Some(stone)
-          })
-        case 2 =>
-          controller.gameBoard.player2.stones.filter(stone => stone.startX == startX && stone.startY == startY).foreach(stone => {
-            stone.x = x
-            stone.y = y
-            controller.gameBoard.board((x, y)).stone = Some(stone)
-          })
-        case 3 =>
-          controller.gameBoard.player3.stones.filter(stone => stone.startX == startX && stone.startY == startY).foreach(stone => {
-            stone.x = x
-            stone.y = y
-            controller.gameBoard.board((x, y)).stone = Some(stone)
-          })
-        case 4 =>
-          controller.gameBoard.player4.stones.filter(stone => stone.startX == startX && stone.startY == startY).foreach(stone => {
-            stone.x = x
-            stone.y = y
-            controller.gameBoard.board((x, y)).stone = Some(stone)
-          })
-        case _ =>
-      }
+      controller.gameBoard.board((x, y)).stone = Some(PlayerStone(startX, startY, x, y, playerColor))
     })
   }
 

@@ -14,7 +14,7 @@ class ControllerSpec extends WordSpec with Matchers {
   "A Controller" when {
     "new set" should {
       val controller = injector.getInstance(classOf[ControllerInterface])
-      val player = Player(1)
+      val player = Player(1, (2, 14))
       "can change player count specific" in {
         controller.newGame(2) equals controller.gameBoard.playerCount
       }
@@ -288,7 +288,7 @@ class ControllerSpec extends WordSpec with Matchers {
         controller.setDestField(testField)
         controller.getDestField shouldBe testField
 
-        val testPlayerStone = controller.gameBoard.player1.stones(0)
+        val testPlayerStone = controller.gameBoard.board(controller.gameBoard.player1.start).stone.get.asInstanceOf[PlayerStone]
         controller.setChoosenPlayerStone(testPlayerStone)
         controller.getChoosenPlayerStone shouldBe testPlayerStone
       }

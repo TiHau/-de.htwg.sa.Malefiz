@@ -20,7 +20,7 @@ case class Controller @Inject() () extends ControllerInterface with Publisher {
   private val logger = Logger(classOf[Controller])
   private val fileIO = injector.instance[FileIOInterface]
   private val undoManager = new UndoManager()
-  private var chosenPlayerStone = gameBoard.player1.stones(0)
+  private var chosenPlayerStone: PlayerStone = _
   private var destField = gameBoard.board((8, 0))
   private var state: State.Value = Print
 
@@ -220,11 +220,10 @@ case class Controller @Inject() () extends ControllerInterface with Publisher {
     if (gameBoard.board.contains((x, y))
       && gameBoard.board((x, y)).stone.isDefined && gameBoard.board((x, y)).stone.get.isInstanceOf[PlayerStone]) {
       var retBool: Boolean = false
-      activePlayer.stones.filter(s => s.x == gameBoard.board((x, y)).x && s.y == gameBoard.board((x, y)).y)
-        .foreach(s => {
-          chosenPlayerStone = gameBoard.board((x, y)).stone.get.asInstanceOf[PlayerStone]
-          retBool = true
-        })
+      if (activePlayer.color == gameBoard.board((x, y)).stone.get.asInstanceOf[PlayerStone].playerColor) {
+        chosenPlayerStone = gameBoard.board((x, y)).stone.get.asInstanceOf[PlayerStone]
+        retBool = true
+      }
       retBool
     } else {
       false

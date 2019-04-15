@@ -37,31 +37,21 @@ case class GameBoard @Inject() (@Named("DefaultSize") var playerCount: Int) exte
     defineBlockStone(6, 7)
     defineBlockStone(10, 7)
     (0 to 16).filter(i => i % 4 == 0).foreach(x => defineBlockStone(x, 11))
-    definePlayerStoneArray(1, player1)
-    definePlayerStoneArray(5, player2)
-    definePlayerStoneArray(9, player3)
-    definePlayerStoneArray(13, player4)
     definePlayerStones(1, player1)
     definePlayerStones(13, player4)
     if (playerCount >= 3) {
       definePlayerStones(5, player2)
       if (playerCount == 4) definePlayerStones(9, player3)
     }
-    def definePlayerStoneArray(xStart: Int, player: Player): Unit = {
-      player.stones(2) = PlayerStone(xStart, 14, xStart, 14, player.color)
-      player.stones(1) = PlayerStone(xStart, 15, xStart, 15, player.color)
-      player.stones(0) = PlayerStone(xStart + 1, 14, xStart + 1, 14, player.color)
-      player.stones(3) = PlayerStone(xStart + 2, 14, xStart + 2, 14, player.color)
-      player.stones(4) = PlayerStone(xStart + 2, 15, xStart + 2, 15, player.color)
-    }
+
     def defineField(x: Int, y: Int): Unit = board.update((x, y), Field(x, y, None))
     def defineBlockStone(x: Int, y: Int): Unit = board.update((x, y), Field(x, y, Some(BlockStone())))
     def definePlayerStones(xFirst: Int, player: Player): Unit = {
-      board.update((xFirst, 14), Field(xFirst, 14, Some(player.stones(2))))
-      board.update((xFirst, 15), Field(xFirst, 15, Some(player.stones(1))))
-      board.update((xFirst + 1, 14), Field(xFirst + 1, 14, Some(player.stones(0))))
-      board.update((xFirst + 2, 14), Field(xFirst + 2, 14, Some(player.stones(3))))
-      board.update((xFirst + 2, 15), Field(xFirst + 2, 15, Some(player.stones(4))))
+      board.update((xFirst, 14), Field(xFirst, 14, Some(PlayerStone(xFirst, 14, xFirst, 14, player.color))))
+      board.update((xFirst, 15), Field(xFirst, 15, Some(PlayerStone(xFirst, 15, xFirst, 15, player.color))))
+      board.update((xFirst + 1, 14), Field(xFirst + 1, 14, Some(PlayerStone(xFirst + 1, 14, xFirst + 1, 14, player.color))))
+      board.update((xFirst + 2, 14), Field(xFirst + 2, 14, Some(PlayerStone(xFirst + 2, 14, xFirst + 2, 14, player.color))))
+      board.update((xFirst + 2, 15), Field(xFirst + 2, 15, Some(PlayerStone(xFirst + 2, 15, xFirst + 2, 15, player.color))))
     }
     this
   }
@@ -145,7 +135,7 @@ case class GameBoard @Inject() (@Named("DefaultSize") var playerCount: Int) exte
 
   def markPossibleMoves(stone: PlayerStone, player: Player, diced: Int): Unit = {
     if (stone.isOnStart) {
-      markPossibleMovesR(player.stones(0).startX, player.stones(0).startY, diced, ' ', player.color)
+      markPossibleMovesR(player.start._1, player.start._2, diced, ' ', player.color)
     } else {
       markPossibleMovesR(stone.x, stone.y, diced, ' ', player.color)
     }

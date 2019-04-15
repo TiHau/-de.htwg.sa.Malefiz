@@ -22,7 +22,7 @@ trait ControllerInterface extends Observable with Publisher {
   /**
    * Der Spieler der aktuell am Zug ist
    */
-  var activePlayer: Player = Player(six)
+  var activePlayer: Player = _
   /**
    * Die gewürfelte Zahl
    */
