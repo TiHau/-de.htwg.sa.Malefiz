@@ -1,12 +1,14 @@
 package de.htwg.se.malefiz.controller
 
-import com.google.inject.{ Guice, Injector }
+import com.google.inject.{Guice, Injector}
 import de.htwg.se.malefiz.MalefizModule
 import de.htwg.se.malefiz.controller.State._
 import de.htwg.se.malefiz.model.gameboard._
 import org.junit.runner.RunWith
 import org.scalatest._
 import org.scalatest.junit.JUnitRunner
+
+import scala.concurrent.Await
 
 @RunWith(classOf[JUnitRunner])
 class ControllerSpec extends WordSpec with Matchers {
@@ -129,6 +131,7 @@ class ControllerSpec extends WordSpec with Matchers {
       }
       "change player from 4 to 1 with Playercount = 2" in {
         controller.newGame(2)
+        Thread.sleep(10)
         controller.activePlayer = controller.gameBoard.player4
         controller.setState(BeforeEndOfTurn)
         controller.endTurn()
@@ -148,6 +151,7 @@ class ControllerSpec extends WordSpec with Matchers {
       }
       "beat a PlayerStone" in {
         controller.newGame(2)
+        Thread.sleep(10)
         val field1 = controller.gameBoard.board((14, 14))
         val field2 = controller.gameBoard.board((14, 13))
         controller.activePlayer = controller.gameBoard.player1
@@ -165,6 +169,7 @@ class ControllerSpec extends WordSpec with Matchers {
 
       "beat a BlockStone" in {
         controller.newGame(2)
+        Thread.sleep(10)
         controller.activePlayer = controller.gameBoard.player1
         controller.diced = 5
         controller.takeInput(2, 14)
@@ -179,6 +184,7 @@ class ControllerSpec extends WordSpec with Matchers {
 
       "undo before end of turn" in {
         controller.newGame(2)
+        Thread.sleep(10)
         controller.activePlayer = controller.gameBoard.player1
         controller.diced = 1
         controller.setState(ChoosePlayerStone)
@@ -196,6 +202,7 @@ class ControllerSpec extends WordSpec with Matchers {
 
       "set invalid playerstone target" in {
         controller.newGame(2)
+        Thread.sleep(10)
         controller.setState(ChooseTarget)
         controller.takeInput(0, 15)
         controller.getState shouldBe ChooseTarget
@@ -203,6 +210,7 @@ class ControllerSpec extends WordSpec with Matchers {
 
       "set invalid bockstone target" in {
         controller.newGame(2)
+        Thread.sleep(10)
         controller.setState(SetBlockStone)
         controller.takeInput(0, 15)
         controller.getState shouldBe SetBlockStone
@@ -210,6 +218,7 @@ class ControllerSpec extends WordSpec with Matchers {
 
       "input in state beforeEndOfTurn" in {
         controller.newGame(2)
+        Thread.sleep(10)
         controller.setState(BeforeEndOfTurn)
         controller.takeInput(0, 15)
         controller.getState shouldBe BeforeEndOfTurn
@@ -217,6 +226,7 @@ class ControllerSpec extends WordSpec with Matchers {
 
       "input while state is print" in {
         controller.newGame(2)
+        Thread.sleep(10)
         controller.setState(Print)
         controller.takeInput(2, 14)
         controller.getState shouldBe Print
@@ -224,6 +234,7 @@ class ControllerSpec extends WordSpec with Matchers {
 
       "when a new Games with 3 Players starts" in {
         controller.newGame(3)
+        Thread.sleep(10)
         controller.getState shouldBe ChoosePlayerStone
         controller.activePlayer shouldBe controller.gameBoard.player4
         controller.needToSetBlockStone shouldBe false
@@ -231,6 +242,7 @@ class ControllerSpec extends WordSpec with Matchers {
 
       "when a new Game with 4 Players starts" in {
         controller.newGame(4)
+        Thread.sleep(10)
         controller.getState shouldBe ChoosePlayerStone
         controller.activePlayer shouldBe controller.gameBoard.player2
         controller.needToSetBlockStone shouldBe false
@@ -238,6 +250,7 @@ class ControllerSpec extends WordSpec with Matchers {
 
       "when a new playerCount of 2 is set" in {
         controller.setPlayerCount(2)
+        Thread.sleep(10)
         controller.getState shouldBe ChoosePlayerStone
         controller.activePlayer shouldBe controller.gameBoard.player2
         controller.needToSetBlockStone shouldBe false
@@ -245,6 +258,7 @@ class ControllerSpec extends WordSpec with Matchers {
 
       "when a new playerCount of 3 is set" in {
         controller.setPlayerCount(3)
+        Thread.sleep(10)
         controller.getState shouldBe ChoosePlayerStone
         controller.activePlayer shouldBe controller.gameBoard.player2
         controller.needToSetBlockStone shouldBe false
@@ -252,6 +266,7 @@ class ControllerSpec extends WordSpec with Matchers {
 
       "when a new playerCount of 4 is set" in {
         controller.setPlayerCount(4)
+        Thread.sleep(10)
         controller.getState shouldBe ChoosePlayerStone
         controller.activePlayer shouldBe controller.gameBoard.player2
         controller.needToSetBlockStone shouldBe false
@@ -259,6 +274,7 @@ class ControllerSpec extends WordSpec with Matchers {
 
       "when input comes in in SetPlayerCount State" in {
         controller.newGame(4)
+        Thread.sleep(10)
         controller.setState(SetPlayerCount)
         controller.takeInput(0, 0)
         controller.getState shouldBe SetPlayerCount
@@ -266,6 +282,7 @@ class ControllerSpec extends WordSpec with Matchers {
 
       "when input comes in in EndTurn state" in {
         controller.newGame(4)
+        Thread.sleep(10)
         controller.setState(EndTurn)
         controller.takeInput(0, 0)
         controller.getState shouldBe EndTurn
@@ -273,6 +290,7 @@ class ControllerSpec extends WordSpec with Matchers {
 
       "when input comes in in PlayerWon state" in {
         controller.newGame(4)
+        Thread.sleep(100)
         controller.setState(PlayerWon)
         controller.takeInput(0, 0)
         controller.getState shouldBe PlayerWon
@@ -280,6 +298,7 @@ class ControllerSpec extends WordSpec with Matchers {
 
       "getter/setter tests" in {
         controller.newGame(4)
+        Thread.sleep(10)
         val testField = Field(8, 0, None)
         controller.setDestField(testField)
         controller.getDestField shouldBe testField
@@ -291,6 +310,7 @@ class ControllerSpec extends WordSpec with Matchers {
 
       "save and load" in {
         controller.newGame(4)
+        Thread.sleep(10)
         val oldDiced: Int = controller.diced
         val oldPlayer: Player = controller.activePlayer
         controller.saveGame()

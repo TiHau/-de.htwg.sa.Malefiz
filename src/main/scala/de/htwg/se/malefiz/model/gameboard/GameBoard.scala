@@ -2,12 +2,13 @@ package de.htwg.se.malefiz.model.gameboard
 
 import com.google.inject.Inject
 import com.google.inject.name.Named
-
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.collection.mutable
+import scala.concurrent.Future
 import scala.swing.Publisher
 
 case class GameBoard @Inject() (@Named("DefaultSize") var playerCount: Int) extends GameBoardInterface with Publisher {
-  override def createBoard: GameBoard = {
+  override def createBoard: Future[GameBoard] = Future{
     defineField(8, 0)
     defineField(8, 4)
     (0 to 16).foreach(i => defineField(i, 1))
