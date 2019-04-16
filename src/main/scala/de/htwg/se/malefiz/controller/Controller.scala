@@ -115,7 +115,17 @@ case class Controller @Inject() () extends ControllerInterface with Publisher {
   private def nextTurn(): Unit = {
     if (!gameBoard.checkWin) {
       undoManager.clear()
-      changePlayer()
+      if (activePlayer.color == 1) {
+        activePlayer = gameBoard.player4
+      } else if (activePlayer.color == 4 && gameBoard.playerCount >= 3) {
+        activePlayer = gameBoard.player2
+      } else if (activePlayer.color == 2 && gameBoard.playerCount == 4) {
+        activePlayer = gameBoard.player3
+      } else if (activePlayer.color == 3) {
+        activePlayer = gameBoard.player1
+      } else {
+        activePlayer = gameBoard.player1
+      }
       diced = scala.util.Random.nextInt(six) + 1
       state = Print
       notifyObservers() //print GameBoard
@@ -131,13 +141,27 @@ case class Controller @Inject() () extends ControllerInterface with Publisher {
   def takeInput(x: Int, y: Int): Unit = {
     state match {
       case ChoosePlayerStone =>
-        if (checkValidPlayerStone(x, y)) {
-          chooseStone()
+        if (gameBoard.board.contains((x, y))
+          && gameBoard.board((x, y)).stone.isDefined
+          && gameBoard.board((x, y)).stone.get.isInstanceOf[PlayerStone]
+          && activePlayer.color == gameBoard.board((x, y)).stone.get.asInstanceOf[PlayerStone].playerColor) {
+          chosenPlayerStone = gameBoard.board((x, y)).stone.get.asInstanceOf[PlayerStone]
+          undoManager.doStep(new ChooseCommand(chosenPlayerStone, this))
+          state = Print
+          notifyObservers()
+          state = ChooseTarget
         }
       case ChooseTarget =>
         if (gameBoard.checkDestForPlayerStone(x, y)) {
           destField = gameBoard.board((x, y))
-          chooseTarget()
+          undoManager.doStep(new MoveCommand(chosenPlayerStone, destField, this))
+          state = Print
+          notifyObservers()
+          state = if (needToSetBlockStone) {
+            SetBlockStone
+          } else {
+            BeforeEndOfTurn
+          }
         }
       case SetBlockStone =>
         if (gameBoard.checkDestForBlockStone(x, y)) {
@@ -146,64 +170,16 @@ case class Controller @Inject() () extends ControllerInterface with Publisher {
           state = Print
           notifyObservers()
           state = BeforeEndOfTurn
-          notifyObservers()
         }
       case _ =>
     }
+    notifyObservers()
   }
 
   def reset(): Unit = {
     activePlayer = gameBoard.player3
     state = SetPlayerCount
     notifyObservers()
-  }
-
-  private def chooseStone(): Unit = {
-    undoManager.doStep(new ChooseCommand(chosenPlayerStone, this))
-    state = Print
-    notifyObservers()
-    state = ChooseTarget
-    notifyObservers()
-  }
-
-  private def chooseTarget(): Unit = {
-    undoManager.doStep(new MoveCommand(chosenPlayerStone, destField, this))
-    state = Print
-    notifyObservers()
-    if (needToSetBlockStone) {
-      state = SetBlockStone
-      notifyObservers()
-    } else {
-      state = BeforeEndOfTurn
-      notifyObservers()
-    }
-  }
-
-  private def changePlayer(): Unit = {
-    if (activePlayer.color == 1) {
-      activePlayer = gameBoard.player4
-    } else if (activePlayer.color == 4 && gameBoard.playerCount >= 3) {
-      activePlayer = gameBoard.player2
-    } else if (activePlayer.color == 2 && gameBoard.playerCount == 4) {
-      activePlayer = gameBoard.player3
-    } else if (activePlayer.color == 3) {
-      activePlayer = gameBoard.player1
-    } else {
-      activePlayer = gameBoard.player1
-    }
-  }
-  private def checkValidPlayerStone(x: Int, y: Int): Boolean = {
-    if (gameBoard.board.contains((x, y))
-      && gameBoard.board((x, y)).stone.isDefined && gameBoard.board((x, y)).stone.get.isInstanceOf[PlayerStone]) {
-      var retBool: Boolean = false
-      if (activePlayer.color == gameBoard.board((x, y)).stone.get.asInstanceOf[PlayerStone].playerColor) {
-        chosenPlayerStone = gameBoard.board((x, y)).stone.get.asInstanceOf[PlayerStone]
-        retBool = true
-      }
-      retBool
-    } else {
-      false
-    }
   }
 
   def setChoosenPlayerStone(newStone: PlayerStone): Unit = chosenPlayerStone = newStone
