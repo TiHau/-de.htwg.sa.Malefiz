@@ -18,14 +18,10 @@ class GUI(controller: ControllerInterface) extends Frame with Observer {
     listenTo(this.mouse.clicks)
     listenTo(this.keys)
     reactions += {
-      case MouseClicked(_, point, _, _, _) =>
-        controller.takeInput((point.x - 20) / ((size.width - 50) / 17), (point.y - 100) / ((size.height - 110) / 16))
-      case KeyPressed(_, Key.Enter, _, _) =>
-        controller.endTurn()
-      case KeyPressed(_, Key.BackSpace, _, _) =>
-        controller.undo()
+      case MouseClicked(_, point, _, _, _) => controller.takeInput((point.x - 20) / ((size.width - 50) / 17), (point.y - 100) / ((size.height - 110) / 16))
+      case KeyPressed(_, Key.Enter, _, _) => controller.endTurn()
+      case KeyPressed(_, Key.BackSpace, _, _) => controller.undo()
     }
-
     override def paint(g: Graphics2D): Unit = {
       //Background
       background = Color.WHITE
@@ -135,9 +131,7 @@ class GUI(controller: ControllerInterface) extends Frame with Observer {
   menuBar = new MenuBar {
     contents += new Menu("File") {
       mnemonic = Key.F
-      contents += new MenuItem(Action("New") {
-        controller.reset()
-      })
+      contents += new MenuItem(Action("New") {controller.reset()})
       contents += new MenuItem(Action("Save") {
         controller.saveGame()
         repaint()
@@ -146,9 +140,7 @@ class GUI(controller: ControllerInterface) extends Frame with Observer {
         controller.loadSavedGame()
         repaint()
       })
-      contents += new MenuItem(Action("Quit") {
-        sys.exit(0)
-      })
+      contents += new MenuItem(Action("Quit") {sys.exit(0)})
     }
     contents += new Menu("Edit") {
       mnemonic = Key.E
@@ -161,7 +153,6 @@ class GUI(controller: ControllerInterface) extends Frame with Observer {
         repaint()
       })
     }
-
   }
 
   size = dim
@@ -171,7 +162,6 @@ class GUI(controller: ControllerInterface) extends Frame with Observer {
   controller.reset()
 
   override def closeOperation(): Unit = sys.exit(0)
-
   override def update(): Unit = {
     message = controller.getState match {
       case Print | EndTurn => message
@@ -190,7 +180,6 @@ class GUI(controller: ControllerInterface) extends Frame with Observer {
     }
     repaint()
   }
-
   private class CountUI extends MainFrame {
     title = "Playercount"
     preferredSize = new Dimension(320, 70)
@@ -210,7 +199,6 @@ class GUI(controller: ControllerInterface) extends Frame with Observer {
       }
     }
   }
-
   private class WinUI extends MainFrame {
     val activePlayerColorString: String = controller.activePlayer.color match {
       case 1 => "Red"
@@ -232,6 +220,5 @@ class GUI(controller: ControllerInterface) extends Frame with Observer {
       }
     }
   }
-
 }
 
