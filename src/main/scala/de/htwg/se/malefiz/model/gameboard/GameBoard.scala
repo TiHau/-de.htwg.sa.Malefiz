@@ -132,7 +132,6 @@ case class GameBoard @Inject() (@Named("DefaultSize") var playerCount: Int) exte
       if (board((x, y)).stone.isDefined && board((x, y)).stone.get.isInstanceOf[PlayerStone] && board((x, y)).stone.get.asInstanceOf[PlayerStone].playerColor == playerColor) {
         return
       }
-
       board((x, y)) = board((x, y)).copy(available = true)
     } else {
       // If there is a blocking stone on the way dont go on
@@ -169,5 +168,4 @@ case class GameBoard @Inject() (@Named("DefaultSize") var playerCount: Int) exte
 
   //wenn ein Stein im Zielfeld steht muss es ein Spielerstein sein => Sieg
   def checkWin: Boolean = board((8, 0)).stone.isDefined
-
 }

@@ -11,10 +11,10 @@ import play.api.libs.json._
 import scala.io.Source
 
 class FileIO extends FileIOInterface {
+  private val source: String = "saveFile.json"
   override def load(controller: ControllerInterface): Unit = {
     if (Files.exists(Paths.get("saveFile.json"))) {
-      val source: String = Source.fromFile("saveFile.json").getLines.mkString
-      val json: JsValue = Json.parse(source)
+      val json: JsValue = Json.parse(Source.fromFile(source).getLines.mkString)
       gameFromJson(json, controller)
     }
   }
@@ -23,11 +23,11 @@ class FileIO extends FileIOInterface {
     controller.setPlayerCount((json \ "playerCount").get.toString().toInt)
     controller.diced = (json \ "diced").get.toString().toInt
 
-    (json \ "activePlayer").get.toString().toInt match {
-      case 1 => controller.activePlayer = controller.gameBoard.player1
-      case 2 => controller.activePlayer = controller.gameBoard.player2
-      case 3 => controller.activePlayer = controller.gameBoard.player3
-      case _ => controller.activePlayer = controller.gameBoard.player4
+    controller.activePlayer = (json \ "activePlayer").get.toString().toInt match {
+      case 1 => controller.gameBoard.player1
+      case 2 => controller.gameBoard.player2
+      case 3 => controller.gameBoard.player3
+      case _ => controller.gameBoard.player4
     }
 
     val cb = controller.gameBoard.board.seq
@@ -50,7 +50,7 @@ class FileIO extends FileIOInterface {
   }
 
   override def save(controller: ControllerInterface): Unit = {
-    val pw = new PrintWriter(new File("saveFile.json"))
+    val pw = new PrintWriter(new File(source))
     pw.write(Json.prettyPrint(gameToJson(controller)))
     pw.close()
   }

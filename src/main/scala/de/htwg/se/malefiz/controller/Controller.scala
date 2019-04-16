@@ -63,7 +63,6 @@ case class Controller @Inject() () extends ControllerInterface with Publisher {
         case Failure(exception)=>
       }
     }
-
     nextTurn()
   }
 
