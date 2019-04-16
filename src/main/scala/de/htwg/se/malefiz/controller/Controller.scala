@@ -116,7 +116,7 @@ case class Controller @Inject() () extends ControllerInterface with Publisher {
     if (!gameBoard.checkWin) {
       undoManager.clear()
       changePlayer()
-      dice()
+      diced = scala.util.Random.nextInt(six) + 1
       state = Print
       notifyObservers() //print GameBoard
       state = ChoosePlayerStone
@@ -135,12 +135,18 @@ case class Controller @Inject() () extends ControllerInterface with Publisher {
           chooseStone()
         }
       case ChooseTarget =>
-        if (setTargetForPlayerStone(x, y)) {
+        if (gameBoard.checkDestForPlayerStone(x, y)) {
+          destField = gameBoard.board((x, y))
           chooseTarget()
         }
       case SetBlockStone =>
-        if (setTargetForBlockStone(x, y)) {
-          setBlockStone()
+        if (gameBoard.checkDestForBlockStone(x, y)) {
+          destField = gameBoard.board((x, y))
+          undoManager.doStep(new BlockStoneCommand(destField, this))
+          state = Print
+          notifyObservers()
+          state = BeforeEndOfTurn
+          notifyObservers()
         }
       case _ =>
     }
@@ -149,14 +155,6 @@ case class Controller @Inject() () extends ControllerInterface with Publisher {
   def reset(): Unit = {
     activePlayer = gameBoard.player3
     state = SetPlayerCount
-    notifyObservers()
-  }
-
-  private def setBlockStone(): Unit = {
-    undoManager.doStep(new BlockStoneCommand(destField, this))
-    state = Print
-    notifyObservers()
-    state = BeforeEndOfTurn
     notifyObservers()
   }
 
@@ -181,8 +179,6 @@ case class Controller @Inject() () extends ControllerInterface with Publisher {
     }
   }
 
-  private def dice(): Unit = diced = scala.util.Random.nextInt(six) + 1
-
   private def changePlayer(): Unit = {
     if (activePlayer.color == 1) {
       activePlayer = gameBoard.player4
@@ -196,26 +192,6 @@ case class Controller @Inject() () extends ControllerInterface with Publisher {
       activePlayer = gameBoard.player1
     }
   }
-
-  def setTargetForPlayerStone(x: Int, y: Int): Boolean = {
-    if (gameBoard.checkDestForPlayerStone(x, y)) {
-      destField = gameBoard.board((x, y))
-      true
-    } else {
-      false
-    }
-  }
-
-  private def setTargetForBlockStone(x: Int, y: Int): Boolean = {
-    if (gameBoard.checkDestForBlockStone(x, y)) {
-      destField = gameBoard.board((x, y))
-      true
-    } else {
-      false
-    }
-
-  }
-
   private def checkValidPlayerStone(x: Int, y: Int): Boolean = {
     if (gameBoard.board.contains((x, y))
       && gameBoard.board((x, y)).stone.isDefined && gameBoard.board((x, y)).stone.get.isInstanceOf[PlayerStone]) {

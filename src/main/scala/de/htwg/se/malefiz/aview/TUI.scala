@@ -77,7 +77,7 @@ case class TUI(controller: ControllerInterface) extends Observer {
         logger.info("Set destination for your Stone(First Input X then Y)\n")
         printGameBoard()
       case State.PlayerWon => logger.info("Player: " + controller.activePlayer.color + " Won the Game\n")
-      case State.BeforeEndOfTurn => logger.info("Please type \"enter\" to go to next Move ore \"undo\" to revert\n")
+      case State.BeforeEndOfTurn => logger.info("Please type \"enter\" to go to next Move or \"undo\" to revert\n")
       case State.EndTurn =>
     }
   }

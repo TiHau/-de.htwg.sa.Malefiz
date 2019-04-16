@@ -35,10 +35,6 @@ class ControllerSpec extends WordSpec with Matchers {
   "A Controller" when {
     "started" should {
       val controller = injector.getInstance(classOf[ControllerInterface])
-      "when set Target" in {
-        val ret = controller.setTargetForPlayerStone(3, 14)
-        ret shouldBe false
-      }
       "take input" in {
         controller.takeInput(3, 14)
         controller.getState shouldBe Print

@@ -87,14 +87,6 @@ trait ControllerInterface extends Observable with Publisher {
   def reset(): Unit
 
   /**
-   * Setzt das Zielfeld auf die Übergebenen Koordinaten, übeprüft ab es ein gültiges Zielfeld ist
-   * @param x X-Koordinate
-   * @param y y-Koordinate
-   * @return true, wenn das Zielfeld gültig ist
-   */
-  def setTargetForPlayerStone(x: Int, y: Int): Boolean
-
-  /**
    * Setzt den ausgwählten Spielerstein
    * @param newStone neuer Spielerstein
    */
