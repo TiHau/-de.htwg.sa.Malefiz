@@ -115,16 +115,16 @@ case class Controller @Inject() () extends ControllerInterface with Publisher {
   private def nextTurn(): Unit = {
     if (!gameBoard.checkWin) {
       undoManager.clear()
-      if (activePlayer.color == 1) {
-        activePlayer = gameBoard.player4
+      activePlayer = if (activePlayer.color == 1) {
+        gameBoard.player4
       } else if (activePlayer.color == 4 && gameBoard.playerCount >= 3) {
-        activePlayer = gameBoard.player2
+        gameBoard.player2
       } else if (activePlayer.color == 2 && gameBoard.playerCount == 4) {
-        activePlayer = gameBoard.player3
+        gameBoard.player3
       } else if (activePlayer.color == 3) {
-        activePlayer = gameBoard.player1
+        gameBoard.player1
       } else {
-        activePlayer = gameBoard.player1
+        gameBoard.player1
       }
       diced = scala.util.Random.nextInt(six) + 1
       state = Print
