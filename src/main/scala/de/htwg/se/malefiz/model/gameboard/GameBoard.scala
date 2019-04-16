@@ -111,7 +111,7 @@ case class GameBoard @Inject() (@Named("DefaultSize") var playerCount: Int) exte
   def resetPlayerStone(stone: PlayerStone): Unit = board((stone.startX, stone.startY)) =
     board((stone.startX, stone.startY)).copy(stone = Some(stone.copy(x = stone.startX, y = stone.startY)))
 
-  def checkDestForBlockStone(x: Int, y: Int): Boolean = y < 12 && board.contains((x, y)) && board((x, y)).stone.isEmpty
+  def checkDestForBlockStone(x: Int, y: Int): Boolean = y < 12 && board.contains((x, y)) && board((x, y)).stone.isEmpty && (x, y) != (8, 0)
 
   def setBlockStoneOnField(field: Field): Unit = board((field.x, field.y)) = board((field.x, field.y)).copy(stone = Some(BlockStone()))
 
