@@ -89,8 +89,7 @@ case class GameBoard @Inject() (@Named("DefaultSize") var playerCount: Int) exte
     jsb.toString()
   }
 
-  def moveStone(current: Field, dest: Field): Option[Stone] = {
-
+  def moveStone(current: Field, dest: Field): Option[Stone] =
     if (validField(dest.x, dest.y) && board((dest.x, dest.y)).available) {
       val save = dest.stone
       board((dest.x, dest.y)) = board((dest.x, dest.y)).copy(stone = Some(current.stone.get.asInstanceOf[PlayerStone].copy(x = dest.x, y = dest.y)))
@@ -99,19 +98,15 @@ case class GameBoard @Inject() (@Named("DefaultSize") var playerCount: Int) exte
     } else {
       None
     }
-  }
 
-  def forceMoveStone(current: Field, dest: Field): Unit = {
+
+  def forceMoveStone(current: Field, dest: Field): Unit =
     if (board.contains((dest.x, dest.y))) {
       val ps: PlayerStone = current.stone.get.asInstanceOf[PlayerStone]
-      if (dest.x == ps.startX && dest.y == ps.startY) {
-        board((dest.x, dest.y)) = board((dest.x, dest.y)).copy(stone = Some(ps.copy(x = ps.startX, y = ps.startY)))
-      } else {
-        board((dest.x, dest.y)) = board((dest.x, dest.y)).copy(stone = Some(ps.copy(x = dest.x, y = dest.y)))
-      }
+      board((dest.x, dest.y)) = board((dest.x, dest.y)).copy(stone = Some(ps.copy(x = dest.x, y = dest.y)))
       board((current.x, current.y)) = board((current.x, current.y)).copy(stone = None)
     }
-  }
+
 
   def resetPlayerStone(stone: PlayerStone): Unit = board((stone.startX, stone.startY)) =
     board((stone.startX, stone.startY)).copy(stone = Some(stone.copy(x = stone.startX, y = stone.startY)))
