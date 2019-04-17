@@ -12,5 +12,5 @@ trait FileIOInterface {
    * Speichert den aktuellen Spielstand ab
    * @param controller
    */
-  def save(controller: ControllerInterface): Unit
+  def save(controller: ControllerInterface): Boolean
 }
