@@ -1,5 +1,6 @@
 package de.htwg.se.malefiz.model.gameboard
 
+import scala.collection.immutable.HashMap
 import scala.collection.mutable
 import scala.concurrent.Future
 import scala.swing.Publisher
@@ -30,8 +31,8 @@ trait GameBoardInterface extends Publisher {
   /**
    * Das Spielfeld
    */
-  val board: mutable.Map[(Int, Int), Field] = mutable.HashMap.empty[(Int, Int), Field]
-
+  //val board: Map[(Int, Int), Field] = HashMap.empty[(Int, Int), Field]
+  def board: Map[(Int, Int), Field]
   /**
    * Initialisiert Felder neu
    * @return neues GameBoard
@@ -57,19 +58,19 @@ trait GameBoardInterface extends Publisher {
    * <code>checkDestForBlockStone(x: Int, y: Int): Boolean</code> überprüft werden.
    * @param field Ein Freies Feld
    */
-  def setBlockStoneOnField(field: Field): Unit
+  def setBlockStoneOnField(field: Field): GameBoardInterface
 
   /**
    * Entfernt den Stein des Felds und setzt ihn auf einen FreeStone
    * @param field Ein Feld
    */
-  def removeStoneOnField(field: Field): Unit
+  def removeStoneOnField(field: Field): GameBoardInterface
 
   /**
    * Setzt den übergebenen Spielerstein wieder auf sein Startfeld zurück
    * @param stone Ein Spielerstein
    */
-  def resetPlayerStone(stone: PlayerStone): Unit
+  def resetPlayerStone(stone: PlayerStone): GameBoardInterface
 
   /**
    * Überprüft ob an den übergebenen Koordinaten ein Spielerstein gesetzt werden darf
@@ -86,7 +87,7 @@ trait GameBoardInterface extends Publisher {
    * @param dest Zielfeld
    * @return Den geschlagenen Stein oder None
    */
-  def moveStone(current: Field, dest: Field): Option[Stone]
+  def moveStone(current: Field, dest: Field): (Option[Stone], GameBoardInterface)
 
   /**
    * Versetzt einene Stein.Ohne das Zielfeld zu überprüfen.
@@ -94,7 +95,7 @@ trait GameBoardInterface extends Publisher {
    * @param current Aktuelles Feld
    * @param dest Zielfeld
    */
-  def forceMoveStone(current: Field, dest: Field): Unit
+  def forceMoveStone(current: Field, dest: Field): GameBoardInterface
 
   /**
    * Setzt avariable auf anwählbare Felder einens Steins in abhängigkeit von der gewürfelten Zahl
@@ -102,12 +103,12 @@ trait GameBoardInterface extends Publisher {
    * @param player Der besitzer des Steins(aktiver Spieler)
    * @param diced Die Distanz
    */
-  def markPossibleMoves(stone: PlayerStone, player: Player, diced: Int): Unit
+  def markPossibleMoves(stone: PlayerStone, player: Player, diced: Int): GameBoardInterface
 
   /**
    * Setzt avariable von allen Feldern auf false
    */
-  def unmarkPossibleMoves(): Unit
+  def unmarkPossibleMoves(): GameBoardInterface
 
   /**
    * Überpüft ob ein Stein auf dem Zielfeld steht
