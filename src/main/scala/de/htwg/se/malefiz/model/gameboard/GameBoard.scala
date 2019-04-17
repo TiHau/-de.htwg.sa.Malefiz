@@ -8,7 +8,7 @@ import scala.collection.immutable
 import scala.concurrent.Future
 import scala.swing.Publisher
 
-case class GameBoard @Inject() (@Named("DefaultSize") var playerCount: Int, board: Map[(Int, Int), Field]) extends GameBoardInterface {
+case class GameBoard @Inject() (@Named("DefaultSize") var playerCount: Int, board: Map[(Int, Int), Field] = immutable.HashMap.empty[(Int, Int), Field]) extends GameBoardInterface {
   override def createBoard: Future[GameBoard] = Future {
     var tmp = defineField(8, 0).defineField(8, 4)
       .defineField(0, 2).defineField(16, 2)
@@ -173,4 +173,6 @@ case class GameBoard @Inject() (@Named("DefaultSize") var playerCount: Int, boar
 
   //wenn ein Stein im Zielfeld steht muss es ein Spielerstein sein => Sieg
   def checkWin: Boolean = board((8, 0)).stone.isDefined
+
+  def setField(target: (Int, Int), whatToSet: Field): GameBoard = copy(board = board - target + (target -> whatToSet))
 }
