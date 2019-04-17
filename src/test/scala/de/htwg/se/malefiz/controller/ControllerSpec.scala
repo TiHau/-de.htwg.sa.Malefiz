@@ -139,7 +139,7 @@ class ControllerSpec extends WordSpec with Matchers {
 
       }
       "check win" in {
-        controller.gameBoard.board((8, 0)) = controller.gameBoard.board((8, 0)).copy(stone = Some(PlayerStone(8, 0, 8, 0, 1)))
+        //        controller.gameBoard.board((8, 0)) = controller.gameBoard.board((8, 0)).copy(stone = Some(PlayerStone(8, 0, 8, 0, 1)))
         controller.setState(BeforeEndOfTurn)
         controller.endTurn()
         controller.getState shouldBe PlayerWon
@@ -161,7 +161,7 @@ class ControllerSpec extends WordSpec with Matchers {
         controller.setState(ChooseTarget)
         controller.gameBoard.forceMoveStone(field1, field2)
 
-        controller.gameBoard.board((14, 13)) = controller.gameBoard.board((14, 13)).copy(available = true)
+        //  controller.gameBoard.board((14, 13)) = controller.gameBoard.board((14, 13)).copy(available = true)
         controller.takeInput(14, 13)
         controller.undo()
         controller.getState shouldBe ChooseTarget
