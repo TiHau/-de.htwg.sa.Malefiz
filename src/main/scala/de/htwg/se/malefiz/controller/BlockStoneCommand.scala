@@ -8,7 +8,6 @@ class BlockStoneCommand(field: Field, controller: ControllerInterface) extends C
   override def doStep(): Unit = controller.gameBoard.setBlockStoneOnField(field)
 
   override def undoStep(): Unit = {
-
     controller.gameBoard.removeStoneOnField(field)
     controller.needToSetBlockStone = true
   }

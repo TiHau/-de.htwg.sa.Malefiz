@@ -10,18 +10,25 @@ import de.htwg.se.malefiz.model.gameboard._
 import de.htwg.se.malefiz.util.UndoManager
 import net.codingwell.scalaguice.InjectorExtensions._
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.swing.Publisher
+import scala.util.{ Failure, Success }
 
 case class Controller @Inject() () extends ControllerInterface with Publisher {
   val injector: Injector = Guice.createInjector(new MalefizModule)
-  var gameBoard: GameBoardInterface = injector.instance[GameBoardInterface](Names.named("default")).createBoard
-  activePlayer = gameBoard.player3
+  var gameBoard: GameBoardInterface = _
+  injector.instance[GameBoardInterface](Names.named("default")).createBoard.onComplete {
+    case Success(gb) =>
+      gameBoard = gb
+      activePlayer = gameBoard.player3
+    case Failure(exception) =>
+  }
   private val six = 6
   private val logger = Logger(classOf[Controller])
   private val fileIO = injector.instance[FileIOInterface]
   private val undoManager = new UndoManager()
   private var chosenPlayerStone: PlayerStone = _
-  private var destField = gameBoard.board((8, 0))
+  private var destField: Field = _
   private var state: State.Value = Print
 
   override def getState: State.Value = state
@@ -43,20 +50,37 @@ case class Controller @Inject() () extends ControllerInterface with Publisher {
   }
 
   def newGame(playerCount: Int): Unit = {
-    gameBoard = playerCount match {
-      case 2 => injector.instance[GameBoardInterface](Names.named("tiny")).createBoard
-      case 3 => injector.instance[GameBoardInterface](Names.named("small")).createBoard
-      case _ => injector.instance[GameBoardInterface](Names.named("default")).createBoard
+    playerCount match {
+      case 2 => injector.instance[GameBoardInterface](Names.named("tiny")).createBoard.onComplete {
+        case Success(gb) => gameBoard = gb
+        case Failure(exception) =>
+      }
+      case 3 => injector.instance[GameBoardInterface](Names.named("small")).createBoard.onComplete {
+        case Success(gb) => gameBoard = gb
+        case Failure(exception) =>
+      }
+      case _ => injector.instance[GameBoardInterface](Names.named("default")).createBoard.onComplete {
+        case Success(gb) => gameBoard = gb
+        case Failure(exception) =>
+      }
     }
-
     nextTurn()
   }
 
   def setPlayerCount(playerCount: Int): Unit = {
-    gameBoard = playerCount match {
-      case 2 => injector.instance[GameBoardInterface](Names.named("tiny")).createBoard
-      case 3 => injector.instance[GameBoardInterface](Names.named("small")).createBoard
-      case _ => injector.instance[GameBoardInterface](Names.named("default")).createBoard
+    playerCount match {
+      case 2 => injector.instance[GameBoardInterface](Names.named("tiny")).createBoard.onComplete {
+        case Success(gb) => gameBoard = gb
+        case Failure(exception) =>
+      }
+      case 3 => injector.instance[GameBoardInterface](Names.named("small")).createBoard.onComplete {
+        case Success(gb) => gameBoard = gb
+        case Failure(exception) =>
+      }
+      case _ => injector.instance[GameBoardInterface](Names.named("default")).createBoard.onComplete {
+        case Success(gb) => gameBoard = gb
+        case Failure(exception) =>
+      }
     }
   }
 
@@ -86,22 +110,18 @@ case class Controller @Inject() () extends ControllerInterface with Publisher {
       val oldState = state
       state = Print
       notifyObservers()
-      oldState match {
-        case ChoosePlayerStone =>
-          state = ChooseTarget
-          notifyObservers()
+      state = oldState match {
+        case ChoosePlayerStone => ChooseTarget
         case ChooseTarget =>
           if (needToSetBlockStone) {
-            state = SetBlockStone
+            SetBlockStone
           } else {
-            state = BeforeEndOfTurn
+            BeforeEndOfTurn
           }
-          notifyObservers()
-        case SetBlockStone =>
-          state = BeforeEndOfTurn
-          notifyObservers()
-        case BeforeEndOfTurn =>
+        case SetBlockStone => BeforeEndOfTurn
+        case _ => state
       }
+      notifyObservers()
     }
   }
 
@@ -113,7 +133,7 @@ case class Controller @Inject() () extends ControllerInterface with Publisher {
   }
 
   private def nextTurn(): Unit = {
-    if (!gameBoard.checkWin) {
+    state = if (!gameBoard.checkWin) {
       undoManager.clear()
       activePlayer = if (activePlayer.color == 1) {
         gameBoard.player4
@@ -121,21 +141,18 @@ case class Controller @Inject() () extends ControllerInterface with Publisher {
         gameBoard.player2
       } else if (activePlayer.color == 2 && gameBoard.playerCount == 4) {
         gameBoard.player3
-      } else if (activePlayer.color == 3) {
-        gameBoard.player1
       } else {
         gameBoard.player1
       }
       diced = scala.util.Random.nextInt(six) + 1
       state = Print
       notifyObservers() //print GameBoard
-      state = ChoosePlayerStone
       needToSetBlockStone = false
-      notifyObservers()
+      ChoosePlayerStone
     } else {
-      state = PlayerWon
-      notifyObservers()
+      PlayerWon
     }
+    notifyObservers()
   }
 
   def takeInput(x: Int, y: Int): Unit = {

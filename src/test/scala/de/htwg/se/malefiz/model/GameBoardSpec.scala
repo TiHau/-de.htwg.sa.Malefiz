@@ -6,13 +6,19 @@ import de.htwg.se.malefiz.MalefizModule
 import org.junit.runner.RunWith
 import org.scalatest.{ Matchers, WordSpec }
 import org.scalatest.junit.JUnitRunner
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.util.{ Failure, Success }
 
 @RunWith(classOf[JUnitRunner])
 class GameBoardSpec extends WordSpec with Matchers {
   val injector: Injector = Guice.createInjector(new MalefizModule)
+  var board: GameBoardInterface = _
   "A GameBoard" when {
     "initialized" should {
-      val board = injector.instance[GameBoardInterface](Names.named("default")).createBoard
+      injector.instance[GameBoardInterface](Names.named("default")).createBoard.onComplete {
+        case Success(u) => board = u
+        case Failure(_) =>
+      }
       "have no field with null" in {
         for (y <- 0 to 15) {
           for (x <- 0 to 16) {
@@ -26,7 +32,11 @@ class GameBoardSpec extends WordSpec with Matchers {
   }
   "A GameBoard" when {
     "seted all" should {
-      val board = injector.instance[GameBoardInterface](Names.named("default")).createBoard
+
+      injector.instance[GameBoardInterface](Names.named("default")).createBoard.onComplete {
+        case Success(gb) => board = gb
+        case Failure(exception) =>
+      }
 
       "have 20 Player Stones" in {
         var count = 0
@@ -46,7 +56,10 @@ class GameBoardSpec extends WordSpec with Matchers {
   }
   "A GameBoard" when {
     "toSting" should {
-      val board = injector.instance[GameBoardInterface](Names.named("default")).createBoard
+      injector.instance[GameBoardInterface](Names.named("default")).createBoard.onComplete {
+        case Success(gb) => board = gb
+        case Failure(exception) =>
+      }
 
       "return a  which is not empty" in {
 
@@ -57,7 +70,10 @@ class GameBoardSpec extends WordSpec with Matchers {
 
   "A GameBoard" when {
     "not win" should {
-      val board = injector.instance[GameBoardInterface](Names.named("default")).createBoard
+      injector.instance[GameBoardInterface](Names.named("default")).createBoard.onComplete {
+        case Success(gb) => board = gb
+        case Failure(exception) =>
+      }
 
       "should return false" in {
 
@@ -68,7 +84,10 @@ class GameBoardSpec extends WordSpec with Matchers {
 
   "A GameBoard" when {
     "move Stone" should {
-      val board = injector.instance[GameBoardInterface](Names.named("default")).createBoard
+      injector.instance[GameBoardInterface](Names.named("default")).createBoard.onComplete {
+        case Success(gb) => board = gb
+        case Failure(exception) =>
+      }
       "Returns Option None" in {
         board.moveStone(board.board((3, 14)), board.board((8, 0))) should be(None)
       }

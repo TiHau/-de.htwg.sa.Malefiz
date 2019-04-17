@@ -2,12 +2,13 @@ package de.htwg.se.malefiz.model.gameboard
 
 import com.google.inject.Inject
 import com.google.inject.name.Named
-
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.collection.mutable
+import scala.concurrent.Future
 import scala.swing.Publisher
 
-case class GameBoard @Inject() (@Named("DefaultSize") var playerCount: Int) extends GameBoardInterface with Publisher {
-  override def createBoard: GameBoard = {
+case class GameBoard @Inject() (@Named("DefaultSize") var playerCount: Int) extends GameBoardInterface {
+  override def createBoard: Future[GameBoard] = Future {
     defineField(8, 0)
     defineField(8, 4)
     (0 to 16).foreach(i => defineField(i, 1))
@@ -99,14 +100,12 @@ case class GameBoard @Inject() (@Named("DefaultSize") var playerCount: Int) exte
       None
     }
 
-
   def forceMoveStone(current: Field, dest: Field): Unit =
     if (board.contains((dest.x, dest.y))) {
       val ps: PlayerStone = current.stone.get.asInstanceOf[PlayerStone]
       board((dest.x, dest.y)) = board((dest.x, dest.y)).copy(stone = Some(ps.copy(x = dest.x, y = dest.y)))
       board((current.x, current.y)) = board((current.x, current.y)).copy(stone = None)
     }
-
 
   def resetPlayerStone(stone: PlayerStone): Unit = board((stone.startX, stone.startY)) =
     board((stone.startX, stone.startY)).copy(stone = Some(stone.copy(x = stone.startX, y = stone.startY)))
@@ -131,7 +130,6 @@ case class GameBoard @Inject() (@Named("DefaultSize") var playerCount: Int) exte
       if (board((x, y)).stone.isDefined && board((x, y)).stone.get.isInstanceOf[PlayerStone] && board((x, y)).stone.get.asInstanceOf[PlayerStone].playerColor == playerColor) {
         return
       }
-
       board((x, y)) = board((x, y)).copy(available = true)
     } else {
       // If there is a blocking stone on the way dont go on
@@ -168,5 +166,4 @@ case class GameBoard @Inject() (@Named("DefaultSize") var playerCount: Int) exte
 
   //wenn ein Stein im Zielfeld steht muss es ein Spielerstein sein => Sieg
   def checkWin: Boolean = board((8, 0)).stone.isDefined
-
 }
