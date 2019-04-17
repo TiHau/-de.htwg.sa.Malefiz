@@ -131,7 +131,7 @@ class GUI(controller: ControllerInterface) extends Frame with Observer {
   menuBar = new MenuBar {
     contents += new Menu("File") {
       mnemonic = Key.F
-      contents += new MenuItem(Action("New") {controller.reset()})
+      contents += new MenuItem(Action("New") { controller.reset() })
       contents += new MenuItem(Action("Save") {
         controller.saveGame()
         repaint()
@@ -140,7 +140,7 @@ class GUI(controller: ControllerInterface) extends Frame with Observer {
         controller.loadSavedGame()
         repaint()
       })
-      contents += new MenuItem(Action("Quit") {sys.exit(0)})
+      contents += new MenuItem(Action("Quit") { sys.exit(0) })
     }
     contents += new Menu("Edit") {
       mnemonic = Key.E

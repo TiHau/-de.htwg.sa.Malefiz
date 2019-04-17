@@ -1,6 +1,6 @@
 package de.htwg.se.malefiz.controller
 
-import com.google.inject.{Guice, Injector}
+import com.google.inject.{ Guice, Injector }
 import de.htwg.se.malefiz.MalefizModule
 import de.htwg.se.malefiz.controller.State._
 import de.htwg.se.malefiz.model.gameboard._

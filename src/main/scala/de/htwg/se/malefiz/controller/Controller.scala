@@ -1,7 +1,7 @@
 package de.htwg.se.malefiz.controller
 
 import com.google.inject.name.Names
-import com.google.inject.{Guice, Inject, Injector}
+import com.google.inject.{ Guice, Inject, Injector }
 import com.typesafe.scalalogging.Logger
 import de.htwg.se.malefiz.MalefizModule
 import de.htwg.se.malefiz.controller.State._
@@ -12,22 +12,23 @@ import net.codingwell.scalaguice.InjectorExtensions._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.swing.Publisher
-import scala.util.{Failure, Success}
+import scala.util.{ Failure, Success }
 
 case class Controller @Inject() () extends ControllerInterface with Publisher {
   val injector: Injector = Guice.createInjector(new MalefizModule)
   var gameBoard: GameBoardInterface = _
-    injector.instance[GameBoardInterface](Names.named("default")).createBoard.onComplete {
-      case Success(gb)=> gameBoard = gb
-        activePlayer = gameBoard.player3
-      case Failure(exception)=>
-    }
+  injector.instance[GameBoardInterface](Names.named("default")).createBoard.onComplete {
+    case Success(gb) =>
+      gameBoard = gb
+      activePlayer = gameBoard.player3
+    case Failure(exception) =>
+  }
   private val six = 6
   private val logger = Logger(classOf[Controller])
   private val fileIO = injector.instance[FileIOInterface]
   private val undoManager = new UndoManager()
   private var chosenPlayerStone: PlayerStone = _
-  private var destField:Field = _
+  private var destField: Field = _
   private var state: State.Value = Print
 
   override def getState: State.Value = state
@@ -51,16 +52,16 @@ case class Controller @Inject() () extends ControllerInterface with Publisher {
   def newGame(playerCount: Int): Unit = {
     playerCount match {
       case 2 => injector.instance[GameBoardInterface](Names.named("tiny")).createBoard.onComplete {
-        case Success(gb)=> gameBoard = gb
-        case Failure(exception)=>
+        case Success(gb) => gameBoard = gb
+        case Failure(exception) =>
       }
       case 3 => injector.instance[GameBoardInterface](Names.named("small")).createBoard.onComplete {
-        case Success(gb)=> gameBoard = gb
-        case Failure(exception)=>
+        case Success(gb) => gameBoard = gb
+        case Failure(exception) =>
       }
       case _ => injector.instance[GameBoardInterface](Names.named("default")).createBoard.onComplete {
-        case Success(gb)=> gameBoard = gb
-        case Failure(exception)=>
+        case Success(gb) => gameBoard = gb
+        case Failure(exception) =>
       }
     }
     nextTurn()
@@ -69,16 +70,16 @@ case class Controller @Inject() () extends ControllerInterface with Publisher {
   def setPlayerCount(playerCount: Int): Unit = {
     playerCount match {
       case 2 => injector.instance[GameBoardInterface](Names.named("tiny")).createBoard.onComplete {
-        case Success(gb)=> gameBoard = gb
-        case Failure(exception)=>
+        case Success(gb) => gameBoard = gb
+        case Failure(exception) =>
       }
       case 3 => injector.instance[GameBoardInterface](Names.named("small")).createBoard.onComplete {
-        case Success(gb)=> gameBoard = gb
-        case Failure(exception)=>
+        case Success(gb) => gameBoard = gb
+        case Failure(exception) =>
       }
       case _ => injector.instance[GameBoardInterface](Names.named("default")).createBoard.onComplete {
-        case Success(gb)=> gameBoard = gb
-        case Failure(exception)=>
+        case Success(gb) => gameBoard = gb
+        case Failure(exception) =>
       }
     }
   }
@@ -118,7 +119,7 @@ case class Controller @Inject() () extends ControllerInterface with Publisher {
             BeforeEndOfTurn
           }
         case SetBlockStone => BeforeEndOfTurn
-        case _=> state
+        case _ => state
       }
       notifyObservers()
     }
@@ -140,7 +141,7 @@ case class Controller @Inject() () extends ControllerInterface with Publisher {
         gameBoard.player2
       } else if (activePlayer.color == 2 && gameBoard.playerCount == 4) {
         gameBoard.player3
-      }  else {
+      } else {
         gameBoard.player1
       }
       diced = scala.util.Random.nextInt(six) + 1

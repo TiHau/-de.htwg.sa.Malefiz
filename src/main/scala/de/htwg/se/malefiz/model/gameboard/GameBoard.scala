@@ -7,8 +7,8 @@ import scala.collection.mutable
 import scala.concurrent.Future
 import scala.swing.Publisher
 
-case class GameBoard @Inject() (@Named("DefaultSize") var playerCount: Int) extends GameBoardInterface with Publisher {
-  override def createBoard: Future[GameBoard] = Future{
+case class GameBoard @Inject() (@Named("DefaultSize") var playerCount: Int) extends GameBoardInterface {
+  override def createBoard: Future[GameBoard] = Future {
     defineField(8, 0)
     defineField(8, 4)
     (0 to 16).foreach(i => defineField(i, 1))
@@ -100,14 +100,12 @@ case class GameBoard @Inject() (@Named("DefaultSize") var playerCount: Int) exte
       None
     }
 
-
   def forceMoveStone(current: Field, dest: Field): Unit =
     if (board.contains((dest.x, dest.y))) {
       val ps: PlayerStone = current.stone.get.asInstanceOf[PlayerStone]
       board((dest.x, dest.y)) = board((dest.x, dest.y)).copy(stone = Some(ps.copy(x = dest.x, y = dest.y)))
       board((current.x, current.y)) = board((current.x, current.y)).copy(stone = None)
     }
-
 
   def resetPlayerStone(stone: PlayerStone): Unit = board((stone.startX, stone.startY)) =
     board((stone.startX, stone.startY)).copy(stone = Some(stone.copy(x = stone.startX, y = stone.startY)))
