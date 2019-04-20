@@ -8,7 +8,8 @@ import scala.collection.immutable
 import scala.concurrent.Future
 import scala.swing.Publisher
 
-case class GameBoard @Inject() (@Named("DefaultSize") var playerCount: Int, board: Map[(Int, Int), Field] = immutable.HashMap.empty[(Int, Int), Field]) extends GameBoardInterface {
+case class GameBoard @Inject() (@Named("DefaultSize") var playerCount: Int, board: Map[(Int, Int), Field] =
+immutable.HashMap.empty[(Int, Int), Field]) extends GameBoardInterface {
   override def createBoard: Future[GameBoard] = Future {
     var tmp = defineField(8, 0).defineField(8, 4)
       .defineField(0, 2).defineField(16, 2)
@@ -130,7 +131,8 @@ case class GameBoard @Inject() (@Named("DefaultSize") var playerCount: Int, boar
   private def markPossibleMovesR(x: Int, y: Int, depth: Int, cameFrom: Char, playerColor: Int): GameBoard = {
     if (depth == 0) {
       //Dont hit your own kind
-      if (board((x, y)).stone.isDefined && board((x, y)).stone.get.isInstanceOf[PlayerStone] && board((x, y)).stone.get.asInstanceOf[PlayerStone].playerColor == playerColor) {
+      if (board((x, y)).stone.isDefined && board((x, y)).stone.get.isInstanceOf[PlayerStone]
+        && board((x, y)).stone.get.asInstanceOf[PlayerStone].playerColor == playerColor) {
         return copy()
       }
       copy(board = board - ((x, y)) + ((x, y) -> board((x, y)).copy(available = true)))
@@ -161,12 +163,12 @@ case class GameBoard @Inject() (@Named("DefaultSize") var playerCount: Int, boar
   }
 
   def unmarkPossibleMoves(): GameBoard = {
-    val tmpB = board.seq
-    var tmp: GameBoard = this
-    tmpB.foreach(f => tmp = tmp.copy(board = board - f._1 + (f._1 -> board(f._1).copy(available = false))))
+    var tmp: GameBoard = copy()
+    val tmpB = tmp.board.seq
+    tmpB.foreach(f => tmp = tmp.unmarkField(f._1._1, f._1._2))
     tmp
   }
-
+  private def unmarkField(x: Int, y: Int):GameBoard = copy(board = board - ((x, y)) + ((x, y) -> board((x, y)).copy(available = false)))
   private def validField(x: Int, y: Int): Boolean = y <= 13 && board.contains((x, y))
 
   def checkDestForPlayerStone(x: Int, y: Int): Boolean = validField(x, y) && board((x, y)).available
