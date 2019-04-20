@@ -10,17 +10,18 @@ class MoveCommand(stone: PlayerStone, destField: Field, controller: ControllerIn
 
   override def doStep(): Unit = {
     val tmp = controller.gameBoard.moveStone(currentField, destField)
+    controller.setGameBoad(tmp._2)
     hitStone = tmp._1
     hitStone match {
-      case Some(stone: PlayerStone) => controller.gameBoard.resetPlayerStone(stone)
+      case Some(stone: PlayerStone) => controller.setGameBoad(controller.gameBoard.resetPlayerStone(stone))
       case Some(_: BlockStone) => controller.needToSetBlockStone = true
       case _ =>
     }
-    controller.gameBoard.unmarkPossibleMoves()
+    controller.setGameBoad(controller.gameBoard.unmarkPossibleMoves())
   }
 
   override def undoStep(): Unit = {
-    controller.gameBoard.forceMoveStone(controller.gameBoard.board(destField.x, destField.y), currentField)
+    controller.setGameBoad(controller.gameBoard.forceMoveStone(controller.gameBoard.board(destField.x, destField.y), currentField))
     controller.gameBoard.setField((destField.x, destField.y), controller.gameBoard.board((destField.x, destField.y)).copy(stone = hitStone))
     hitStone match {
       case Some(stone: PlayerStone) =>
@@ -33,7 +34,7 @@ class MoveCommand(stone: PlayerStone, destField: Field, controller: ControllerIn
 
       case _ =>
     }
-    controller.gameBoard.markPossibleMoves(stone, controller.activePlayer, controller.diced)
+    controller.setGameBoad(controller.gameBoard.markPossibleMoves(stone, controller.activePlayer, controller.diced))
     controller.needToSetBlockStone = false
   }
 

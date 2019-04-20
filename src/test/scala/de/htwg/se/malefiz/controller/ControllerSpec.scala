@@ -159,7 +159,7 @@ class ControllerSpec extends WordSpec with Matchers {
         controller.setState(ChoosePlayerStone)
         controller.takeInput(2, 14)
         controller.setState(ChooseTarget)
-        controller.gameBoard.forceMoveStone(field1, field2)
+        controller.setGameBoad(controller.gameBoard.forceMoveStone(field1, field2))
 
         //  controller.gameBoard.board((14, 13)) = controller.gameBoard.board((14, 13)).copy(available = true)
         controller.takeInput(14, 13)

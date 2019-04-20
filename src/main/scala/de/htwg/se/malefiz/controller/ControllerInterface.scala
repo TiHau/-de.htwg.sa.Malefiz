@@ -67,7 +67,7 @@ trait ControllerInterface extends Observable with Publisher {
    * @return GameBoard
    */
   def gameBoard: GameBoardInterface
-
+  def setGameBoad(newGameBoard:GameBoardInterface):Unit
   /**
    * beendet den Zug und startet den nächsten
    */

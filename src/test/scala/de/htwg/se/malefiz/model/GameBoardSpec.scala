@@ -89,7 +89,8 @@ class GameBoardSpec extends WordSpec with Matchers {
         case Failure(exception) =>
       }
       "Returns Option None" in {
-        board.moveStone(board.board((3, 14)), board.board((8, 0))) should be(None)
+        val tmp = board.moveStone(board.board((3, 14)), board.board((8, 0)))
+        tmp._1 should be(None)
       }
     }
   }

@@ -206,4 +206,6 @@ case class Controller @Inject() () extends ControllerInterface with Publisher {
   def setDestField(newField: Field): Unit = destField = newField
 
   def getDestField: Field = destField
+
+  override def setGameBoad(newGameBoard: GameBoardInterface): Unit = gameBoard = newGameBoard
 }

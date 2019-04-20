@@ -115,6 +115,6 @@ trait GameBoardInterface extends Publisher {
    * @return true, wenn ein Spielerstein auf dem Zielfed steht
    */
   def checkWin: Boolean
-  def setField(target: (Int, Int), whatToSet: Field): GameBoard
+  def setField(target: (Int, Int), whatToSet: Field): GameBoardInterface
 
 }
