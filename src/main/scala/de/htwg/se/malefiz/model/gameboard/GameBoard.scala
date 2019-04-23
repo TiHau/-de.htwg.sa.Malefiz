@@ -144,19 +144,19 @@ immutable.HashMap.empty[(Int, Int), Field]) extends GameBoardInterface {
       var tmp = copy()
       // up
       if (validField(x, y - 1) && cameFrom != 'u') {
-        tmp = markPossibleMovesR(x, y - 1, depth - 1, 'd', playerColor)
+        tmp = tmp.markPossibleMovesR(x, y - 1, depth - 1, 'd', playerColor)
       }
       // down
       if (validField(x, y + 1) && cameFrom != 'd') {
-        tmp = markPossibleMovesR(x, y + 1, depth - 1, 'u', playerColor)
+        tmp = tmp.markPossibleMovesR(x, y + 1, depth - 1, 'u', playerColor)
       }
       // left
       if (validField(x - 1, y) && cameFrom != 'r') {
-        tmp = markPossibleMovesR(x - 1, y, depth - 1, 'l', playerColor)
+        tmp = tmp.markPossibleMovesR(x - 1, y, depth - 1, 'l', playerColor)
       }
       // right
       if (validField(x + 1, y) && cameFrom != 'l') {
-        tmp = markPossibleMovesR(x + 1, y, depth - 1, 'r', playerColor)
+        tmp = tmp.markPossibleMovesR(x + 1, y, depth - 1, 'r', playerColor)
       }
       tmp
     }
