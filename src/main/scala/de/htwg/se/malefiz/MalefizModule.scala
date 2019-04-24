@@ -13,7 +13,7 @@ class MalefizModule extends AbstractModule with ScalaModule {
   val tiny: Int = 2
   def configure(): Unit = {
     bindConstant().annotatedWith(Names.named("DefaultSize")).to(defaultSize)
-    bind[GameBoardInterface].to[GameBoard]
+    //bind[GameBoardInterface].to[GameBoard]
     bind[ControllerInterface].to[Controller]
     bind[FileIOInterface].to[fileioJson.FileIO]
     bind[GameBoardInterface].annotatedWithName("default").toInstance(GameBoard(defaultSize))

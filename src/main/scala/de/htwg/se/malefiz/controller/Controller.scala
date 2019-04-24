@@ -64,6 +64,9 @@ case class Controller @Inject() () extends ControllerInterface with Publisher {
         case Failure(exception) =>
       }
     }
+    Thread.sleep {
+      10
+    }
     nextTurn()
   }
 
@@ -206,4 +209,6 @@ case class Controller @Inject() () extends ControllerInterface with Publisher {
   def setDestField(newField: Field): Unit = destField = newField
 
   def getDestField: Field = destField
+
+  override def setGameBoad(newGameBoard: GameBoardInterface): Unit = gameBoard = newGameBoard
 }
