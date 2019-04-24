@@ -22,7 +22,7 @@ class MoveCommand(stone: PlayerStone, destField: Field, controller: ControllerIn
 
   override def undoStep(): Unit = {
     controller.setGameBoad(controller.gameBoard.forceMoveStone(controller.gameBoard.board(destField.x, destField.y), currentField))
-    controller.gameBoard.setField((destField.x, destField.y), controller.gameBoard.board((destField.x, destField.y)).copy(stone = hitStone))
+    controller.setGameBoad(controller.gameBoard.setField((destField.x, destField.y), controller.gameBoard.board((destField.x, destField.y)).copy(stone = hitStone)))
     hitStone match {
       case Some(stone: PlayerStone) =>
         val x = stone.startX
@@ -31,7 +31,6 @@ class MoveCommand(stone: PlayerStone, destField: Field, controller: ControllerIn
         controller.gameBoard.setField(
           (destField.x, destField.y),
           controller.gameBoard.board((destField.x, destField.y)).copy(stone = Some(stone.copy(x = destField.x, y = destField.y))))
-
       case _ =>
     }
     controller.setGameBoad(controller.gameBoard.markPossibleMoves(stone, controller.activePlayer, controller.diced))

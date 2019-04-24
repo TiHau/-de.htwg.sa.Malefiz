@@ -15,9 +15,9 @@ class FileIOSpec extends WordSpec with Matchers {
     val injector: Injector = Guice.createInjector(new MalefizModule)
     val controller: ControllerInterface = injector.getInstance(classOf[ControllerInterface])
     "save load" should {
-      Thread.sleep(10)
       controller.activePlayer = controller.gameBoard.player3
       controller.saveGame()
+      Thread.sleep(10)
       controller.activePlayer = controller.gameBoard.player1
       controller.loadSavedGame()
       "have player nr 3" in {

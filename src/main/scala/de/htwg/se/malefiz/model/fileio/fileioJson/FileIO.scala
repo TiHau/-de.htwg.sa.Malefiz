@@ -18,7 +18,9 @@ class FileIO extends FileIOInterface {
 
   override def load(controller: ControllerInterface): Unit = {
     if (Files.exists(Paths.get(source))) {
-      val json: JsValue = Json.parse(Source.fromFile(source).getLines.mkString)
+      val file = Source.fromFile(source)
+      val json: JsValue = Json.parse(file.getLines.mkString)
+      file.close()
       controller.setGameBoad(gameFromJson(json, controller))
     }
   }
