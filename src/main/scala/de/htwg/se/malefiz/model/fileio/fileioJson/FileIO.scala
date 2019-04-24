@@ -7,6 +7,7 @@ import de.htwg.se.malefiz.controller.ControllerInterface
 import de.htwg.se.malefiz.model.fileio.FileIOInterface
 import de.htwg.se.malefiz.model.gameboard._
 import play.api.libs.json._
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.io.Source
@@ -18,11 +19,11 @@ class FileIO extends FileIOInterface {
   override def load(controller: ControllerInterface): Unit = {
     if (Files.exists(Paths.get(source))) {
       val json: JsValue = Json.parse(Source.fromFile(source).getLines.mkString)
-      gameFromJson(json, controller)
+      controller.setGameBoad(gameFromJson(json, controller))
     }
   }
 
-  private def gameFromJson(json: JsValue, controller: ControllerInterface): Unit = {
+  private def gameFromJson(json: JsValue, controller: ControllerInterface): GameBoard = {
     controller.setPlayerCount((json \ "playerCount").get.toString().toInt)
     controller.diced = (json \ "diced").get.toString().toInt
 
@@ -33,13 +34,13 @@ class FileIO extends FileIOInterface {
       case _ => controller.gameBoard.player4
     }
 
-    val cb = controller.gameBoard.board.seq
-    //   cb.foreach(f => controller.gameBoard.board(f._1) = controller.gameBoard.board(f._1).copy(stone = None))
+    var tmp_board: GameBoard = controller.gameBoard.asInstanceOf[GameBoard]
+    controller.gameBoard.board.seq.foreach(f => tmp_board = tmp_board.setField((f._1._1, f._1._2), Field(f._1._1, f._1._2, None)))
 
     (json \ "blockStones").as[JsArray].value.foreach(blockStone => {
       val x = (blockStone \ "x").get.toString().toInt
       val y = (blockStone \ "y").get.toString().toInt
-      //  controller.gameBoard.board((x, y)) = controller.gameBoard.board((x, y)).copy(stone = Some(BlockStone()))
+      tmp_board = tmp_board.setField((x, y), Field(x, y, Some(BlockStone())))
     })
 
     (json \ "playerStones").as[JsArray].value.foreach(playerStone => {
@@ -48,8 +49,9 @@ class FileIO extends FileIOInterface {
       val startX = (playerStone \ "startX").get.toString().toInt
       val startY = (playerStone \ "startY").get.toString().toInt
       val playerColor = (playerStone \ "playerColor").get.toString().toInt
-      //      controller.gameBoard.board((x, y)) = controller.gameBoard.board((x, y)).copy(stone = Some(PlayerStone(startX, startY, x, y, playerColor)))
+      tmp_board = tmp_board.setField((x, y), Field(x, y, Some(PlayerStone(startX, startY, x, y, playerColor))))
     })
+    tmp_board
   }
 
   override def save(controller: ControllerInterface): Boolean = {
@@ -64,27 +66,27 @@ class FileIO extends FileIOInterface {
     false
   }
 
-def gameToJson (controller: ControllerInterface): Future[JsObject] = Future {
-  Json.obj (
-  "activePlayer" -> JsNumber (controller.activePlayer.color),
-  "diced" -> JsNumber (controller.diced),
-  "playerCount" -> JsNumber (controller.gameBoard.playerCount),
-  "blockStones" -> Json.toJson (
-  (0 to 16) flatMap (x =>
-  (0 to 13) filter (y => controller.gameBoard.board.contains ((x, y) ) )
-  filter (y => controller.gameBoard.board ((x, y) ).stone.isDefined)
-  filter (y => controller.gameBoard.board ((x, y) ).stone.get.isInstanceOf[BlockStone] )
-  map (y => Json.obj ("x" -> JsNumber (x), "y" -> JsNumber (y) ) ) ) ),
-  "playerStones" -> Json.toJson (
-  (0 to 16) flatMap (x =>
-  (0 to 15) filter (y => controller.gameBoard.board.contains ((x, y) ) )
-  filter (y => controller.gameBoard.board ((x, y) ).stone.isDefined)
-  filter (y => controller.gameBoard.board ((x, y) ).stone.get.isInstanceOf[PlayerStone] )
-  map (y => Json.obj (
-  "x" -> JsNumber (x),
-  "y" -> JsNumber (y),
-  "startX" -> JsNumber (controller.gameBoard.board ((x, y) ).stone.get.asInstanceOf[PlayerStone].startX),
-  "startY" -> JsNumber (controller.gameBoard.board ((x, y) ).stone.get.asInstanceOf[PlayerStone].startY),
-  "playerColor" -> JsNumber (controller.gameBoard.board ((x, y) ).stone.get.asInstanceOf[PlayerStone].playerColor) ) ) ) ) )
-}
+  def gameToJson(controller: ControllerInterface): Future[JsObject] = Future {
+    Json.obj(
+      "activePlayer" -> JsNumber(controller.activePlayer.color),
+      "diced" -> JsNumber(controller.diced),
+      "playerCount" -> JsNumber(controller.gameBoard.playerCount),
+      "blockStones" -> Json.toJson(
+        (0 to 16) flatMap (x =>
+          (0 to 13) filter (y => controller.gameBoard.board.contains((x, y)))
+            filter (y => controller.gameBoard.board((x, y)).stone.isDefined)
+            filter (y => controller.gameBoard.board((x, y)).stone.get.isInstanceOf[BlockStone])
+            map (y => Json.obj("x" -> JsNumber(x), "y" -> JsNumber(y))))),
+      "playerStones" -> Json.toJson(
+        (0 to 16) flatMap (x =>
+          (0 to 15) filter (y => controller.gameBoard.board.contains((x, y)))
+            filter (y => controller.gameBoard.board((x, y)).stone.isDefined)
+            filter (y => controller.gameBoard.board((x, y)).stone.get.isInstanceOf[PlayerStone])
+            map (y => Json.obj(
+            "x" -> JsNumber(x),
+            "y" -> JsNumber(y),
+            "startX" -> JsNumber(controller.gameBoard.board((x, y)).stone.get.asInstanceOf[PlayerStone].startX),
+            "startY" -> JsNumber(controller.gameBoard.board((x, y)).stone.get.asInstanceOf[PlayerStone].startY),
+            "playerColor" -> JsNumber(controller.gameBoard.board((x, y)).stone.get.asInstanceOf[PlayerStone].playerColor))))))
+  }
 }

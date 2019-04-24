@@ -1,14 +1,12 @@
 package de.htwg.se.malefiz.controller
 
-import com.google.inject.{ Guice, Injector }
+import com.google.inject.{Guice, Injector}
 import de.htwg.se.malefiz.MalefizModule
 import de.htwg.se.malefiz.controller.State._
 import de.htwg.se.malefiz.model.gameboard._
 import org.junit.runner.RunWith
 import org.scalatest._
 import org.scalatest.junit.JUnitRunner
-
-import scala.concurrent.Await
 
 @RunWith(classOf[JUnitRunner])
 class ControllerSpec extends WordSpec with Matchers {

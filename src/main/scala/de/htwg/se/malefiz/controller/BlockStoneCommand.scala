@@ -1,7 +1,7 @@
 package de.htwg.se.malefiz.controller
 
-import de.htwg.se.malefiz.util.Command
 import de.htwg.se.malefiz.model.gameboard.Field
+import de.htwg.se.malefiz.util.Command
 
 class BlockStoneCommand(field: Field, controller: ControllerInterface) extends Command {
 

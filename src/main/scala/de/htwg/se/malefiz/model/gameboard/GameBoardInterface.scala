@@ -1,6 +1,5 @@
 package de.htwg.se.malefiz.model.gameboard
 
-import scala.concurrent.Future
 import scala.swing.Publisher
 
 trait GameBoardInterface extends Publisher {
@@ -35,7 +34,7 @@ trait GameBoardInterface extends Publisher {
    * Initialisiert Felder neu
    * @return neues GameBoard
    */
-  def createBoard: Future[GameBoardInterface]
+  def createBoard: GameBoardInterface
 
   /**
    * Liefert die Anzahl von Spielern

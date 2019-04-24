@@ -1,7 +1,7 @@
 package de.htwg.se.malefiz.controller
 
 import com.google.inject.name.Names
-import com.google.inject.{ Guice, Inject, Injector }
+import com.google.inject.{Guice, Inject, Injector}
 import com.typesafe.scalalogging.Logger
 import de.htwg.se.malefiz.MalefizModule
 import de.htwg.se.malefiz.controller.State._
@@ -10,19 +10,12 @@ import de.htwg.se.malefiz.model.gameboard._
 import de.htwg.se.malefiz.util.UndoManager
 import net.codingwell.scalaguice.InjectorExtensions._
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.swing.Publisher
-import scala.util.{ Failure, Success }
 
-case class Controller @Inject() () extends ControllerInterface with Publisher {
+case class Controller @Inject()() extends ControllerInterface with Publisher {
   val injector: Injector = Guice.createInjector(new MalefizModule)
-  var gameBoard: GameBoardInterface = _
-  injector.instance[GameBoardInterface](Names.named("default")).createBoard.onComplete {
-    case Success(gb) =>
-      gameBoard = gb
-      activePlayer = gameBoard.player3
-    case Failure(exception) =>
-  }
+  var gameBoard: GameBoardInterface = injector.instance[GameBoardInterface](Names.named("default")).createBoard
+  activePlayer = gameBoard.player3
   private val six = 6
   private val logger = Logger(classOf[Controller])
   private val fileIO = injector.instance[FileIOInterface]
@@ -34,6 +27,7 @@ case class Controller @Inject() () extends ControllerInterface with Publisher {
   override def getState: State.Value = state
 
   override def setState(newState: State.Value): Unit = state = newState
+
   override def loadSavedGame(): Unit = {
     state = ChoosePlayerStone
     undoManager.clear()
@@ -50,40 +44,19 @@ case class Controller @Inject() () extends ControllerInterface with Publisher {
   }
 
   def newGame(playerCount: Int): Unit = {
-    playerCount match {
-      case 2 => injector.instance[GameBoardInterface](Names.named("tiny")).createBoard.onComplete {
-        case Success(gb) => gameBoard = gb
-        case Failure(exception) =>
-      }
-      case 3 => injector.instance[GameBoardInterface](Names.named("small")).createBoard.onComplete {
-        case Success(gb) => gameBoard = gb
-        case Failure(exception) =>
-      }
-      case _ => injector.instance[GameBoardInterface](Names.named("default")).createBoard.onComplete {
-        case Success(gb) => gameBoard = gb
-        case Failure(exception) =>
-      }
-    }
-    Thread.sleep {
-      10
+    gameBoard = playerCount match {
+      case 2 => injector.instance[GameBoardInterface](Names.named("tiny")).createBoard
+      case 3 => injector.instance[GameBoardInterface](Names.named("small")).createBoard
+      case _ => injector.instance[GameBoardInterface](Names.named("default")).createBoard
     }
     nextTurn()
   }
 
   def setPlayerCount(playerCount: Int): Unit = {
-    playerCount match {
-      case 2 => injector.instance[GameBoardInterface](Names.named("tiny")).createBoard.onComplete {
-        case Success(gb) => gameBoard = gb
-        case Failure(exception) =>
-      }
-      case 3 => injector.instance[GameBoardInterface](Names.named("small")).createBoard.onComplete {
-        case Success(gb) => gameBoard = gb
-        case Failure(exception) =>
-      }
-      case _ => injector.instance[GameBoardInterface](Names.named("default")).createBoard.onComplete {
-        case Success(gb) => gameBoard = gb
-        case Failure(exception) =>
-      }
+    gameBoard = playerCount match {
+      case 2 => injector.instance[GameBoardInterface](Names.named("tiny")).createBoard
+      case 3 => injector.instance[GameBoardInterface](Names.named("small")).createBoard
+      case _ => injector.instance[GameBoardInterface](Names.named("default")).createBoard
     }
   }
 

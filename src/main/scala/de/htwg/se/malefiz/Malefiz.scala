@@ -1,9 +1,8 @@
 package de.htwg.se.malefiz
 
-import com.google.inject.{ Guice, Injector }
+import com.google.inject.{Guice, Injector}
+import de.htwg.se.malefiz.aview.{GUI, TUI}
 import de.htwg.se.malefiz.controller.ControllerInterface
-import de.htwg.se.malefiz.aview.TUI
-import de.htwg.se.malefiz.aview.GUI
 
 object Malefiz {
   val injector: Injector = Guice.createInjector(new MalefizModule)

@@ -2,13 +2,12 @@ package de.htwg.se.malefiz.model.gameboard
 
 import com.google.inject.Inject
 import com.google.inject.name.Named
+
 import scala.collection.{immutable, mutable}
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 
 case class GameBoard @Inject() (@Named("DefaultSize") playerCount: Int, board: Map[(Int, Int), Field] =
 immutable.HashMap.empty[(Int, Int), Field]) extends GameBoardInterface {
-  override def createBoard: Future[GameBoard] = Future {
+  override def createBoard: GameBoard = {
     var tmp = defineField(8, 0).defineField(8, 4)
       .defineField(0, 2).defineField(16, 2)
       .defineField(6, 6).defineField(10, 6)

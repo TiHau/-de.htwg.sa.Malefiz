@@ -1,11 +1,11 @@
 package de.htwg.se.malefiz.model
 
-import com.google.inject.{ Guice, Injector }
+import com.google.inject.{Guice, Injector}
 import de.htwg.se.malefiz.MalefizModule
 import de.htwg.se.malefiz.controller.ControllerInterface
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.{ Matchers, WordSpec }
+import org.scalatest.{Matchers, WordSpec}
 
 @RunWith(classOf[JUnitRunner])
 class FileIOSpec extends WordSpec with Matchers {

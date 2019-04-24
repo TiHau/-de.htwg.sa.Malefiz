@@ -2,8 +2,8 @@ package de.htwg.se.malefiz.controller
 
 import de.htwg.se.malefiz.controller.State._
 import org.junit.runner.RunWith
-import org.scalatest.{ Matchers, WordSpec }
 import org.scalatest.junit.JUnitRunner
+import org.scalatest.{Matchers, WordSpec}
 
 @RunWith(classOf[JUnitRunner])
 class StateSpec extends WordSpec with Matchers {

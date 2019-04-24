@@ -1,13 +1,13 @@
 package de.htwg.se.malefiz.aview
 
-import java.awt.{ Color, Font, Toolkit }
+import java.awt.{Color, Font, Toolkit}
 
-import de.htwg.se.malefiz.util.Observer
-import de.htwg.se.malefiz.controller.{ ControllerInterface, State }
-
-import scala.swing.event._
-import scala.swing._
+import de.htwg.se.malefiz.controller.ControllerInterface
 import de.htwg.se.malefiz.controller.State._
+import de.htwg.se.malefiz.util.Observer
+
+import scala.swing._
+import scala.swing.event._
 
 class GUI(controller: ControllerInterface) extends Frame with Observer {
   private val dim = Toolkit.getDefaultToolkit.getScreenSize

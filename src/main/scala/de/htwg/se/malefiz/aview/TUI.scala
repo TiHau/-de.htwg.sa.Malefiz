@@ -1,8 +1,8 @@
 package de.htwg.se.malefiz.aview
 
 import com.typesafe.scalalogging.Logger
+import de.htwg.se.malefiz.controller.{ControllerInterface, State}
 import de.htwg.se.malefiz.util.Observer
-import de.htwg.se.malefiz.controller.{ ControllerInterface, State }
 
 case class TUI(controller: ControllerInterface) extends Observer {
   private val logger = Logger(classOf[TUI])
