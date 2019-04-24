@@ -8,7 +8,7 @@ import scala.collection.immutable
 import scala.concurrent.Future
 import scala.swing.Publisher
 
-case class GameBoard @Inject() (@Named("DefaultSize") var playerCount: Int, board: Map[(Int, Int), Field] =
+case class GameBoard @Inject() (@Named("DefaultSize") playerCount: Int, board: Map[(Int, Int), Field] =
 immutable.HashMap.empty[(Int, Int), Field]) extends GameBoardInterface {
   override def createBoard: Future[GameBoard] = Future {
     var tmp = defineField(8, 0).defineField(8, 4)
