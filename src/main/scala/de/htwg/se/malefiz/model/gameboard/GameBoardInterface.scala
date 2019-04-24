@@ -1,7 +1,5 @@
 package de.htwg.se.malefiz.model.gameboard
 
-import scala.collection.immutable.HashMap
-import scala.collection.mutable
 import scala.concurrent.Future
 import scala.swing.Publisher
 

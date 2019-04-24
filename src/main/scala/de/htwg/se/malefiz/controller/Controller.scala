@@ -64,6 +64,9 @@ case class Controller @Inject() () extends ControllerInterface with Publisher {
         case Failure(exception) =>
       }
     }
+    Thread.sleep {
+      10
+    }
     nextTurn()
   }
 
