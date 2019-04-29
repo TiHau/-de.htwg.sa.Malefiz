@@ -24,3 +24,5 @@ libraryDependencies += "com.typesafe.scala-logging" %% "scala-logging" % "3.7.2"
 
 libraryDependencies += "com.typesafe.play" %% "play-json" % "2.6.6"
 libraryDependencies += "org.scala-lang.modules" %% "scala-xml" % "1.1.0"
+
+libraryDependencies += "com.typesafe.akka" %% "akka-actor" % "2.5.22"
