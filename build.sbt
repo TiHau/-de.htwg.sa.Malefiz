@@ -26,3 +26,8 @@ libraryDependencies += "com.typesafe.play" %% "play-json" % "2.6.6"
 libraryDependencies += "org.scala-lang.modules" %% "scala-xml" % "1.1.0"
 
 libraryDependencies += "com.typesafe.akka" %% "akka-actor" % "2.5.22"
+
+libraryDependencies += "com.typesafe.akka" %% "akka-http" % "10.1.8"
+
+libraryDependencies += "com.typesafe.akka" %% "akka-stream" % "2.5.22"
+  
