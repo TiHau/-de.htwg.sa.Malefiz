@@ -10,13 +10,11 @@ object Routes {
 
   val all: Route =
     get {
-      pathPrefix("/" / Remaining) { _ =>
         path("") {
           complete {
             JsonConverter.gameToJson().toString()
           }
-        }
-      } ~
+        } ~
         pathPrefix("touch") {
           path(IntNumber / IntNumber) { (column, row) =>
             complete {
@@ -40,19 +38,19 @@ object Routes {
             }
           }
         } ~
-        pathPrefix("turn" / Remaining) { _ =>
+        path("turn") {
           complete {
             Malefiz.controller.endTurn()
             JsonConverter.gameToJson().toString()
           }
         } ~
-        pathPrefix("redo" / Remaining) { _ =>
+        path("redo") {
           complete {
             Malefiz.controller.redo()
             JsonConverter.gameToJson().toString()
           }
         } ~
-        pathPrefix("undo" / Remaining) { _ =>
+        path("undo") {
           complete {
             Malefiz.controller.undo()
             JsonConverter.gameToJson().toString()
