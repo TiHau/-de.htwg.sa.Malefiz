@@ -1,5 +1,7 @@
 package de.htwg.se.malefiz.model.gameboard
 
+import play.api.libs.json.JsObject
+
 import scala.swing.Publisher
 
 trait GameBoardInterface extends Publisher {
@@ -112,6 +114,9 @@ trait GameBoardInterface extends Publisher {
    * @return true, wenn ein Spielerstein auf dem Zielfed steht
    */
   def checkWin: Boolean
+
+  def toJson: JsObject
+
   def setField(target: (Int, Int), whatToSet: Field): GameBoardInterface
 
 }

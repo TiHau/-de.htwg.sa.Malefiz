@@ -3,7 +3,6 @@ package de.htwg.se.malefiz.rest
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import de.htwg.se.malefiz.Malefiz
-import de.htwg.se.malefiz.util.JsonConverter
 
 
 object Routes {
@@ -12,14 +11,14 @@ object Routes {
     get {
         path("") {
           complete {
-            JsonConverter.gameToJson().toString()
+            Malefiz.controller.toJson.toString
           }
         } ~
         pathPrefix("touch") {
           path(IntNumber / IntNumber) { (column, row) =>
             complete {
               Malefiz.controller.takeInput(column, row)
-              JsonConverter.gameToJson().toString()
+              Malefiz.controller.toJson.toString
             }
           }
         } ~
@@ -34,26 +33,26 @@ object Routes {
                 count
               }
               )
-              JsonConverter.gameToJson().toString()
+              Malefiz.controller.toJson.toString
             }
           }
         } ~
         path("turn") {
           complete {
             Malefiz.controller.endTurn()
-            JsonConverter.gameToJson().toString()
+            Malefiz.controller.toJson.toString
           }
         } ~
         path("redo") {
           complete {
             Malefiz.controller.redo()
-            JsonConverter.gameToJson().toString()
+            Malefiz.controller.toJson.toString
           }
         } ~
         path("undo") {
           complete {
             Malefiz.controller.undo()
-            JsonConverter.gameToJson().toString()
+            Malefiz.controller.toJson.toString
           }
         }
 

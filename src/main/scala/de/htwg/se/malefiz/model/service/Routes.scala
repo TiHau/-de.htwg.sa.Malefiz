@@ -4,7 +4,6 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import com.google.inject.name.Names
 import de.htwg.se.malefiz.model.gameboard.{BlockStone, Field, GameBoardInterface, PlayerStone}
-import de.htwg.se.malefiz.util.JsonConverter
 import net.codingwell.scalaguice.InjectorExtensions._
 import play.api.libs.json.{JsBoolean, JsNumber, Json}
 
@@ -52,13 +51,6 @@ object Routes {
               "xStart" -> JsNumber(WebServer.gameBoard.player4.start._1),
               "yStart" -> JsNumber(WebServer.gameBoard.player4.start._2)
             ).toString()
-          }
-        } ~
-        pathPrefix("field") {
-          path(IntNumber / IntNumber) { (column, row) =>
-            complete {
-              JsonConverter.fieldToJson(WebServer.gameBoard, column, row).toString()
-            }
           }
         } ~
         pathPrefix("new") {
@@ -186,6 +178,26 @@ object Routes {
                 JsBoolean(true).toString()
               }
             }
+        } ~
+          path("getString") {
+            complete {
+              WebServer.gameBoard.toString
+          }
+        } ~
+          path("getJson") {
+            complete {
+              WebServer.gameBoard.toJson.toString
+          }
+        } ~
+        pathPrefix("isOneOfMyStonesThere") {
+          path(IntNumber / IntNumber / IntNumber) { (x, y, playerColor) =>
+            complete {
+              JsBoolean(WebServer.gameBoard.board.contains((x, y))
+                && WebServer.gameBoard.board((x, y)).stone.isDefined
+                && WebServer.gameBoard.board((x, y)).stone.get.isInstanceOf[PlayerStone]
+                && playerColor == WebServer.gameBoard.board((x, y)).stone.get.asInstanceOf[PlayerStone].playerColor).toString
+            }
+          }
         }
     }
 }

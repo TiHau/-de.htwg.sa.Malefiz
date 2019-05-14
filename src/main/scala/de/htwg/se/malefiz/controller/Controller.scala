@@ -1,5 +1,7 @@
 package de.htwg.se.malefiz.controller
 
+import akka.http.scaladsl.Http
+import akka.http.scaladsl.model.{HttpMethod, HttpMethods, HttpRequest, HttpResponse}
 import com.google.inject.name.Names
 import com.google.inject.{Guice, Inject, Injector}
 import com.typesafe.scalalogging.Logger
@@ -9,7 +11,16 @@ import de.htwg.se.malefiz.model.fileio.FileIOInterface
 import de.htwg.se.malefiz.model.gameboard._
 import de.htwg.se.malefiz.util.UndoManager
 import net.codingwell.scalaguice.InjectorExtensions._
+import play.api.libs.json.{JsBoolean, JsObject, Json}
+import akka.actor.ActorSystem
 
+import scala.util.{Failure, Success}
+import akka.http.scaladsl.Http
+import akka.stream.ActorMaterializer
+import akka.stream.scaladsl.Sink
+
+import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, Future}
 import scala.swing.Publisher
 
 case class Controller @Inject()() extends ControllerInterface with Publisher {
@@ -132,8 +143,21 @@ case class Controller @Inject()() extends ControllerInterface with Publisher {
   }
 
   def takeInput(x: Int, y: Int): Unit = {
+    implicit val system = ActorSystem()
+    implicit val materializer = ActorMaterializer()
+    implicit val executionContext = system.dispatcher
     state match {
       case ChoosePlayerStone =>
+        val responseFuture: Future[HttpResponse] = Http().singleRequest(HttpRequest(HttpMethods.GET, "http://localhost:8081/isOneOfMyStonesThere/" + x + "/" + y + "/" + activePlayer.color))
+
+        responseFuture.onComplete {
+          case Success(response: HttpResponse) => println("It works!\n"+response.entity)
+          case Failure(_) => println("failed!")
+        }
+
+        Await.result(responseFuture, Duration(5000, "millis"))
+
+
         if (gameBoard.board.contains((x, y))
           && gameBoard.board((x, y)).stone.isDefined
           && gameBoard.board((x, y)).stone.get.isInstanceOf[PlayerStone]
@@ -184,4 +208,9 @@ case class Controller @Inject()() extends ControllerInterface with Publisher {
   def getDestField: Field = destField
 
   override def setGameBoad(newGameBoard: GameBoardInterface): Unit = gameBoard = newGameBoard
+
+  def toJson: JsObject = {
+    Json.obj("unimplemented" -> JsBoolean(true))
+  }
+
 }

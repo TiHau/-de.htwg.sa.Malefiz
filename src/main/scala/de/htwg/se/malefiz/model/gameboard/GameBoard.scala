@@ -2,6 +2,7 @@ package de.htwg.se.malefiz.model.gameboard
 
 import com.google.inject.Inject
 import com.google.inject.name.Named
+import play.api.libs.json._
 
 import scala.collection.{immutable, mutable}
 
@@ -77,6 +78,59 @@ immutable.HashMap.empty[(Int, Int), Field]) extends GameBoardInterface {
     jsb.append(" ")
     (10 to 16).addString(jsb, " ")
     jsb.toString()
+  }
+
+  override def toJson: JsObject = {
+    Json.obj(
+      "rows" -> Json.toJson(
+        for {
+          y <- 0 to 15
+        } yield rowToJson(y)))
+  }
+
+  private def rowToJson(y: Int): JsObject = {
+    Json.obj(
+      "rowNr" -> JsNumber(y),
+      "fields" -> Json.toJson(
+        for {
+          x <- 0 to 16
+        } yield fieldToJson(x, y)))
+  }
+  private def fieldToJson(x: Int, y: Int): JsObject = {
+    if (board.contains((x, y))) {
+      val field = board((x, y))
+      field.stone match {
+        case Some(stone: PlayerStone) =>
+          Json.obj(
+            "isFreeSpace" -> JsBoolean(false),
+            "x" -> JsNumber(x),
+            "y" -> JsNumber(y),
+            "sort" -> JsString(stone.playerColor.toString),
+            "avariable" -> JsBoolean(field.available))
+        case Some(_: BlockStone) =>
+          Json.obj(
+            "isFreeSpace" -> JsBoolean(false),
+            "x" -> JsNumber(x),
+            "y" -> JsNumber(y),
+            "sort" -> JsString("b"),
+            "avariable" -> JsBoolean(field.available))
+
+        case None =>
+          Json.obj(
+            "isFreeSpace" -> JsBoolean(false),
+            "x" -> JsNumber(x),
+            "y" -> JsNumber(y),
+            "sort" -> JsString("f"),
+            "avariable" -> JsBoolean(field.available))
+      }
+    } else {
+      Json.obj(
+        "isFreeSpace" -> JsBoolean(true),
+        "x" -> JsNumber(x),
+        "y" -> JsNumber(y),
+        "sort" -> JsString("f"),
+        "avariable" -> JsBoolean(false))
+    }
   }
 
   def moveStone(current: Field, dest: Field): (Option[Stone], GameBoard) =
