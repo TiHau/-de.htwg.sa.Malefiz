@@ -45,14 +45,6 @@ trait GameBoardInterface extends Publisher {
   def playerCount: Int
 
   /**
-   * Überprüft ob an den übergebenen Koordinaten ein Blockstein gesetzt werden darf
-   * @param x X-Koordinate des zu überprüfenden Feldes
-   * @param y y-Koordinate des zu überprüfenden Feldes
-   * @return Liefert true, wenn ein Blockstein auf dieses Feld gesetzt werden darf
-   */
-  def checkDestForBlockStone(x: Int, y: Int): Boolean
-
-  /**
    * Setzt einen Blockstein auf ein übergebenes Feld. Das Feld sollte vorher mit
    * <code>checkDestForBlockStone(x: Int, y: Int): Boolean</code> überprüft werden.
    * @param field Ein Freies Feld

@@ -1,5 +1,6 @@
 package de.htwg.se.malefiz.model.service
 
+import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import com.google.inject.name.Names
@@ -70,13 +71,6 @@ object Routes {
             JsNumber(WebServer.gameBoard.playerCount).toString()
           }
         } ~
-        pathPrefix("checkDestForBlockStone") {
-          path(IntNumber / IntNumber) { (x, y) =>
-            complete {
-              JsBoolean(WebServer.gameBoard.checkDestForBlockStone(x, y)).toString()
-            }
-          }
-        } ~
         pathPrefix("setBlockStoneOnField") {
           path(IntNumber / IntNumber) { (x, y) =>
             complete {
@@ -135,18 +129,25 @@ object Routes {
             }
           }
         } ~
-        pathPrefix("forceMoveStone") {
+        pathPrefix("markPossibleMoves") {
           path(IntNumber / IntNumber / IntNumber / IntNumber) { (x, y, playerColor, diced) =>
             complete {
-              val stone = WebServer.gameBoard.board((x, y)).stone.get.asInstanceOf[PlayerStone]
-              val player = playerColor match {
-                case 1 => WebServer.gameBoard.player1
-                case 2 => WebServer.gameBoard.player2
-                case 3 => WebServer.gameBoard.player3
-                case _ => WebServer.gameBoard.player4
+              if (WebServer.gameBoard.board.contains((x, y))
+                && WebServer.gameBoard.board((x, y)).stone.isDefined
+                && WebServer.gameBoard.board((x, y)).stone.get.isInstanceOf[PlayerStone]
+                && playerColor == WebServer.gameBoard.board((x, y)).stone.get.asInstanceOf[PlayerStone].playerColor) {
+                val stone = WebServer.gameBoard.board((x, y)).stone.get.asInstanceOf[PlayerStone]
+                val player = playerColor match {
+                  case 1 => WebServer.gameBoard.player1
+                  case 2 => WebServer.gameBoard.player2
+                  case 3 => WebServer.gameBoard.player3
+                  case _ => WebServer.gameBoard.player4
+                }
+                WebServer.gameBoard = WebServer.gameBoard.markPossibleMoves(stone, player, diced)
+                JsBoolean(true).toString()
+              } else {
+                JsBoolean(false).toString()
               }
-              WebServer.gameBoard = WebServer.gameBoard.markPossibleMoves(stone, player, diced)
-              JsBoolean(true).toString()
             }
           }
         } ~
@@ -179,24 +180,14 @@ object Routes {
               }
             }
         } ~
-          path("getString") {
-            complete {
-              WebServer.gameBoard.toString
+        path("getString") {
+          complete {
+            WebServer.gameBoard.toString
           }
         } ~
-          path("getJson") {
-            complete {
-              WebServer.gameBoard.toJson.toString
-          }
-        } ~
-        pathPrefix("isOneOfMyStonesThere") {
-          path(IntNumber / IntNumber / IntNumber) { (x, y, playerColor) =>
-            complete {
-              JsBoolean(WebServer.gameBoard.board.contains((x, y))
-                && WebServer.gameBoard.board((x, y)).stone.isDefined
-                && WebServer.gameBoard.board((x, y)).stone.get.isInstanceOf[PlayerStone]
-                && playerColor == WebServer.gameBoard.board((x, y)).stone.get.asInstanceOf[PlayerStone].playerColor).toString
-            }
+        path("getJson") {
+          complete {
+            WebServer.gameBoard.toJson.toString
           }
         }
     }

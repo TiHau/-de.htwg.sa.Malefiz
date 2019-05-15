@@ -15,10 +15,7 @@ trait ControllerInterface extends Observable with Publisher {
    */
   def getState: State.Value
   def setState(newState: State.Value): Unit
-  /**
-   * Boolen wert der festlegt ob ein Blockstein gesetzt werden muss
-   */
-  var needToSetBlockStone = false
+
   /**
    * Der Spieler der aktuell am Zug ist
    */
@@ -85,18 +82,6 @@ trait ControllerInterface extends Observable with Publisher {
    * Setzt Spiel zurück
    */
   def reset(): Unit
-
-  /**
-   * Setzt den ausgwählten Spielerstein
-   * @param newStone neuer Spielerstein
-   */
-  def setChoosenPlayerStone(newStone: PlayerStone): Unit
-
-  /**
-   * Liefert den ausgewählten Spielerstein
-   * @return ausgewählter Spielerstein
-   */
-  def getChoosenPlayerStone: PlayerStone
 
   /**
    * Setzt das Zielfeld

@@ -161,16 +161,20 @@ immutable.HashMap.empty[(Int, Int), Field]) extends GameBoardInterface {
     copy(board = board - ((stone.startX, stone.startY))
       + ((stone.startX, stone.startY) -> board((stone.startX, stone.startY)).copy(stone = Some(stone.copy(x = stone.startX, y = stone.startY)))))
 
-  def checkDestForBlockStone(x: Int, y: Int): Boolean = y < 12 && board.contains((x, y)) && board((x, y)).stone.isEmpty && (x, y) != (8, 0)
+  private def checkDestForBlockStone(x: Int, y: Int): Boolean = y < 12 && board.contains((x, y)) && board((x, y)).stone.isEmpty && (x, y) != (8, 0)
 
-  def setBlockStoneOnField(field: Field): GameBoard = copy(board = board - ((field.x, field.y))
-    + ((field.x, field.y) -> board((field.x, field.y)).copy(stone = Some(BlockStone()))))
+  def setBlockStoneOnField(field: Field): GameBoard = {
+    if (checkDestForBlockStone(field.x, field.y))
+      copy(board = board - ((field.x, field.y)) + ((field.x, field.y) -> board((field.x, field.y)).copy(stone = Some(BlockStone()))))
+    else
+      copy()
+  }
 
   def removeStoneOnField(field: Field): GameBoard = copy(board = board - ((field.x, field.y))
     + ((field.x, field.y) -> board((field.x, field.y)).copy(stone = None)))
 
   def markPossibleMoves(stone: PlayerStone, player: Player, diced: Int): GameBoard = {
-    var tmp = copy()
+    var tmp = copy().unmarkPossibleMoves()
     if (stone.isOnStart) {
       tmp = tmp.markPossibleMovesR(player.start._1, player.start._2, diced, ' ', player.color)
     } else {

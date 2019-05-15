@@ -16,6 +16,7 @@ import akka.actor.ActorSystem
 
 import scala.util.{Failure, Success}
 import akka.http.scaladsl.Http
+import akka.util.ByteString
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Sink
 
@@ -31,9 +32,11 @@ case class Controller @Inject()() extends ControllerInterface with Publisher {
   private val logger = Logger(classOf[Controller])
   private val fileIO = injector.instance[FileIOInterface]
   private val undoManager = new UndoManager()
-  private var chosenPlayerStone: PlayerStone = _
+  private var chosenPlayerStone: Option[(Int, Int)] = None
+  private var needToSetBlockStone = false
   private var destField: Field = _
   private var state: State.Value = Print
+  private var activePlayerColor: Int = _
 
   override def getState: State.Value = state
 
@@ -120,25 +123,18 @@ case class Controller @Inject()() extends ControllerInterface with Publisher {
   }
 
   private def nextTurn(): Unit = {
-    state = if (!gameBoard.checkWin) {
-      undoManager.clear()
-      activePlayer = if (activePlayer.color == 1) {
-        gameBoard.player4
-      } else if (activePlayer.color == 4 && gameBoard.playerCount >= 3) {
-        gameBoard.player2
-      } else if (activePlayer.color == 2 && gameBoard.playerCount == 4) {
-        gameBoard.player3
-      } else {
-        gameBoard.player1
-      }
-      diced = scala.util.Random.nextInt(six) + 1
-      state = Print
-      notifyObservers() //print GameBoard
-      needToSetBlockStone = false
-      ChoosePlayerStone
+    activePlayerColor = if (activePlayerColor == 1) {
+      4
+    } else if (activePlayerColor == 4 && gameBoard.playerCount >= 3) {
+      2
+    } else if (activePlayerColor == 2 && gameBoard.playerCount == 4) {
+      3
     } else {
-      PlayerWon
+      1
     }
+    diced = scala.util.Random.nextInt(six) + 1
+    needToSetBlockStone = false
+    chosenPlayerStone = None
     notifyObservers()
   }
 
@@ -146,50 +142,65 @@ case class Controller @Inject()() extends ControllerInterface with Publisher {
     implicit val system = ActorSystem()
     implicit val materializer = ActorMaterializer()
     implicit val executionContext = system.dispatcher
-    state match {
-      case ChoosePlayerStone =>
-        val responseFuture: Future[HttpResponse] = Http().singleRequest(HttpRequest(HttpMethods.GET, "http://localhost:8081/isOneOfMyStonesThere/" + x + "/" + y + "/" + activePlayer.color))
 
-        responseFuture.onComplete {
-          case Success(response: HttpResponse) => println("It works!\n"+response.entity)
-          case Failure(_) => println("failed!")
-        }
-
-        Await.result(responseFuture, Duration(5000, "millis"))
-
-
-        if (gameBoard.board.contains((x, y))
-          && gameBoard.board((x, y)).stone.isDefined
-          && gameBoard.board((x, y)).stone.get.isInstanceOf[PlayerStone]
-          && activePlayer.color == gameBoard.board((x, y)).stone.get.asInstanceOf[PlayerStone].playerColor) {
-          chosenPlayerStone = gameBoard.board((x, y)).stone.get.asInstanceOf[PlayerStone]
-          undoManager.doStep(new ChooseCommand(chosenPlayerStone, this))
-          state = Print
-          notifyObservers()
-          state = ChooseTarget
-        }
-      case ChooseTarget =>
-        if (gameBoard.checkDestForPlayerStone(x, y)) {
-          destField = gameBoard.board((x, y))
-          undoManager.doStep(new MoveCommand(chosenPlayerStone, destField, this))
-          state = Print
-          notifyObservers()
-          state = if (needToSetBlockStone) {
-            SetBlockStone
-          } else {
-            BeforeEndOfTurn
+    //check if player clicked on one of his stones
+    if (!needToSetBlockStone) {
+      Http().singleRequest(HttpRequest(HttpMethods.GET, "http://localhost:8081/markPossibleMoves/" + x + "/" + y + "/" + activePlayer.color + "/" + diced)).onComplete {
+        case Success(response: HttpResponse) =>
+          if (response.status.isSuccess()) {
+            response.entity.toStrict(Duration(5000, "millis")).map {
+              _.data
+            }.map(_.utf8String).onComplete {
+              case Success(value) =>
+                val stoneChoosen = value.toBoolean
+                if (stoneChoosen)
+                  chosenPlayerStone = Some((x, y))
+            }
           }
-        }
-      case SetBlockStone =>
-        if (gameBoard.checkDestForBlockStone(x, y)) {
-          destField = gameBoard.board((x, y))
-          undoManager.doStep(new BlockStoneCommand(destField, this))
-          state = Print
-          notifyObservers()
-          state = BeforeEndOfTurn
-        }
-      case _ =>
+      }
     }
+
+    //check if player clicked on a field that he can move to
+    if (chosenPlayerStone.isDefined) {
+      Http().singleRequest(HttpRequest(HttpMethods.GET, "http://localhost:8081/moveStone/" + chosenPlayerStone.get._1 + "/" + chosenPlayerStone.get._2 + "/" + x + "/" + y)).onComplete {
+        case Success(response: HttpResponse) =>
+          if (response.status.isSuccess()) {
+            response.entity.toStrict(Duration(5000, "millis")).map {
+              _.data
+            }.map(_.utf8String).onComplete {
+              case Success(value) =>
+                val hit = Json.parse(value)
+                val sort: String = (hit \ "sort").get.toString.replace("\"", "")
+                if (sort.equals("b")) {
+                  needToSetBlockStone = true
+                } else if (sort.equals("p")) {
+                  nextTurn()
+                } else {
+                  nextTurn()
+                }
+                chosenPlayerStone = None
+            }
+          }
+      }
+    }
+
+    //setBlockStone if needed
+    if (needToSetBlockStone) {
+      Http().singleRequest(HttpRequest(HttpMethods.GET, "http://localhost:8081/setBlockStoneOnField/" + x + "/" + y)).onComplete {
+        case Success(response: HttpResponse) =>
+          if (response.status.isSuccess()) {
+            response.entity.toStrict(Duration(5000, "millis")).map {
+              _.data
+            }.map(_.utf8String).onComplete {
+              case Success(value) =>
+                val blockStoneSet = value.toBoolean
+                if (blockStoneSet)
+                  nextTurn()
+            }
+          }
+      }
+    }
+
     notifyObservers()
   }
 
@@ -198,10 +209,6 @@ case class Controller @Inject()() extends ControllerInterface with Publisher {
     state = SetPlayerCount
     notifyObservers()
   }
-
-  def setChoosenPlayerStone(newStone: PlayerStone): Unit = chosenPlayerStone = newStone
-
-  def getChoosenPlayerStone: PlayerStone = chosenPlayerStone
 
   def setDestField(newField: Field): Unit = destField = newField
 
