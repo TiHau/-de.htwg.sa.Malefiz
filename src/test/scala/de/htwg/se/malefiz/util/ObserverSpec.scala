@@ -9,7 +9,7 @@ import org.scalatest.junit.JUnitRunner
 import org.scalatest.{Matchers, WordSpec}
 @RunWith(classOf[JUnitRunner])
 class ObserverSpec extends WordSpec with Matchers {
-  val injector: Injector = Guice.createInjector(new MalefizModule)
+/*  val injector: Injector = Guice.createInjector(new MalefizModule)
   val controller = injector.getInstance(classOf[ControllerInterface])
   val gui = new TUI(controller)
   controller.notifyObservers()
@@ -21,6 +21,6 @@ class ObserverSpec extends WordSpec with Matchers {
       }
 
     }
-  }
+  }*/
 
 }

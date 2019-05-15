@@ -17,15 +17,15 @@ class FileIO extends FileIOInterface {
   private val source: String = "saveFile.json"
 
   override def load(controller: ControllerInterface): Unit = {
-    if (Files.exists(Paths.get(source))) {
+   /* if (Files.exists(Paths.get(source))) {
       val file = Source.fromFile(source)
       val json: JsValue = Json.parse(file.getLines.mkString)
       file.close()
-      controller.setGameBoad(gameFromJson(json, controller))
-    }
+
+    }*/
   }
 
-  private def gameFromJson(json: JsValue, controller: ControllerInterface): GameBoard = {
+ /* private def gameFromJson(json: JsValue, controller: ControllerInterface): GameBoard = {
     controller.setPlayerCount((json \ "playerCount").get.toString().toInt)
     controller.diced = (json \ "diced").get.toString().toInt
 
@@ -55,20 +55,20 @@ class FileIO extends FileIOInterface {
     })
     tmp_board
   }
-
+*/
   override def save(controller: ControllerInterface): Boolean = {
-    gameToJson(controller) onComplete {
+   /* gameToJson(controller) onComplete {
       case Success(gameJson) =>
         val pw = new PrintWriter(new File(source))
         pw.write(Json.prettyPrint(gameJson))
         pw.close()
         return true
       case Failure(exception) =>
-    }
+    }*/
     false
   }
 
-  def gameToJson(controller: ControllerInterface): Future[JsObject] = Future {
+  /*def gameToJson(controller: ControllerInterface): Future[JsObject] = Future {
     Json.obj(
       "activePlayer" -> JsNumber(controller.activePlayer.color),
       "diced" -> JsNumber(controller.diced),
@@ -90,5 +90,5 @@ class FileIO extends FileIOInterface {
             "startX" -> JsNumber(controller.gameBoard.board((x, y)).stone.get.asInstanceOf[PlayerStone].startX),
             "startY" -> JsNumber(controller.gameBoard.board((x, y)).stone.get.asInstanceOf[PlayerStone].startY),
             "playerColor" -> JsNumber(controller.gameBoard.board((x, y)).stone.get.asInstanceOf[PlayerStone].playerColor))))))
-  }
+  }*/
 }

@@ -2,7 +2,7 @@ package de.htwg.se.malefiz.rest
 
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
-import de.htwg.se.malefiz.Malefiz
+import de.htwg.se.malefiz.aview.ViewSocket
 
 
 object Routes {
@@ -11,21 +11,21 @@ object Routes {
     get {
         path("") {
           complete {
-            Malefiz.controller.toJson.toString
+            WebServer.controller.toJson.toString
           }
         } ~
         pathPrefix("touch") {
           path(IntNumber / IntNumber) { (column, row) =>
             complete {
-              Malefiz.controller.takeInput(column, row)
-              Malefiz.controller.toJson.toString
+              WebServer.controller.takeInput(column, row)
+              WebServer.controller.toJson.toString
             }
           }
         } ~
         pathPrefix("new") {
           path(IntNumber) { count =>
             complete {
-              Malefiz.controller.newGame(if (count > 4) {
+              WebServer.controller.newGame(if (count > 4) {
                 4
               } else if (count < 2) {
                 2
@@ -33,28 +33,31 @@ object Routes {
                 count
               }
               )
-              Malefiz.controller.toJson.toString
+              WebServer.controller.toJson.toString
             }
           }
         } ~
-        path("turn") {
+        path("save") {
           complete {
-            Malefiz.controller.endTurn()
-            Malefiz.controller.toJson.toString
+            WebServer.controller.saveGame()
+            WebServer.controller.toJson.toString
           }
         } ~
-        path("redo") {
+        path("load") {
           complete {
-            Malefiz.controller.redo()
-            Malefiz.controller.toJson.toString
+            WebServer.controller.loadSavedGame()
+            WebServer.controller.toJson.toString
           }
         } ~
-        path("undo") {
-          complete {
-            Malefiz.controller.undo()
-            Malefiz.controller.toJson.toString
-          }
-        }
+          path("toJson") {
+            complete {
+              WebServer.controller.toJson.toString
+            }
+          } ~
+      path("websocket") {
+        handleWebSocketMessages(ViewSocket.listen())
+      }
+
 
     }
 

@@ -4,19 +4,19 @@ import com.typesafe.scalalogging.Logger
 import de.htwg.se.malefiz.controller.{ControllerInterface, State}
 import de.htwg.se.malefiz.util.Observer
 
-case class TUI(controller: ControllerInterface) extends Observer {
+case class TUI() extends Observer {
   private val logger = Logger(classOf[TUI])
   var checkFirst: Boolean = true
   logger.info("TUI Malefiz\n")
   logger.info("Welcome!!!\n")
-  controller.add(this)
+//  controller.add(this)
 
   def printGameBoard(): Unit = {
-    logger.info("\nGameboard: \n" +
+    /*logger.info("\nGameboard: \n" +
       controller.gameBoard.toString +
       "\nPlayer: " + controller.activePlayer.color +
       "\nDiced: " + controller.diced
-      + "\n")
+      + "\n")*/
   }
 
   def readLine(): Unit = {
@@ -28,7 +28,7 @@ case class TUI(controller: ControllerInterface) extends Observer {
       case Some(i) => i
       case None => 0
     }
-    controller.takeInput(x, y)
+   // controller.takeInput(x, y)
 
   }
 
@@ -36,23 +36,23 @@ case class TUI(controller: ControllerInterface) extends Observer {
     val line = scala.io.StdIn.readLine()
     line match {
       case "count" =>
-        controller.newGame(4)
+      // controller.newGame(4)
         None
       case "exit" => sys.exit(0)
       case "restart" =>
         checkFirst = true
-        controller.reset()
+     //   controller.reset()
         None
       case "undo" =>
-        controller.undo()
+     //   controller.undo()
         printGameBoard()
         None
       case "redo" =>
-        controller.redo()
+   //     controller.redo()
         printGameBoard()
         None
       case "enter" =>
-        controller.endTurn()
+   //     controller.endTurn()
         None
       case _ =>
         try {
@@ -64,7 +64,7 @@ case class TUI(controller: ControllerInterface) extends Observer {
   }
 
   override def update(): Unit = {
-    controller.getState match {
+ /*   controller.getState match {
       case State.Print => printGameBoard()
       case State.SetBlockStone =>
         logger.info("Set destination for hit Blockstone(First Input X then Y)\n")
@@ -79,6 +79,6 @@ case class TUI(controller: ControllerInterface) extends Observer {
       case State.PlayerWon => logger.info("Player: " + controller.activePlayer.color + " Won the Game\n")
       case State.BeforeEndOfTurn => logger.info("Please type \"enter\" to go to next Move or \"undo\" to revert\n")
       case State.EndTurn =>
-    }
+    }*/
   }
 }

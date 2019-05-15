@@ -10,7 +10,7 @@ import org.scalatest.{Matchers, WordSpec}
 @RunWith(classOf[JUnitRunner])
 class FileIOSpec extends WordSpec with Matchers {
 
-  "A FileIO Json" when {
+ /* "A FileIO Json" when {
 
     val injector: Injector = Guice.createInjector(new MalefizModule)
     val controller: ControllerInterface = injector.getInstance(classOf[ControllerInterface])
@@ -26,5 +26,5 @@ class FileIOSpec extends WordSpec with Matchers {
 
     }
 
-  }
+  }*/
 }

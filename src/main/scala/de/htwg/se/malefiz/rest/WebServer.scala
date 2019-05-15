@@ -3,10 +3,15 @@ package de.htwg.se.malefiz.rest
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.stream.ActorMaterializer
+import com.google.inject.{Guice, Injector}
+import de.htwg.se.malefiz.MalefizModule
+import de.htwg.se.malefiz.controller.ControllerInterface
 
 import scala.io.StdIn
 
 object WebServer {
+  val injector: Injector = Guice.createInjector(new MalefizModule)
+  val controller: ControllerInterface = injector.getInstance(classOf[ControllerInterface])
 
   def main(args: Array[String]) {
 

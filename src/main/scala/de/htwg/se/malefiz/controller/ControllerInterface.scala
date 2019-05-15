@@ -8,23 +8,6 @@ import scala.swing.Publisher
 
 trait ControllerInterface extends Observable with Publisher {
 
-  private val six = 6
-
-  /**
-   * Der aktuelle Spielzustand wird geliefert oder gesetzt
-   */
-  def getState: State.Value
-  def setState(newState: State.Value): Unit
-
-  /**
-   * Der Spieler der aktuell am Zug ist
-   */
-  var activePlayer: Player = _
-  /**
-   * Die gewürfelte Zahl
-   */
-  var diced: Int = six
-
   /**
    * läd den Gespeicherten Spielstand
    */
@@ -34,18 +17,6 @@ trait ControllerInterface extends Observable with Publisher {
    * Speichert den aktuellen Spielstand ab
    */
   def saveGame(): Unit
-
-  /**
-   * Macht den letzten Click rückgängig
-   * Setzt den Spielstatus auf den Wert, der vor dem letzten Zug aktiv war
-   */
-  def undo(): Unit
-
-  /**
-   * Wenn ein Click rückgängig gemacht wurde wird diese wiederholt.
-   * Aktualisiert den Spielstatus
-   */
-  def redo(): Unit
 
   /**
    * Erstellt ein neues Spiel
@@ -59,16 +30,6 @@ trait ControllerInterface extends Observable with Publisher {
    */
   def setPlayerCount(playerCount: Int): Unit
 
-  /**
-   * Liefert das GameBoard
-   * @return GameBoard
-   */
-  def gameBoard: GameBoardInterface
-  def setGameBoad(newGameBoard:GameBoardInterface):Unit
-  /**
-   * beendet den Zug und startet den nächsten
-   */
-  def endTurn(): Unit
 
   /**
    * Bekommt Koordinaten eines Felds und führt in Abhängigkeit des aktuellen Spielstatuses
@@ -78,22 +39,7 @@ trait ControllerInterface extends Observable with Publisher {
    */
   def takeInput(x: Int, y: Int): Unit
 
-  /**
-   * Setzt Spiel zurück
-   */
-  def reset(): Unit
 
-  /**
-   * Setzt das Zielfeld
-   * @param newField neues Zielfeld
-   */
-  def setDestField(newField: Field): Unit
-
-  /**
-   * Liefert das Zielfeld
-   * @return
-   */
-  def getDestField: Field
 
   def toJson: JsObject
 }

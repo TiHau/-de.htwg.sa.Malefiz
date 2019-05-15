@@ -2,39 +2,87 @@ package de.htwg.se.malefiz.aview
 
 import java.awt.{Color, Font, Toolkit}
 
-import de.htwg.se.malefiz.controller.ControllerInterface
-import de.htwg.se.malefiz.controller.State._
-import de.htwg.se.malefiz.util.Observer
+import akka.actor.ActorSystem
+import akka.http.scaladsl.Http
+import akka.http.scaladsl.model.{HttpMethods, HttpRequest, HttpResponse, StatusCodes}
+import akka.http.scaladsl.model.ws.{Message, TextMessage, WebSocketRequest}
+import akka.stream.ActorMaterializer
+import akka.stream.scaladsl.{Flow, Keep, Sink, Source}
+import akka.{Done, NotUsed}
 
+import scala.concurrent.Future
+import scala.concurrent.duration.Duration
 import scala.swing._
 import scala.swing.event._
+import scala.util.Success
 
-class GUI(controller: ControllerInterface) extends Frame with Observer {
+class GUI extends Frame {
+
+  implicit val system = ActorSystem()
+  implicit val materializer = ActorMaterializer()
+  import system.dispatcher
+
+  // print each incoming strict text message
+  val printSink: Sink[Message, Future[Done]] =
+    Sink.foreach { _: Message =>
+      update()
+    }
+
+  val helloSource: Source[Message, NotUsed] =
+    Source.single(TextMessage("hello world!"))
+
+  // the Future[Done] is the materialized value of Sink.foreach
+  // and it is completed when the stream completes
+  val flow: Flow[Message, Message, Future[Done]] =
+  Flow.fromSinkAndSourceMat(printSink, helloSource)(Keep.left)
+
+  // upgradeResponse is a Future[WebSocketUpgradeResponse] that
+  // completes or fails when the connection succeeds or fails
+  // and closed is a Future[Done] representing the stream completion from above
+  val (upgradeResponse, closed) =
+  Http().singleWebSocketRequest(WebSocketRequest("ws://localhost:8080/websocket"), flow)
+
+  val connected = upgradeResponse.map { upgrade =>
+    // just like a regular http request we can access response status which is available via upgrade.response.status
+    // status code 101 (Switching Protocols) indicates that server support WebSockets
+    if (upgrade.response.status == StatusCodes.SwitchingProtocols) {
+      Done
+    } else {
+      throw new RuntimeException(s"Connection failed: ${upgrade.response.status}")
+    }
+  }
+
+  // in a real application you would not side effect here
+  // and handle errors more carefully
+  connected.onComplete(println)
+  update()
+
+
+
+
+
   private val dim = Toolkit.getDefaultToolkit.getScreenSize
   private var message = "Ask Count First"
-  controller.add(this)
   contents = new FlowPanel() {
     focusable = true
     listenTo(this.mouse.clicks)
     listenTo(this.keys)
     reactions += {
-      case MouseClicked(_, point, _, _, _) => controller.takeInput((point.x - 20) / ((size.width - 50) / 17), (point.y - 100) / ((size.height - 110) / 16))
-      case KeyPressed(_, Key.Enter, _, _) => controller.endTurn()
-      case KeyPressed(_, Key.BackSpace, _, _) => controller.undo()
+      case MouseClicked(_, point, _, _, _) => //controller.takeInput((point.x - 20) / ((size.width - 50) / 17), (point.y - 100) / ((size.height - 110) / 16))
     }
     override def paint(g: Graphics2D): Unit = {
       //Background
       background = Color.WHITE
-      val activePlayerColorString: String = controller.activePlayer.color match {
+     /* val activePlayerColorString: String = controller.activePlayer.color match {
         case 1 => "Red"
         case 2 => "Green"
         case 3 => "Yellow"
         case _ => "Blue"
-      }
+      }*/
       g.setFont(new Font("TimesRoman", Font.BOLD, size.width / 60))
-      g.drawString("Player: " + activePlayerColorString, 40, 40)
+      //g.drawString("Player: " + activePlayerColorString, 40, 40)
       g.drawString("" + message, size.width / 3, 40)
-      g.drawString("Diced: " + controller.diced.toString, size.width - size.width / 6, 40)
+      //g.drawString("Diced: " + controller.diced.toString, size.width - size.width / 6, 40)
       //Playground
       g.setColor(Color.LIGHT_GRAY)
       g.fillRect(10, 80, size.width - 20, size.height - 90)
@@ -44,7 +92,7 @@ class GUI(controller: ControllerInterface) extends Frame with Observer {
     private def printingGameboard(g: Graphics2D): Unit = {
       var x: Int = 0
       var y: Int = 0
-      val currentGB = controller.gameBoard.toString.replace(" ", "#").replace("###", "   ").trim
+      val currentGB = ""//controller.gameBoard.toString.replace(" ", "#").replace("###", "   ").trim
       var check = 0
       var count = 0
       currentGB.foreach {
@@ -131,27 +179,15 @@ class GUI(controller: ControllerInterface) extends Frame with Observer {
   menuBar = new MenuBar {
     contents += new Menu("File") {
       mnemonic = Key.F
-      contents += new MenuItem(Action("New") { controller.reset() })
+      contents += new MenuItem(Action("New") { })
       contents += new MenuItem(Action("Save") {
-        controller.saveGame()
+
         repaint()
       })
       contents += new MenuItem(Action("Load") {
-        controller.loadSavedGame()
         repaint()
       })
       contents += new MenuItem(Action("Quit") { sys.exit(0) })
-    }
-    contents += new Menu("Edit") {
-      mnemonic = Key.E
-      contents += new MenuItem(Action("Undo") {
-        controller.undo()
-        repaint()
-      })
-      contents += new MenuItem(Action("Redo") {
-        controller.redo()
-        repaint()
-      })
     }
   }
 
@@ -159,11 +195,22 @@ class GUI(controller: ControllerInterface) extends Frame with Observer {
   visible = true
   resizable = true
   title = "Malefitz"
-  controller.reset()
+
 
   override def closeOperation(): Unit = sys.exit(0)
-  override def update(): Unit = {
-    message = controller.getState match {
+  def update(): Unit = {
+    Http().singleRequest(HttpRequest(HttpMethods.GET, "http://localhost:8080/toJson")).onComplete {
+      case Success(response: HttpResponse) =>
+        if (response.status.isSuccess()) {
+          response.entity.toStrict(Duration(5000, "millis")).map {
+            _.data
+          }.map(_.utf8String).onComplete {
+            case Success(value) =>
+             println(value)
+          }
+        }
+    }
+   /* message = controller.getState match {
       case Print | EndTurn => message
       case SetBlockStone => "Set a BlockStone"
       case ChoosePlayerStone => "Chose one of your Stones"
@@ -177,7 +224,7 @@ class GUI(controller: ControllerInterface) extends Frame with Observer {
         countUI.visible = true
         message
       case BeforeEndOfTurn => "Press Enter to end your turn or Backspace to undo"
-    }
+    }*/
     repaint()
   }
   private class CountUI extends MainFrame {
@@ -186,36 +233,32 @@ class GUI(controller: ControllerInterface) extends Frame with Observer {
     location = new Point(dim.width / 3, dim.height / 3)
     contents = new FlowPanel() {
       contents += Button("2 Player") {
-        controller.newGame(2)
         dispose
       }
       contents += Button("3 Player") {
-        controller.newGame(3)
         dispose
       }
       contents += Button("4 Player") {
-        controller.newGame(4)
         dispose
       }
     }
   }
   private class WinUI extends MainFrame {
-    val activePlayerColorString: String = controller.activePlayer.color match {
+   /* val activePlayerColorString: String = controller.activePlayer.color match {
       case 1 => "Red"
       case 2 => "Green"
       case 3 => "Yellow"
       case _ => "Blue"
-    }
+    }*/
     title = "Victory"
     preferredSize = new Dimension(400, 120)
     location = new Point(dim.width / 3, dim.height / 3)
     contents = new FlowPanel() {
-      contents += new Label("Player " + activePlayerColorString + " Won the Game!")
+     // contents += new Label("Player " + activePlayerColorString + " Won the Game!")
       contents += Button("Exit") {
         sys.exit(0)
       }
       contents += Button("New Game") {
-        controller.reset()
         dispose()
       }
     }
