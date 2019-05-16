@@ -140,7 +140,7 @@ immutable.HashMap.empty[(Int, Int), Field]) extends GameBoardInterface {
         - ((dest.x, dest.y))
         + ((dest.x, dest.y) -> board((dest.x, dest.y)).copy(stone = Some(current.stone.get.asInstanceOf[PlayerStone].copy(x = dest.x, y = dest.y))))
         - ((current.x, current.y))
-        + ((current.x, current.y) -> board((current.x, current.y)).copy(stone = None))))
+        + ((current.x, current.y) -> board((current.x, current.y)).copy(stone = None))).unmarkPossibleMoves())
     } else {
       (None, copy())
     }

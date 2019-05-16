@@ -115,9 +115,10 @@ case class Controller @Inject()() extends ControllerInterface with Publisher {
             }.map(_.utf8String).onComplete {
               case Success(value) =>
                 val stoneChoosen = value.toBoolean
-                if (stoneChoosen)
+                if (stoneChoosen) {
                   chosenPlayerStone = Some((x, y))
-                message = "Choose a Target Field"
+                  message = "Choose a Target Field"
+                }
               case Failure(_) =>
             }
           }
@@ -135,13 +136,12 @@ case class Controller @Inject()() extends ControllerInterface with Publisher {
               case Success(value) =>
                 val hit = Json.parse(value)
                 val sort: String = (hit \ "sort").get.toString.replace("\"", "")
-                if (sort.equals("b")) {
-                  needToSetBlockStone = true
-                  message = "Set a BlockStone"
-                } else if (sort.equals("p")) {
-                  nextTurn()
-                } else {
-                  nextTurn()
+                sort match {
+                  case "b"=>
+                    needToSetBlockStone = true
+                    message = "Set a BlockStone"
+                  case   _=>
+                    nextTurn()
                 }
                 chosenPlayerStone = None
               case Failure(_) =>
