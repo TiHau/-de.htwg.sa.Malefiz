@@ -52,6 +52,7 @@ case class Controller @Inject()() extends ControllerInterface with Publisher {
             case Success(value) =>
               val created = value.toBoolean
               if (created) {
+                ViewSocket.updateGame()
                 nextTurn()
               }
             case Failure(_) =>
@@ -195,14 +196,17 @@ case class Controller @Inject()() extends ControllerInterface with Publisher {
           response.entity.toStrict(Duration(5000, "millis")).map {
             _.data
           }.map(_.utf8String).onComplete {
-            case Success(value) => gameBoardAsString = value
+            case Success(value) => println( value)
+              gameBoardAsString = value + "§"
             case Failure(_) =>
           }
         }
       case Failure(_) =>
     }
-    Await.result(resp2, Duration(10000, "millis"))
-    Thread.sleep(10000)
+    Await.result(resp2, Duration(5000, "millis"))
+    while(!gameBoardAsString.endsWith("§")) {
+      Thread.sleep(1000)
+    }
     Json.obj(
       "activePlayer" -> JsNumber(activePlayerColor),
       "diced" -> JsString(diced.toString),

@@ -229,7 +229,7 @@ class GUI extends Frame {
               if(!newG) {
                 message = (tmpJson \ "message").get.toString.replace("\"", "")
               }
-              gbString = (tmpJson \ "gbstring").get.toString.replace("\"", "").replace("\\n","\n")
+              gbString = (tmpJson \ "gbstring").get.toString.replace("\"", "").replace("\\n","\n").replace("§","")
               println(gbString)
               message match {
                 case "Victory" =>
@@ -250,7 +250,6 @@ class GUI extends Frame {
   def newGame(count:Int): Unit ={
     Http().singleRequest(HttpRequest(HttpMethods.GET, "http://localhost:8080/new/" + count)).onComplete {
       case Success(response: HttpResponse) =>
-        update()
     }
   }
 
@@ -261,14 +260,17 @@ class GUI extends Frame {
     contents = new FlowPanel() {
       contents += Button("2 Player") {
         newGame(2)
+        update()
         dispose
       }
       contents += Button("3 Player") {
         newGame(3)
+        update()
         dispose
       }
       contents += Button("4 Player") {
         newGame(4)
+        update()
         dispose
 
       }
