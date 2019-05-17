@@ -10,11 +10,12 @@ import de.htwg.se.malefiz.MalefizModule
 import de.htwg.se.malefiz.aview.ViewSocket
 import de.htwg.se.malefiz.model.fileio.FileIOInterface
 import net.codingwell.scalaguice.InjectorExtensions._
-import play.api.libs.json.{JsBoolean, JsObject, Json}
+import play.api.libs.json.{JsBoolean, JsNumber, JsObject, JsString, JsValue, Json}
 
+import scala.concurrent.{Await, Future}
 import scala.concurrent.duration.Duration
 import scala.swing.Publisher
-import scala.util.Success
+import scala.util.{Failure, Success}
 
 case class Controller @Inject()() extends ControllerInterface with Publisher {
   val injector: Injector = Guice.createInjector(new MalefizModule)
@@ -50,11 +51,14 @@ case class Controller @Inject()() extends ControllerInterface with Publisher {
           }.map(_.utf8String).onComplete {
             case Success(value) =>
               val created = value.toBoolean
-              if(created) {
+              if (created) {
+                ViewSocket.updateGame()
                 nextTurn()
               }
+            case Failure(_) =>
           }
         }
+      case Failure(_) =>
     }
 
   }
@@ -65,6 +69,7 @@ case class Controller @Inject()() extends ControllerInterface with Publisher {
         if (response.status.isSuccess()) {
           logger.info("Set player count successful")
         }
+      case Failure(_) =>
     }
   }
 
@@ -92,8 +97,10 @@ case class Controller @Inject()() extends ControllerInterface with Publisher {
               chosenPlayerStone = None
               message = "Choose one of your Stones"
               ViewSocket.updateGame()
+            case Failure(_) =>
           }
         }
+      case Failure(_) =>
     }
   }
 
@@ -108,11 +115,14 @@ case class Controller @Inject()() extends ControllerInterface with Publisher {
             }.map(_.utf8String).onComplete {
               case Success(value) =>
                 val stoneChoosen = value.toBoolean
-                if (stoneChoosen)
+                if (stoneChoosen) {
                   chosenPlayerStone = Some((x, y))
                   message = "Choose a Target Field"
+                }
+              case Failure(_) =>
             }
           }
+        case Failure(_) =>
       }
     }
     //check if player clicked on a field that he can move to
@@ -126,17 +136,18 @@ case class Controller @Inject()() extends ControllerInterface with Publisher {
               case Success(value) =>
                 val hit = Json.parse(value)
                 val sort: String = (hit \ "sort").get.toString.replace("\"", "")
-                if (sort.equals("b")) {
-                  needToSetBlockStone = true
-                  message = "Set a BlockStone"
-                } else if (sort.equals("p")) {
-                  nextTurn()
-                } else {
-                  nextTurn()
+                sort match {
+                  case "b"=>
+                    needToSetBlockStone = true
+                    message = "Set a BlockStone"
+                  case   _=>
+                    nextTurn()
                 }
                 chosenPlayerStone = None
+              case Failure(_) =>
             }
           }
+        case Failure(_) =>
       }
     }
     //setBlockStone if needed
@@ -151,15 +162,59 @@ case class Controller @Inject()() extends ControllerInterface with Publisher {
                 val blockStoneSet = value.toBoolean
                 if (blockStoneSet)
                   nextTurn()
+              case Failure(_) =>
             }
           }
+        case Failure(_) =>
       }
     }
     ViewSocket.updateGame()
   }
 
   def toJson: JsObject = {
-    Json.obj("unimplemented" -> JsBoolean(true))
+    var gameBoardAsJson: JsValue = Json.obj("failed" -> JsBoolean(true))
+    var gameBoardAsString: String = ""
+    val resp: Future[HttpResponse] = Http().singleRequest(HttpRequest(HttpMethods.GET, "http://localhost:8081/getJson"))
+    resp.onComplete {
+      case Success(response: HttpResponse) =>
+        if (response.status.isSuccess()) {
+          response.entity.toStrict(Duration(5000, "millis")).map {
+            _.data
+          }.map(_.utf8String).onComplete {
+            case Success(value) =>
+              gameBoardAsJson = Json.parse(value)
+            case Failure(_) =>
+          }
+        }
+      case Failure(_) =>
+    }
+    Await.result(resp, Duration(8000, "millis"))
+    val resp2: Future[HttpResponse] = Http().singleRequest(HttpRequest(HttpMethods.GET, "http://localhost:8081/getString"))
+    resp2.onComplete {
+      case Success(response: HttpResponse) =>
+        if (response.status.isSuccess()) {
+          response.entity.toStrict(Duration(5000, "millis")).map {
+            _.data
+          }.map(_.utf8String).onComplete {
+            case Success(value) => println( value)
+              gameBoardAsString = value + "§"
+            case Failure(_) =>
+          }
+        }
+      case Failure(_) =>
+    }
+    Await.result(resp2, Duration(5000, "millis"))
+    while(!gameBoardAsString.endsWith("§")) {
+      Thread.sleep(1000)
+    }
+    Json.obj(
+      "activePlayer" -> JsNumber(activePlayerColor),
+      "diced" -> JsString(diced.toString),
+      "message" -> JsString(message),
+      "rows" -> gameBoardAsJson,
+      "gbstring" -> gameBoardAsString
+    )
+
   }
 
 }

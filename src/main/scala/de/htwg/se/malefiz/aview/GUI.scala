@@ -9,6 +9,7 @@ import akka.http.scaladsl.model.ws.{Message, TextMessage, WebSocketRequest}
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.{Flow, Keep, Sink, Source}
 import akka.{Done, NotUsed}
+import play.api.libs.json.Json
 
 import scala.concurrent.Future
 import scala.concurrent.duration.Duration
@@ -20,6 +21,7 @@ class GUI extends Frame {
 
   implicit val system = ActorSystem()
   implicit val materializer = ActorMaterializer()
+
   import system.dispatcher
 
   // print each incoming strict text message
@@ -55,34 +57,40 @@ class GUI extends Frame {
   // in a real application you would not side effect here
   // and handle errors more carefully
   connected.onComplete(println)
-  update()
-
-
-
 
 
   private val dim = Toolkit.getDefaultToolkit.getScreenSize
   private var message = "Ask Count First"
+  private var activePlayer: Int = 3
+  private var diced: Int = 0
+  private var gbString: String = ""
+  private var newG = false
   contents = new FlowPanel() {
     focusable = true
     listenTo(this.mouse.clicks)
     listenTo(this.keys)
     reactions += {
-      case MouseClicked(_, point, _, _, _) => //controller.takeInput((point.x - 20) / ((size.width - 50) / 17), (point.y - 100) / ((size.height - 110) / 16))
+      case MouseClicked(_, point, _, _, _) =>
+        Http().singleRequest(HttpRequest(HttpMethods.GET, "http://localhost:8080/touch/" + (point.x - 20) / ((size.width - 50) / 17) + "/" +  (point.y - 100) / ((size.height - 110) / 16))).onComplete {
+          case Success(response: HttpResponse) =>
+            update()
+        }
+
     }
+
     override def paint(g: Graphics2D): Unit = {
       //Background
       background = Color.WHITE
-     /* val activePlayerColorString: String = controller.activePlayer.color match {
-        case 1 => "Red"
-        case 2 => "Green"
-        case 3 => "Yellow"
-        case _ => "Blue"
-      }*/
+       val activePlayerColorString: String = activePlayer match {
+         case 1 => "Red"
+         case 2 => "Green"
+         case 3 => "Yellow"
+         case _ => "Blue"
+       }
       g.setFont(new Font("TimesRoman", Font.BOLD, size.width / 60))
-      //g.drawString("Player: " + activePlayerColorString, 40, 40)
+      g.drawString("Player: " + activePlayerColorString, 40, 40)
       g.drawString("" + message, size.width / 3, 40)
-      //g.drawString("Diced: " + controller.diced.toString, size.width - size.width / 6, 40)
+      g.drawString("Diced: " + diced.toString, size.width - size.width / 6, 40)
       //Playground
       g.setColor(Color.LIGHT_GRAY)
       g.fillRect(10, 80, size.width - 20, size.height - 90)
@@ -92,7 +100,7 @@ class GUI extends Frame {
     private def printingGameboard(g: Graphics2D): Unit = {
       var x: Int = 0
       var y: Int = 0
-      val currentGB = ""//controller.gameBoard.toString.replace(" ", "#").replace("###", "   ").trim
+      val currentGB = gbString.replace(" ", "#").replace("###", "   ").trim
       var check = 0
       var count = 0
       currentGB.foreach {
@@ -146,6 +154,7 @@ class GUI extends Frame {
           g.setColor(color)
         }
       }
+
       def setStoneColorWithAlternateBackgroundPainting(color: Color): Unit = {
         if (check == 1) {
           drawOvalNormal(Color.MAGENTA)
@@ -179,7 +188,11 @@ class GUI extends Frame {
   menuBar = new MenuBar {
     contents += new Menu("File") {
       mnemonic = Key.F
-      contents += new MenuItem(Action("New") { })
+      contents += new MenuItem(Action("New") {
+        message = "Start a Game"
+        newG = true
+        update()
+      })
       contents += new MenuItem(Action("Save") {
 
         repaint()
@@ -187,7 +200,9 @@ class GUI extends Frame {
       contents += new MenuItem(Action("Load") {
         repaint()
       })
-      contents += new MenuItem(Action("Quit") { sys.exit(0) })
+      contents += new MenuItem(Action("Quit") {
+        sys.exit(0)
+      })
     }
   }
 
@@ -195,9 +210,11 @@ class GUI extends Frame {
   visible = true
   resizable = true
   title = "Malefitz"
+  update()
 
 
   override def closeOperation(): Unit = sys.exit(0)
+
   def update(): Unit = {
     Http().singleRequest(HttpRequest(HttpMethods.GET, "http://localhost:8080/toJson")).onComplete {
       case Success(response: HttpResponse) =>
@@ -206,62 +223,84 @@ class GUI extends Frame {
             _.data
           }.map(_.utf8String).onComplete {
             case Success(value) =>
-             println(value)
+              val tmpJson = Json.parse(value)
+              activePlayer = (tmpJson \ "activePlayer").get.toString.replace("\"", "").toInt
+              diced = (tmpJson \ "diced").get.toString.replace("\"", "").toInt
+              if(!newG) {
+                message = (tmpJson \ "message").get.toString.replace("\"", "")
+              }
+              gbString = (tmpJson \ "gbstring").get.toString.replace("\"", "").replace("\\n","\n").replace("§","")
+              println(gbString)
+              message match {
+                case "Victory" =>
+                  val wonUI = new WinUI
+                  wonUI.visible = true
+                case "Start a Game" =>
+                  newG = false
+                  val countUI = new CountUI
+                  countUI.visible = true
+                case _=>
+              }
+              repaint()
           }
         }
     }
-   /* message = controller.getState match {
-      case Print | EndTurn => message
-      case SetBlockStone => "Set a BlockStone"
-      case ChoosePlayerStone => "Chose one of your Stones"
-      case ChooseTarget => "Chose a Target Field"
-      case PlayerWon =>
-        val wonUI = new WinUI
-        wonUI.visible = true
-        message
-      case SetPlayerCount =>
-        val countUI = new CountUI
-        countUI.visible = true
-        message
-      case BeforeEndOfTurn => "Press Enter to end your turn or Backspace to undo"
-    }*/
-    repaint()
   }
+
+  def newGame(count:Int): Unit ={
+    Http().singleRequest(HttpRequest(HttpMethods.GET, "http://localhost:8080/new/" + count)).onComplete {
+      case Success(response: HttpResponse) =>
+    }
+  }
+
   private class CountUI extends MainFrame {
     title = "Playercount"
     preferredSize = new Dimension(320, 70)
     location = new Point(dim.width / 3, dim.height / 3)
     contents = new FlowPanel() {
       contents += Button("2 Player") {
+        newGame(2)
+        update()
         dispose
       }
       contents += Button("3 Player") {
+        newGame(3)
+        update()
         dispose
       }
       contents += Button("4 Player") {
+        newGame(4)
+        update()
         dispose
+
       }
     }
   }
+
+
   private class WinUI extends MainFrame {
-   /* val activePlayerColorString: String = controller.activePlayer.color match {
-      case 1 => "Red"
-      case 2 => "Green"
-      case 3 => "Yellow"
-      case _ => "Blue"
-    }*/
+     val activePlayerColorString: String = activePlayer match {
+       case 1 => "Red"
+       case 2 => "Green"
+       case 3 => "Yellow"
+       case _ => "Blue"
+     }
     title = "Victory"
     preferredSize = new Dimension(400, 120)
     location = new Point(dim.width / 3, dim.height / 3)
     contents = new FlowPanel() {
-     // contents += new Label("Player " + activePlayerColorString + " Won the Game!")
+       contents += new Label("Player " + activePlayerColorString + " Won the Game!")
       contents += Button("Exit") {
         sys.exit(0)
       }
       contents += Button("New Game") {
-        dispose()
+        message = "Start a Game"
+        newG = true
+        update()
+        dispose
       }
     }
   }
+
 }
 

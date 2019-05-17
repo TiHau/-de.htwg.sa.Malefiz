@@ -1,22 +1,79 @@
 package de.htwg.se.malefiz.aview
 
+import akka.{Done, NotUsed}
+import akka.actor.ActorSystem
+import akka.http.scaladsl.Http
+import akka.http.scaladsl.model.{HttpMethods, HttpRequest, HttpResponse, StatusCodes}
+import akka.http.scaladsl.model.ws.{Message, TextMessage, WebSocketRequest}
+import akka.stream.ActorMaterializer
+import akka.stream.scaladsl.{Flow, Keep, Sink, Source}
 import com.typesafe.scalalogging.Logger
 import de.htwg.se.malefiz.controller.{ControllerInterface, State}
 import de.htwg.se.malefiz.util.Observer
+import play.api.libs.json.Json
+
+import scala.concurrent.Future
+import scala.concurrent.duration.Duration
+import scala.util.Success
 
 case class TUI() extends Observer {
   private val logger = Logger(classOf[TUI])
   var checkFirst: Boolean = true
   logger.info("TUI Malefiz\n")
   logger.info("Welcome!!!\n")
-//  controller.add(this)
+  private var message = "Ask Count First"
+  private var activePlayer: Int = 3
+  private var diced: Int = 0
+  private var gbString: String = ""
+  private var newG = false
+
+  implicit val system = ActorSystem()
+  implicit val materializer = ActorMaterializer()
+
+  import system.dispatcher
+
+  // print each incoming strict text message
+  val printSink: Sink[Message, Future[Done]] =
+    Sink.foreach { _: Message =>
+      update()
+    }
+
+  val helloSource: Source[Message, NotUsed] =
+    Source.single(TextMessage("hello world!"))
+
+  // the Future[Done] is the materialized value of Sink.foreach
+  // and it is completed when the stream completes
+  val flow: Flow[Message, Message, Future[Done]] =
+  Flow.fromSinkAndSourceMat(printSink, helloSource)(Keep.left)
+
+  // upgradeResponse is a Future[WebSocketUpgradeResponse] that
+  // completes or fails when the connection succeeds or fails
+  // and closed is a Future[Done] representing the stream completion from above
+  val (upgradeResponse, closed) =
+  Http().singleWebSocketRequest(WebSocketRequest("ws://localhost:8080/websocket"), flow)
+
+  val connected = upgradeResponse.map { upgrade =>
+    // just like a regular http request we can access response status which is available via upgrade.response.status
+    // status code 101 (Switching Protocols) indicates that server support WebSockets
+    if (upgrade.response.status == StatusCodes.SwitchingProtocols) {
+      Done
+    } else {
+      throw new RuntimeException(s"Connection failed: ${upgrade.response.status}")
+    }
+  }
+
+  // in a real application you would not side effect here
+  // and handle errors more carefully
+  connected.onComplete(println)
+
+  //  controller.add(this)
 
   def printGameBoard(): Unit = {
-    /*logger.info("\nGameboard: \n" +
-      controller.gameBoard.toString +
-      "\nPlayer: " + controller.activePlayer.color +
-      "\nDiced: " + controller.diced
-      + "\n")*/
+    logger.info("\nGameboard: \n" +
+      gbString +
+      "\nPlayer: " + activePlayer +
+      "\nDiced: " + diced
+      + "\n")
   }
 
   def readLine(): Unit = {
@@ -28,31 +85,25 @@ case class TUI() extends Observer {
       case Some(i) => i
       case None => 0
     }
-   // controller.takeInput(x, y)
-
+    Http().singleRequest(HttpRequest(HttpMethods.GET, "http://localhost:8080/touch/" + x + "/" +  y)).onComplete {
+      case Success(response: HttpResponse) =>
+        update()
+    }
   }
 
   private def readInput: Option[Int] = {
     val line = scala.io.StdIn.readLine()
     line match {
       case "count" =>
-      // controller.newGame(4)
+        Http().singleRequest(HttpRequest(HttpMethods.GET, "http://localhost:8080/new/" + 4)).onComplete {
+          case Success(response: HttpResponse) =>
+            update()
+        }
         None
       case "exit" => sys.exit(0)
       case "restart" =>
         checkFirst = true
      //   controller.reset()
-        None
-      case "undo" =>
-     //   controller.undo()
-        printGameBoard()
-        None
-      case "redo" =>
-   //     controller.redo()
-        printGameBoard()
-        None
-      case "enter" =>
-   //     controller.endTurn()
         None
       case _ =>
         try {
@@ -64,21 +115,33 @@ case class TUI() extends Observer {
   }
 
   override def update(): Unit = {
- /*   controller.getState match {
-      case State.Print => printGameBoard()
-      case State.SetBlockStone =>
-        logger.info("Set destination for hit Blockstone(First Input X then Y)\n")
-        printGameBoard()
-      case State.ChoosePlayerStone =>
-        logger.info("Type in Coordinates of your PlayerStone(First Input X then Y)\n")
-        printGameBoard()
-      case State.SetPlayerCount =>
-      case State.ChooseTarget =>
-        logger.info("Set destination for your Stone(First Input X then Y)\n")
-        printGameBoard()
-      case State.PlayerWon => logger.info("Player: " + controller.activePlayer.color + " Won the Game\n")
-      case State.BeforeEndOfTurn => logger.info("Please type \"enter\" to go to next Move or \"undo\" to revert\n")
-      case State.EndTurn =>
-    }*/
+    Http().singleRequest(HttpRequest(HttpMethods.GET, "http://localhost:8080/toJson")).onComplete {
+      case Success(response: HttpResponse) =>
+        if (response.status.isSuccess()) {
+          response.entity.toStrict(Duration(5000, "millis")).map {
+            _.data
+          }.map(_.utf8String).onComplete {
+            case Success(value) =>
+              val tmpJson = Json.parse(value)
+              activePlayer = (tmpJson \ "activePlayer").get.toString.replace("\"", "").toInt
+              diced = (tmpJson \ "diced").get.toString.replace("\"", "").toInt
+              if(!newG) {
+                message = (tmpJson \ "message").get.toString.replace("\"", "")
+              }
+              gbString = (tmpJson \ "gbstring").get.toString.replace("\"", "").replace("\\n","\n")
+              println(gbString)
+              message match {
+                case "Victory" =>
+                  logger.info("Player: " + activePlayer + " Won the Game\n")
+                case _=> logger.info(message + "\n")
+              }
+              printGameBoard()
+          }
+        }
+    }
+
+
+
+
   }
 }

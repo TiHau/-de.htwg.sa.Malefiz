@@ -58,9 +58,9 @@ object Routes {
           path(IntNumber) { playerCount =>
             complete {
               WebServer.gameBoard = playerCount match {
-                case 2 => WebServer.injector.instance[GameBoardInterface](Names.named("tiny"))
-                case 3 => WebServer.injector.instance[GameBoardInterface](Names.named("small"))
-                case _ => WebServer.injector.instance[GameBoardInterface](Names.named("default"))
+                case 2 => WebServer.injector.instance[GameBoardInterface](Names.named("tiny")).createBoard
+                case 3 => WebServer.injector.instance[GameBoardInterface](Names.named("small")).createBoard
+                case _ => WebServer.injector.instance[GameBoardInterface](Names.named("default")).createBoard
               }
               JsBoolean(true).toString()
             }
