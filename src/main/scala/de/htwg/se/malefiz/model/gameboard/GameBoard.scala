@@ -133,16 +133,16 @@ immutable.HashMap.empty[(Int, Int), Field]) extends GameBoardInterface {
     }
   }
 
-  def moveStone(current: Field, dest: Field): (Option[Stone], GameBoard) =
+  def moveStone(current: Field, dest: Field): (Boolean, Option[Stone], GameBoard) =
     if (validField(dest.x, dest.y) && board((dest.x, dest.y)).available) {
       val save = dest.stone
-      (save, copy(board = board
+      (true, save, copy(board = board
         - ((dest.x, dest.y))
         + ((dest.x, dest.y) -> board((dest.x, dest.y)).copy(stone = Some(current.stone.get.asInstanceOf[PlayerStone].copy(x = dest.x, y = dest.y))))
         - ((current.x, current.y))
         + ((current.x, current.y) -> board((current.x, current.y)).copy(stone = None))).unmarkPossibleMoves())
     } else {
-      (None, copy())
+      (false, None, copy())
     }
 
   def forceMoveStone(current: Field, dest: Field): GameBoard =
@@ -163,11 +163,11 @@ immutable.HashMap.empty[(Int, Int), Field]) extends GameBoardInterface {
 
   private def checkDestForBlockStone(x: Int, y: Int): Boolean = y < 12 && board.contains((x, y)) && board((x, y)).stone.isEmpty && (x, y) != (8, 0)
 
-  def setBlockStoneOnField(field: Field): GameBoard = {
+  def setBlockStoneOnField(field: Field): (Boolean, GameBoard) = {
     if (checkDestForBlockStone(field.x, field.y))
-      copy(board = board - ((field.x, field.y)) + ((field.x, field.y) -> board((field.x, field.y)).copy(stone = Some(BlockStone()))))
+      (true,copy(board = board - ((field.x, field.y)) + ((field.x, field.y) -> board((field.x, field.y)).copy(stone = Some(BlockStone())))))
     else
-      copy()
+      (false,copy())
   }
 
   def removeStoneOnField(field: Field): GameBoard = copy(board = board - ((field.x, field.y))

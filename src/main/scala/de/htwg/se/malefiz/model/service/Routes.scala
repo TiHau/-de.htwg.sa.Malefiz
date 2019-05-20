@@ -74,8 +74,9 @@ object Routes {
         pathPrefix("setBlockStoneOnField") {
           path(IntNumber / IntNumber) { (x, y) =>
             complete {
-              WebServer.gameBoard = WebServer.gameBoard.setBlockStoneOnField(WebServer.gameBoard.board((x, y)))
-              JsBoolean(true).toString()
+              val tmp = WebServer.gameBoard.setBlockStoneOnField(WebServer.gameBoard.board((x, y)))
+              WebServer.gameBoard = tmp._2
+              JsBoolean(tmp._1).toString()
             }
           }
         } ~
@@ -88,9 +89,9 @@ object Routes {
           }
         } ~
         pathPrefix("resetPlayerStone") {
-          path(IntNumber / IntNumber) { (x, y) =>
+          path(IntNumber / IntNumber / IntNumber / IntNumber /IntNumber) { (x, y, startX, startY, color) =>
             complete {
-              WebServer.gameBoard = WebServer.gameBoard.resetPlayerStone(WebServer.gameBoard.board((x, y)).stone.get.asInstanceOf[PlayerStone])
+              WebServer.gameBoard = WebServer.gameBoard.resetPlayerStone(PlayerStone(startX, startY, x, y, color))
               JsBoolean(true).toString()
             }
           }
@@ -108,13 +109,20 @@ object Routes {
               val start = WebServer.gameBoard.board((x, y))
               val dest = WebServer.gameBoard.board((xDest, yDest))
               val res = WebServer.gameBoard.moveStone(start, dest)
-              val hitStone = res._1
-              WebServer.gameBoard = res._2
+              val hitStone = res._2
+              WebServer.gameBoard = res._3
 
               hitStone match {
-                case Some(stone: PlayerStone) => Json.obj("sort" -> "p", "x" -> JsNumber(stone.x), "y" -> JsNumber(stone.y)).toString()
-                case Some(_: BlockStone) => Json.obj("sort" -> "b").toString()
-                case _ => Json.obj("sort" -> "f").toString()
+                case Some(stone: PlayerStone) => Json.obj(
+                  "moved" -> JsBoolean(res._1),
+                  "sort" -> "p",
+                  "x" -> JsNumber(stone.x),
+                  "y" -> JsNumber(stone.y),
+                  "startX" -> JsNumber(stone.startX),
+                  "startY" -> JsNumber(stone.startY),
+                  "color" -> JsNumber(stone.playerColor)).toString()
+                case Some(_: BlockStone) => Json.obj("moved" -> JsBoolean(res._1), "sort" -> "b").toString()
+                case _ => Json.obj("moved" -> JsBoolean(res._1), "sort" -> "f").toString()
               }
             }
           }
@@ -132,6 +140,9 @@ object Routes {
         pathPrefix("markPossibleMoves") {
           path(IntNumber / IntNumber / IntNumber / IntNumber) { (x, y, playerColor, diced) =>
             complete {
+              if (WebServer.gameBoard.board.contains((x, y))&& !WebServer.gameBoard.board((x, y)).available) {
+                WebServer.gameBoard = WebServer.gameBoard.unmarkPossibleMoves()
+              }
               if (WebServer.gameBoard.board.contains((x, y))
                 && WebServer.gameBoard.board((x, y)).stone.isDefined
                 && WebServer.gameBoard.board((x, y)).stone.get.isInstanceOf[PlayerStone]

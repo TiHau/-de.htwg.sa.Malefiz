@@ -49,7 +49,7 @@ trait GameBoardInterface extends Publisher {
    * <code>checkDestForBlockStone(x: Int, y: Int): Boolean</code> überprüft werden.
    * @param field Ein Freies Feld
    */
-  def setBlockStoneOnField(field: Field): GameBoardInterface
+  def setBlockStoneOnField(field: Field): (Boolean, GameBoardInterface)
 
   /**
    * Entfernt den Stein des Felds und setzt ihn auf einen FreeStone
@@ -78,7 +78,7 @@ trait GameBoardInterface extends Publisher {
    * @param dest Zielfeld
    * @return Den geschlagenen Stein oder None
    */
-  def moveStone(current: Field, dest: Field): (Option[Stone], GameBoardInterface)
+  def moveStone(current: Field, dest: Field): (Boolean, Option[Stone], GameBoardInterface)
 
   /**
    * Versetzt einene Stein.Ohne das Zielfeld zu überprüfen.
