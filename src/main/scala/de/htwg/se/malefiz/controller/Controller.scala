@@ -24,6 +24,7 @@ case class Controller @Inject()() extends ControllerInterface with Publisher {
   private val fileIO = injector.instance[FileIOInterface]
   private var chosenPlayerStone: Option[(Int, Int)] = None
   private var needToSetBlockStone = false
+  private var needToMove = true
   private var activePlayerColor: Int = 3
   private var diced: Int = six
   private implicit val system = ActorSystem()
@@ -117,6 +118,7 @@ case class Controller @Inject()() extends ControllerInterface with Publisher {
                 val stoneChoosen = value.toBoolean
                 if (stoneChoosen) {
                   chosenPlayerStone = Some((x, y))
+                  needToMove = true
                   message = "Choose a Target Field"
                 }
               case Failure(_) =>
@@ -135,13 +137,45 @@ case class Controller @Inject()() extends ControllerInterface with Publisher {
             }.map(_.utf8String).onComplete {
               case Success(value) =>
                 val hit = Json.parse(value)
+                val moved: Boolean = (hit \ "moved").get.toString.replace("\"", "").toBoolean
+                if(moved){
+                  println("here")
+                  needToMove = false
+                }
+
                 val sort: String = (hit \ "sort").get.toString.replace("\"", "")
                 sort match {
                   case "b"=>
                     needToSetBlockStone = true
                     message = "Set a BlockStone"
+                  case "p"=>
+                    val xN: Int = (hit \ "x").get.toString.replace("\"", "").toInt
+                    val yN: Int = (hit \ "y").get.toString.replace("\"", "").toInt
+                    val startX: Int = (hit \ "startX").get.toString.replace("\"", "").toInt
+                    val startY: Int = (hit \ "startY").get.toString.replace("\"", "").toInt
+                    val color: Int = (hit \ "color").get.toString.replace("\"", "").toInt
+                    Http().singleRequest(HttpRequest(HttpMethods.GET, "http://localhost:8081/resetPlayerStone/" + xN + "/" + yN + "/" + startX + "/" + startY + "/" + color)).onComplete {
+                      case Success(response: HttpResponse) =>
+                        if (response.status.isSuccess()) {
+                          response.entity.toStrict(Duration(5000, "millis")).map {
+                            _.data
+                          }.map(_.utf8String).onComplete {
+                            case Success(value) =>
+                              val playerStoneReset = value.toBoolean
+                              if (playerStoneReset) {
+                                if (!needToSetBlockStone && !needToMove) {
+                                  nextTurn()
+                                }
+                              }
+                            case Failure(_) =>
+                          }
+                        }
+                      case Failure(_) =>
+                    }
+
                   case   _=>
-                    nextTurn()
+                    if(!needToSetBlockStone && !needToMove)
+                      nextTurn()
                 }
                 chosenPlayerStone = None
               case Failure(_) =>
@@ -205,7 +239,7 @@ case class Controller @Inject()() extends ControllerInterface with Publisher {
     }
     Await.result(resp2, Duration(5000, "millis"))
     while(!gameBoardAsString.endsWith("§")) {
-      Thread.sleep(1000)
+      Thread.sleep(100)
     }
     Json.obj(
       "activePlayer" -> JsNumber(activePlayerColor),
