@@ -1,14 +1,14 @@
 package de.htwg.se.malefiz.aview
 
-import akka.{Done, NotUsed}
+import akka.{ Done, NotUsed }
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
-import akka.http.scaladsl.model.{HttpMethods, HttpRequest, HttpResponse, StatusCodes}
-import akka.http.scaladsl.model.ws.{Message, TextMessage, WebSocketRequest}
+import akka.http.scaladsl.model.{ HttpMethods, HttpRequest, HttpResponse, StatusCodes }
+import akka.http.scaladsl.model.ws.{ Message, TextMessage, WebSocketRequest }
 import akka.stream.ActorMaterializer
-import akka.stream.scaladsl.{Flow, Keep, Sink, Source}
+import akka.stream.scaladsl.{ Flow, Keep, Sink, Source }
 import com.typesafe.scalalogging.Logger
-import de.htwg.se.malefiz.controller.{ControllerInterface, State}
+import de.htwg.se.malefiz.controller.{ ControllerInterface, State }
 import de.htwg.se.malefiz.util.Observer
 import play.api.libs.json.Json
 
@@ -44,13 +44,13 @@ case class TUI() extends Observer {
   // the Future[Done] is the materialized value of Sink.foreach
   // and it is completed when the stream completes
   val flow: Flow[Message, Message, Future[Done]] =
-  Flow.fromSinkAndSourceMat(printSink, helloSource)(Keep.left)
+    Flow.fromSinkAndSourceMat(printSink, helloSource)(Keep.left)
 
   // upgradeResponse is a Future[WebSocketUpgradeResponse] that
   // completes or fails when the connection succeeds or fails
   // and closed is a Future[Done] representing the stream completion from above
   val (upgradeResponse, closed) =
-  Http().singleWebSocketRequest(WebSocketRequest("ws://localhost:8080/websocket"), flow)
+    Http().singleWebSocketRequest(WebSocketRequest("ws://localhost:8080/websocket"), flow)
 
   val connected = upgradeResponse.map { upgrade =>
     // just like a regular http request we can access response status which is available via upgrade.response.status
@@ -85,7 +85,7 @@ case class TUI() extends Observer {
       case Some(i) => i
       case None => 0
     }
-    Http().singleRequest(HttpRequest(HttpMethods.GET, "http://localhost:8080/touch/" + x + "/" +  y)).onComplete {
+    Http().singleRequest(HttpRequest(HttpMethods.GET, "http://localhost:8080/touch/" + x + "/" + y)).onComplete {
       case Success(response: HttpResponse) =>
         update()
     }
@@ -103,7 +103,7 @@ case class TUI() extends Observer {
       case "exit" => sys.exit(0)
       case "restart" =>
         checkFirst = true
-     //   controller.reset()
+        //   controller.reset()
         None
       case _ =>
         try {
@@ -125,23 +125,20 @@ case class TUI() extends Observer {
               val tmpJson = Json.parse(value)
               activePlayer = (tmpJson \ "activePlayer").get.toString.replace("\"", "").toInt
               diced = (tmpJson \ "diced").get.toString.replace("\"", "").toInt
-              if(!newG) {
+              if (!newG) {
                 message = (tmpJson \ "message").get.toString.replace("\"", "")
               }
-              gbString = (tmpJson \ "gbstring").get.toString.replace("\"", "").replace("\\n","\n")
+              gbString = (tmpJson \ "gbstring").get.toString.replace("\"", "").replace("\\n", "\n")
               println(gbString)
               message match {
                 case "Victory" =>
                   logger.info("Player: " + activePlayer + " Won the Game\n")
-                case _=> logger.info(message + "\n")
+                case _ => logger.info(message + "\n")
               }
               printGameBoard()
           }
         }
     }
-
-
-
 
   }
 }

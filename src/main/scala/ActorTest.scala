@@ -1,4 +1,4 @@
-import akka.actor.{Actor, ActorRef, ActorSystem, Props}
+import akka.actor.{ Actor, ActorRef, ActorSystem, Props }
 
 class MyActor(collector: ActorRef) extends Actor {
   override def receive: Receive = {

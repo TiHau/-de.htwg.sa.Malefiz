@@ -1,0 +1,23 @@
+version: '3'
+services:
+  model:
+    build:
+      context: .
+      dockerfile: ./docker/model/Dockerfile
+    ports:
+      - 8081:8081
+    networks:
+      default:
+        aliases:
+          - mymodel
+
+  controller:
+    build:
+      context: .
+      dockerfile: ./docker/controller/Dockerfile
+    ports:
+      - 8080:8080
+    networks:
+      default:
+        aliases:
+          - myconroller

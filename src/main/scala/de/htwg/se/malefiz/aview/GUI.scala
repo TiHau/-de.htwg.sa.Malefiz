@@ -1,14 +1,14 @@
 package de.htwg.se.malefiz.aview
 
-import java.awt.{Color, Font, Toolkit}
+import java.awt.{ Color, Font, Toolkit }
 
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
-import akka.http.scaladsl.model.{HttpMethods, HttpRequest, HttpResponse, StatusCodes}
-import akka.http.scaladsl.model.ws.{Message, TextMessage, WebSocketRequest}
+import akka.http.scaladsl.model.{ HttpMethods, HttpRequest, HttpResponse, StatusCodes }
+import akka.http.scaladsl.model.ws.{ Message, TextMessage, WebSocketRequest }
 import akka.stream.ActorMaterializer
-import akka.stream.scaladsl.{Flow, Keep, Sink, Source}
-import akka.{Done, NotUsed}
+import akka.stream.scaladsl.{ Flow, Keep, Sink, Source }
+import akka.{ Done, NotUsed }
 import play.api.libs.json.Json
 
 import scala.concurrent.Future
@@ -36,13 +36,13 @@ class GUI extends Frame {
   // the Future[Done] is the materialized value of Sink.foreach
   // and it is completed when the stream completes
   val flow: Flow[Message, Message, Future[Done]] =
-  Flow.fromSinkAndSourceMat(printSink, helloSource)(Keep.left)
+    Flow.fromSinkAndSourceMat(printSink, helloSource)(Keep.left)
 
   // upgradeResponse is a Future[WebSocketUpgradeResponse] that
   // completes or fails when the connection succeeds or fails
   // and closed is a Future[Done] representing the stream completion from above
   val (upgradeResponse, closed) =
-  Http().singleWebSocketRequest(WebSocketRequest("ws://localhost:8080/websocket"), flow)
+    Http().singleWebSocketRequest(WebSocketRequest("ws://localhost:8080/websocket"), flow)
 
   val connected = upgradeResponse.map { upgrade =>
     // just like a regular http request we can access response status which is available via upgrade.response.status
@@ -58,7 +58,6 @@ class GUI extends Frame {
   // and handle errors more carefully
   connected.onComplete(println)
 
-
   private val dim = Toolkit.getDefaultToolkit.getScreenSize
   private var message = "Ask Count First"
   private var activePlayer: Int = 3
@@ -71,7 +70,7 @@ class GUI extends Frame {
     listenTo(this.keys)
     reactions += {
       case MouseClicked(_, point, _, _, _) =>
-        Http().singleRequest(HttpRequest(HttpMethods.GET, "http://localhost:8080/touch/" + (point.x - 20) / ((size.width - 50) / 17) + "/" +  (point.y - 100) / ((size.height - 110) / 16))).onComplete {
+        Http().singleRequest(HttpRequest(HttpMethods.GET, "http://localhost:8080/touch/" + (point.x - 20) / ((size.width - 50) / 17) + "/" + (point.y - 100) / ((size.height - 110) / 16))).onComplete {
           case Success(response: HttpResponse) =>
             update()
         }
@@ -81,12 +80,12 @@ class GUI extends Frame {
     override def paint(g: Graphics2D): Unit = {
       //Background
       background = Color.WHITE
-       val activePlayerColorString: String = activePlayer match {
-         case 1 => "Red"
-         case 2 => "Green"
-         case 3 => "Yellow"
-         case _ => "Blue"
-       }
+      val activePlayerColorString: String = activePlayer match {
+        case 1 => "Red"
+        case 2 => "Green"
+        case 3 => "Yellow"
+        case _ => "Blue"
+      }
       g.setFont(new Font("TimesRoman", Font.BOLD, size.width / 60))
       g.drawString("Player: " + activePlayerColorString, 40, 40)
       g.drawString("" + message, size.width / 3, 40)
@@ -212,7 +211,6 @@ class GUI extends Frame {
   title = "Malefitz"
   update()
 
-
   override def closeOperation(): Unit = sys.exit(0)
 
   def update(): Unit = {
@@ -226,10 +224,10 @@ class GUI extends Frame {
               val tmpJson = Json.parse(value)
               activePlayer = (tmpJson \ "activePlayer").get.toString.replace("\"", "").toInt
               diced = (tmpJson \ "diced").get.toString.replace("\"", "").toInt
-              if(!newG) {
+              if (!newG) {
                 message = (tmpJson \ "message").get.toString.replace("\"", "")
               }
-              gbString = (tmpJson \ "gbstring").get.toString.replace("\"", "").replace("\\n","\n").replace("§","")
+              gbString = (tmpJson \ "gbstring").get.toString.replace("\"", "").replace("\\n", "\n").replace("§", "")
               println(gbString)
               message match {
                 case "Victory" =>
@@ -239,7 +237,7 @@ class GUI extends Frame {
                   newG = false
                   val countUI = new CountUI
                   countUI.visible = true
-                case _=>
+                case _ =>
               }
               repaint()
           }
@@ -247,7 +245,7 @@ class GUI extends Frame {
     }
   }
 
-  def newGame(count:Int): Unit ={
+  def newGame(count: Int): Unit = {
     Http().singleRequest(HttpRequest(HttpMethods.GET, "http://localhost:8080/new/" + count)).onComplete {
       case Success(response: HttpResponse) =>
     }
@@ -277,19 +275,18 @@ class GUI extends Frame {
     }
   }
 
-
   private class WinUI extends MainFrame {
-     val activePlayerColorString: String = activePlayer match {
-       case 1 => "Red"
-       case 2 => "Green"
-       case 3 => "Yellow"
-       case _ => "Blue"
-     }
+    val activePlayerColorString: String = activePlayer match {
+      case 1 => "Red"
+      case 2 => "Green"
+      case 3 => "Yellow"
+      case _ => "Blue"
+    }
     title = "Victory"
     preferredSize = new Dimension(400, 120)
     location = new Point(dim.width / 3, dim.height / 3)
     contents = new FlowPanel() {
-       contents += new Label("Player " + activePlayerColorString + " Won the Game!")
+      contents += new Label("Player " + activePlayerColorString + " Won the Game!")
       contents += Button("Exit") {
         sys.exit(0)
       }

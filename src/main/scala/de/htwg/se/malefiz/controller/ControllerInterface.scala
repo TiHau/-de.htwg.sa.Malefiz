@@ -30,7 +30,6 @@ trait ControllerInterface extends Observable with Publisher {
    */
   def setPlayerCount(playerCount: Int): Unit
 
-
   /**
    * Bekommt Koordinaten eines Felds und führt in Abhängigkeit des aktuellen Spielstatuses
    * die jeweilige Operationen aus
@@ -38,8 +37,6 @@ trait ControllerInterface extends Observable with Publisher {
    * @param y Y-Koordinate
    */
   def takeInput(x: Int, y: Int): Unit
-
-
 
   def toJson: JsObject
 }
