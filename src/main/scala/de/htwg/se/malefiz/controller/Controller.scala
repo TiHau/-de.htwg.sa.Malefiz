@@ -2,22 +2,22 @@ package de.htwg.se.malefiz.controller
 
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
-import akka.http.scaladsl.model.{HttpMethods, HttpRequest, HttpResponse}
+import akka.http.scaladsl.model.{ HttpMethods, HttpRequest, HttpResponse }
 import akka.stream.ActorMaterializer
-import com.google.inject.{Guice, Inject, Injector}
+import com.google.inject.{ Guice, Inject, Injector }
 import com.typesafe.scalalogging.Logger
 import de.htwg.se.malefiz.MalefizModule
 import de.htwg.se.malefiz.aview.ViewSocket
 import de.htwg.se.malefiz.model.fileio.FileIOInterface
 import net.codingwell.scalaguice.InjectorExtensions._
-import play.api.libs.json.{JsBoolean, JsNumber, JsObject, JsString, JsValue, Json}
+import play.api.libs.json.{ JsBoolean, JsNumber, JsObject, JsString, JsValue, Json }
 
-import scala.concurrent.{Await, Future}
+import scala.concurrent.{ Await, Future }
 import scala.concurrent.duration.Duration
 import scala.swing.Publisher
-import scala.util.{Failure, Success}
+import scala.util.{ Failure, Success }
 
-case class Controller @Inject()() extends ControllerInterface with Publisher {
+case class Controller @Inject() () extends ControllerInterface with Publisher {
   val injector: Injector = Guice.createInjector(new MalefizModule)
   private val six = 6
   private val logger = Logger(classOf[Controller])
@@ -32,7 +32,6 @@ case class Controller @Inject()() extends ControllerInterface with Publisher {
   private implicit val executionContext = system.dispatcher
   private var message = "Start a Game" // check win "Victory"
 
-
   override def loadSavedGame(): Unit = {
     fileIO.load(this)
     ViewSocket.updateGame()
@@ -44,7 +43,7 @@ case class Controller @Inject()() extends ControllerInterface with Publisher {
   }
 
   def newGame(playerCount: Int): Unit = {
-    Http().singleRequest(HttpRequest(HttpMethods.GET, "http://localhost:8081/new/" + playerCount)).onComplete {
+    Http().singleRequest(HttpRequest(HttpMethods.GET, "http://mymodel:8081/new/" + playerCount)).onComplete {
       case Success(response: HttpResponse) =>
         if (response.status.isSuccess()) {
           response.entity.toStrict(Duration(5000, "millis")).map {
@@ -65,7 +64,7 @@ case class Controller @Inject()() extends ControllerInterface with Publisher {
   }
 
   def setPlayerCount(playerCount: Int): Unit = {
-    Http().singleRequest(HttpRequest(HttpMethods.GET, "http://localhost:8081/new/" + playerCount)).onComplete {
+    Http().singleRequest(HttpRequest(HttpMethods.GET, "http://mymodel:8081/new/" + playerCount)).onComplete {
       case Success(response: HttpResponse) =>
         if (response.status.isSuccess()) {
           logger.info("Set player count successful")
@@ -74,9 +73,8 @@ case class Controller @Inject()() extends ControllerInterface with Publisher {
     }
   }
 
-
   private def nextTurn(): Unit = {
-    Http().singleRequest(HttpRequest(HttpMethods.GET, "http://localhost:8081/playerCount")).onComplete {
+    Http().singleRequest(HttpRequest(HttpMethods.GET, "http://mymodel:8081/playerCount")).onComplete {
       case Success(response: HttpResponse) =>
         if (response.status.isSuccess()) {
           response.entity.toStrict(Duration(5000, "millis")).map {
@@ -108,7 +106,7 @@ case class Controller @Inject()() extends ControllerInterface with Publisher {
   def takeInput(x: Int, y: Int): Unit = {
     //check if player clicked on one of his stones
     if (!needToSetBlockStone) {
-      Http().singleRequest(HttpRequest(HttpMethods.GET, "http://localhost:8081/markPossibleMoves/" + x + "/" + y + "/" + activePlayerColor + "/" + diced)).onComplete {
+      Http().singleRequest(HttpRequest(HttpMethods.GET, "http://mymodel:8081/markPossibleMoves/" + x + "/" + y + "/" + activePlayerColor + "/" + diced)).onComplete {
         case Success(response: HttpResponse) =>
           if (response.status.isSuccess()) {
             response.entity.toStrict(Duration(5000, "millis")).map {
@@ -129,7 +127,7 @@ case class Controller @Inject()() extends ControllerInterface with Publisher {
     }
     //check if player clicked on a field that he can move to
     if (chosenPlayerStone.isDefined) {
-      Http().singleRequest(HttpRequest(HttpMethods.GET, "http://localhost:8081/moveStone/" + chosenPlayerStone.get._1 + "/" + chosenPlayerStone.get._2 + "/" + x + "/" + y)).onComplete {
+      Http().singleRequest(HttpRequest(HttpMethods.GET, "http://mymodel:8081/moveStone/" + chosenPlayerStone.get._1 + "/" + chosenPlayerStone.get._2 + "/" + x + "/" + y)).onComplete {
         case Success(response: HttpResponse) =>
           if (response.status.isSuccess()) {
             response.entity.toStrict(Duration(5000, "millis")).map {
@@ -138,23 +136,23 @@ case class Controller @Inject()() extends ControllerInterface with Publisher {
               case Success(value) =>
                 val hit = Json.parse(value)
                 val moved: Boolean = (hit \ "moved").get.toString.replace("\"", "").toBoolean
-                if(moved){
+                if (moved) {
                   println("here")
                   needToMove = false
                 }
 
                 val sort: String = (hit \ "sort").get.toString.replace("\"", "")
                 sort match {
-                  case "b"=>
+                  case "b" =>
                     needToSetBlockStone = true
                     message = "Set a BlockStone"
-                  case "p"=>
+                  case "p" =>
                     val xN: Int = (hit \ "x").get.toString.replace("\"", "").toInt
                     val yN: Int = (hit \ "y").get.toString.replace("\"", "").toInt
                     val startX: Int = (hit \ "startX").get.toString.replace("\"", "").toInt
                     val startY: Int = (hit \ "startY").get.toString.replace("\"", "").toInt
                     val color: Int = (hit \ "color").get.toString.replace("\"", "").toInt
-                    Http().singleRequest(HttpRequest(HttpMethods.GET, "http://localhost:8081/resetPlayerStone/" + xN + "/" + yN + "/" + startX + "/" + startY + "/" + color)).onComplete {
+                    Http().singleRequest(HttpRequest(HttpMethods.GET, "http://mymodel:8081/resetPlayerStone/" + xN + "/" + yN + "/" + startX + "/" + startY + "/" + color)).onComplete {
                       case Success(response: HttpResponse) =>
                         if (response.status.isSuccess()) {
                           response.entity.toStrict(Duration(5000, "millis")).map {
@@ -173,8 +171,8 @@ case class Controller @Inject()() extends ControllerInterface with Publisher {
                       case Failure(_) =>
                     }
 
-                  case   _=>
-                    if(!needToSetBlockStone && !needToMove)
+                  case _ =>
+                    if (!needToSetBlockStone && !needToMove)
                       nextTurn()
                 }
                 chosenPlayerStone = None
@@ -186,7 +184,7 @@ case class Controller @Inject()() extends ControllerInterface with Publisher {
     }
     //setBlockStone if needed
     if (needToSetBlockStone) {
-      Http().singleRequest(HttpRequest(HttpMethods.GET, "http://localhost:8081/setBlockStoneOnField/" + x + "/" + y)).onComplete {
+      Http().singleRequest(HttpRequest(HttpMethods.GET, "http://mymodel:8081/setBlockStoneOnField/" + x + "/" + y)).onComplete {
         case Success(response: HttpResponse) =>
           if (response.status.isSuccess()) {
             response.entity.toStrict(Duration(5000, "millis")).map {
@@ -208,7 +206,7 @@ case class Controller @Inject()() extends ControllerInterface with Publisher {
   def toJson: JsObject = {
     var gameBoardAsJson: JsValue = Json.obj("failed" -> JsBoolean(true))
     var gameBoardAsString: String = ""
-    val resp: Future[HttpResponse] = Http().singleRequest(HttpRequest(HttpMethods.GET, "http://localhost:8081/getJson"))
+    val resp: Future[HttpResponse] = Http().singleRequest(HttpRequest(HttpMethods.GET, "http://mymodel:8081/getJson"))
     resp.onComplete {
       case Success(response: HttpResponse) =>
         if (response.status.isSuccess()) {
@@ -223,14 +221,15 @@ case class Controller @Inject()() extends ControllerInterface with Publisher {
       case Failure(_) =>
     }
     Await.result(resp, Duration(8000, "millis"))
-    val resp2: Future[HttpResponse] = Http().singleRequest(HttpRequest(HttpMethods.GET, "http://localhost:8081/getString"))
+    val resp2: Future[HttpResponse] = Http().singleRequest(HttpRequest(HttpMethods.GET, "http://mymodel:8081/getString"))
     resp2.onComplete {
       case Success(response: HttpResponse) =>
         if (response.status.isSuccess()) {
           response.entity.toStrict(Duration(5000, "millis")).map {
             _.data
           }.map(_.utf8String).onComplete {
-            case Success(value) => println( value)
+            case Success(value) =>
+              println(value)
               gameBoardAsString = value + "§"
             case Failure(_) =>
           }
@@ -238,7 +237,7 @@ case class Controller @Inject()() extends ControllerInterface with Publisher {
       case Failure(_) =>
     }
     Await.result(resp2, Duration(5000, "millis"))
-    while(!gameBoardAsString.endsWith("§")) {
+    while (!gameBoardAsString.endsWith("§")) {
       Thread.sleep(100)
     }
     Json.obj(
@@ -246,8 +245,7 @@ case class Controller @Inject()() extends ControllerInterface with Publisher {
       "diced" -> JsString(diced.toString),
       "message" -> JsString(message),
       "rows" -> gameBoardAsJson,
-      "gbstring" -> gameBoardAsString
-    )
+      "gbstring" -> gameBoardAsString)
 
   }
 

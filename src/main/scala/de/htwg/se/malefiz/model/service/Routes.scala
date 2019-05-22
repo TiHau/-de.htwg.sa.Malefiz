@@ -4,10 +4,9 @@ import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import com.google.inject.name.Names
-import de.htwg.se.malefiz.model.gameboard.{BlockStone, Field, GameBoardInterface, PlayerStone}
+import de.htwg.se.malefiz.model.gameboard.{ BlockStone, Field, GameBoardInterface, PlayerStone }
 import net.codingwell.scalaguice.InjectorExtensions._
-import play.api.libs.json.{JsBoolean, JsNumber, Json}
-
+import play.api.libs.json.{ JsBoolean, JsNumber, Json }
 
 object Routes {
 
@@ -23,8 +22,7 @@ object Routes {
             Json.obj(
               "color" -> JsNumber(WebServer.gameBoard.player1.color),
               "xStart" -> JsNumber(WebServer.gameBoard.player1.start._1),
-              "yStart" -> JsNumber(WebServer.gameBoard.player1.start._2)
-            ).toString()
+              "yStart" -> JsNumber(WebServer.gameBoard.player1.start._2)).toString()
           }
         } ~
         path("player2") {
@@ -32,8 +30,7 @@ object Routes {
             Json.obj(
               "color" -> JsNumber(WebServer.gameBoard.player2.color),
               "xStart" -> JsNumber(WebServer.gameBoard.player2.start._1),
-              "yStart" -> JsNumber(WebServer.gameBoard.player2.start._2)
-            ).toString()
+              "yStart" -> JsNumber(WebServer.gameBoard.player2.start._2)).toString()
           }
         } ~
         path("player3") {
@@ -41,8 +38,7 @@ object Routes {
             Json.obj(
               "color" -> JsNumber(WebServer.gameBoard.player3.color),
               "xStart" -> JsNumber(WebServer.gameBoard.player3.start._1),
-              "yStart" -> JsNumber(WebServer.gameBoard.player3.start._2)
-            ).toString()
+              "yStart" -> JsNumber(WebServer.gameBoard.player3.start._2)).toString()
           }
         } ~
         path("player4") {
@@ -50,8 +46,7 @@ object Routes {
             Json.obj(
               "color" -> JsNumber(WebServer.gameBoard.player4.color),
               "xStart" -> JsNumber(WebServer.gameBoard.player4.start._1),
-              "yStart" -> JsNumber(WebServer.gameBoard.player4.start._2)
-            ).toString()
+              "yStart" -> JsNumber(WebServer.gameBoard.player4.start._2)).toString()
           }
         } ~
         pathPrefix("new") {
@@ -89,7 +84,7 @@ object Routes {
           }
         } ~
         pathPrefix("resetPlayerStone") {
-          path(IntNumber / IntNumber / IntNumber / IntNumber /IntNumber) { (x, y, startX, startY, color) =>
+          path(IntNumber / IntNumber / IntNumber / IntNumber / IntNumber) { (x, y, startX, startY, color) =>
             complete {
               WebServer.gameBoard = WebServer.gameBoard.resetPlayerStone(PlayerStone(startX, startY, x, y, color))
               JsBoolean(true).toString()
@@ -140,7 +135,7 @@ object Routes {
         pathPrefix("markPossibleMoves") {
           path(IntNumber / IntNumber / IntNumber / IntNumber) { (x, y, playerColor, diced) =>
             complete {
-              if (WebServer.gameBoard.board.contains((x, y))&& !WebServer.gameBoard.board((x, y)).available) {
+              if (WebServer.gameBoard.board.contains((x, y)) && !WebServer.gameBoard.board((x, y)).available) {
                 WebServer.gameBoard = WebServer.gameBoard.unmarkPossibleMoves()
               }
               if (WebServer.gameBoard.board.contains((x, y))

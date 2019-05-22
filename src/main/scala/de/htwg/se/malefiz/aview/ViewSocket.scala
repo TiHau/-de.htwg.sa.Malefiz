@@ -1,14 +1,12 @@
 package de.htwg.se.malefiz.aview
 
 import akka.NotUsed
-import akka.http.scaladsl.model.ws.{Message, TextMessage}
+import akka.http.scaladsl.model.ws.{ Message, TextMessage }
 import akka.stream.OverflowStrategy
-import akka.stream.scaladsl.{Flow, Sink, Source, SourceQueueWithComplete}
+import akka.stream.scaladsl.{ Flow, Sink, Source, SourceQueueWithComplete }
 import de.htwg.se.malefiz.rest.WebServer
 
-object ViewSocket{
-
-
+object ViewSocket {
 
   private var browserConnections: List[TextMessage => Unit] = List()
 
@@ -24,9 +22,5 @@ object ViewSocket{
   def updateGame(): Unit = {
     for (connection <- browserConnections) connection(TextMessage.Strict(WebServer.controller.toJson.toString()))
   }
-
-
-
-
 
 }

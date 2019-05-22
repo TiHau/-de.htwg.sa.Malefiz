@@ -4,10 +4,9 @@ import com.google.inject.Inject
 import com.google.inject.name.Named
 import play.api.libs.json._
 
-import scala.collection.{immutable, mutable}
+import scala.collection.{ immutable, mutable }
 
-case class GameBoard @Inject() (@Named("DefaultSize") playerCount: Int, board: Map[(Int, Int), Field] =
-immutable.HashMap.empty[(Int, Int), Field]) extends GameBoardInterface {
+case class GameBoard @Inject() (@Named("DefaultSize") playerCount: Int, board: Map[(Int, Int), Field] = immutable.HashMap.empty[(Int, Int), Field]) extends GameBoardInterface {
   override def createBoard: GameBoard = {
     var tmp = defineField(8, 0).defineField(8, 4)
       .defineField(0, 2).defineField(16, 2)
@@ -165,9 +164,9 @@ immutable.HashMap.empty[(Int, Int), Field]) extends GameBoardInterface {
 
   def setBlockStoneOnField(field: Field): (Boolean, GameBoard) = {
     if (checkDestForBlockStone(field.x, field.y))
-      (true,copy(board = board - ((field.x, field.y)) + ((field.x, field.y) -> board((field.x, field.y)).copy(stone = Some(BlockStone())))))
+      (true, copy(board = board - ((field.x, field.y)) + ((field.x, field.y) -> board((field.x, field.y)).copy(stone = Some(BlockStone())))))
     else
-      (false,copy())
+      (false, copy())
   }
 
   def removeStoneOnField(field: Field): GameBoard = copy(board = board - ((field.x, field.y))
@@ -223,7 +222,7 @@ immutable.HashMap.empty[(Int, Int), Field]) extends GameBoardInterface {
     tmpB.foreach(f => tmp = tmp.unmarkField(f._1._1, f._1._2))
     tmp
   }
-  private def unmarkField(x: Int, y: Int):GameBoard = copy(board = board - ((x, y)) + ((x, y) -> board((x, y)).copy(available = false)))
+  private def unmarkField(x: Int, y: Int): GameBoard = copy(board = board - ((x, y)) + ((x, y) -> board((x, y)).copy(available = false)))
   private def validField(x: Int, y: Int): Boolean = y <= 13 && board.contains((x, y))
 
   def checkDestForPlayerStone(x: Int, y: Int): Boolean = validField(x, y) && board((x, y)).available

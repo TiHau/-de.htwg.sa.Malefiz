@@ -4,16 +4,15 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import de.htwg.se.malefiz.aview.ViewSocket
 
-
 object Routes {
 
   val all: Route =
     get {
-        path("") {
-          complete {
-            WebServer.controller.toJson.toString
-          }
-        } ~
+      path("") {
+        complete {
+          WebServer.controller.toJson.toString
+        }
+      } ~
         pathPrefix("touch") {
           path(IntNumber / IntNumber) { (column, row) =>
             complete {
@@ -31,8 +30,7 @@ object Routes {
                 2
               } else {
                 count
-              }
-              )
+              })
               WebServer.controller.toJson.toString
             }
           }
@@ -49,15 +47,14 @@ object Routes {
             WebServer.controller.toJson.toString
           }
         } ~
-          path("toJson") {
-            complete {
-              WebServer.controller.toJson.toString
-            }
-          } ~
-      path("websocket") {
-        handleWebSocketMessages(ViewSocket.listen())
-      }
-
+        path("toJson") {
+          complete {
+            WebServer.controller.toJson.toString
+          }
+        } ~
+        path("websocket") {
+          handleWebSocketMessages(ViewSocket.listen())
+        }
 
     }
 

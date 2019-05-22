@@ -1,6 +1,6 @@
 package de.htwg.se.malefiz
 
-import de.htwg.se.malefiz.aview.{GUI, TUI}
+import de.htwg.se.malefiz.aview.{ GUI, TUI }
 
 object Malefiz {
 

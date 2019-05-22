@@ -1,7 +1,7 @@
 package de.htwg.se.malefiz.model.fileio.fileioJson
 
-import java.io.{File, PrintWriter}
-import java.nio.file.{Files, Paths}
+import java.io.{ File, PrintWriter }
+import java.nio.file.{ Files, Paths }
 
 import de.htwg.se.malefiz.controller.ControllerInterface
 import de.htwg.se.malefiz.model.fileio.FileIOInterface
@@ -11,13 +11,13 @@ import play.api.libs.json._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.io.Source
-import scala.util.{Failure, Success}
+import scala.util.{ Failure, Success }
 
 class FileIO extends FileIOInterface {
   private val source: String = "saveFile.json"
 
   override def load(controller: ControllerInterface): Unit = {
-   /* if (Files.exists(Paths.get(source))) {
+    /* if (Files.exists(Paths.get(source))) {
       val file = Source.fromFile(source)
       val json: JsValue = Json.parse(file.getLines.mkString)
       file.close()
@@ -25,7 +25,7 @@ class FileIO extends FileIOInterface {
     }*/
   }
 
- /* private def gameFromJson(json: JsValue, controller: ControllerInterface): GameBoard = {
+  /* private def gameFromJson(json: JsValue, controller: ControllerInterface): GameBoard = {
     controller.setPlayerCount((json \ "playerCount").get.toString().toInt)
     controller.diced = (json \ "diced").get.toString().toInt
 
@@ -57,7 +57,7 @@ class FileIO extends FileIOInterface {
   }
 */
   override def save(controller: ControllerInterface): Boolean = {
-   /* gameToJson(controller) onComplete {
+    /* gameToJson(controller) onComplete {
       case Success(gameJson) =>
         val pw = new PrintWriter(new File(source))
         pw.write(Json.prettyPrint(gameJson))
