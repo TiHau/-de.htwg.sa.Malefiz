@@ -18,42 +18,6 @@ object Routes {
           ""
         }
       } ~
-        path("player1") {
-          complete {
-            Json.obj(
-              "color" -> JsNumber(WebServer.gameBoard.player1.color),
-              "xStart" -> JsNumber(WebServer.gameBoard.player1.start._1),
-              "yStart" -> JsNumber(WebServer.gameBoard.player1.start._2)
-            ).toString()
-          }
-        } ~
-        path("player2") {
-          complete {
-            Json.obj(
-              "color" -> JsNumber(WebServer.gameBoard.player2.color),
-              "xStart" -> JsNumber(WebServer.gameBoard.player2.start._1),
-              "yStart" -> JsNumber(WebServer.gameBoard.player2.start._2)
-            ).toString()
-          }
-        } ~
-        path("player3") {
-          complete {
-            Json.obj(
-              "color" -> JsNumber(WebServer.gameBoard.player3.color),
-              "xStart" -> JsNumber(WebServer.gameBoard.player3.start._1),
-              "yStart" -> JsNumber(WebServer.gameBoard.player3.start._2)
-            ).toString()
-          }
-        } ~
-        path("player4") {
-          complete {
-            Json.obj(
-              "color" -> JsNumber(WebServer.gameBoard.player4.color),
-              "xStart" -> JsNumber(WebServer.gameBoard.player4.start._1),
-              "yStart" -> JsNumber(WebServer.gameBoard.player4.start._2)
-            ).toString()
-          }
-        } ~
         pathPrefix("new") {
           path(IntNumber) { playerCount =>
             complete {
@@ -80,26 +44,11 @@ object Routes {
             }
           }
         } ~
-        pathPrefix("removeStoneOnField") {
-          path(IntNumber / IntNumber) { (x, y) =>
-            complete {
-              WebServer.gameBoard = WebServer.gameBoard.removeStoneOnField(WebServer.gameBoard.board((x, y)))
-              JsBoolean(true).toString()
-            }
-          }
-        } ~
         pathPrefix("resetPlayerStone") {
           path(IntNumber / IntNumber / IntNumber / IntNumber /IntNumber) { (x, y, startX, startY, color) =>
             complete {
               WebServer.gameBoard = WebServer.gameBoard.resetPlayerStone(PlayerStone(startX, startY, x, y, color))
               JsBoolean(true).toString()
-            }
-          }
-        } ~
-        pathPrefix("checkDestForPlayerStone") {
-          path(IntNumber / IntNumber) { (x, y) =>
-            complete {
-              JsBoolean(WebServer.gameBoard.checkDestForPlayerStone(x, y)).toString()
             }
           }
         } ~
@@ -126,17 +75,7 @@ object Routes {
               }
             }
           }
-        } ~
-        pathPrefix("forceMoveStone") {
-          path(IntNumber / IntNumber / IntNumber / IntNumber) { (x, y, xDest, yDest) =>
-            complete {
-              val start = WebServer.gameBoard.board((x, y))
-              val dest = WebServer.gameBoard.board((xDest, yDest))
-              WebServer.gameBoard = WebServer.gameBoard.forceMoveStone(start, dest)
-              JsBoolean(true).toString()
-            }
-          }
-        } ~
+        }~
         pathPrefix("markPossibleMoves") {
           path(IntNumber / IntNumber / IntNumber / IntNumber) { (x, y, playerColor, diced) =>
             complete {
@@ -167,29 +106,6 @@ object Routes {
             WebServer.gameBoard = WebServer.gameBoard.unmarkPossibleMoves()
             JsBoolean(true).toString()
           }
-        } ~
-        path("checkWin") {
-          complete {
-            JsBoolean(WebServer.gameBoard.checkWin).toString()
-          }
-        } ~
-        pathPrefix("setField") {
-          path(IntNumber / IntNumber / IntNumber / IntNumber / IntNumber) { (x, y, playerColor, stoneXstart, stoneYstart) =>
-            complete {
-              val stone = playerColor match {
-                case 0 => BlockStone()
-                case _ => PlayerStone(stoneXstart, stoneYstart, x, y, playerColor)
-              }
-              WebServer.gameBoard = WebServer.gameBoard.setField((x, y), Field(x, y, Some(stone)))
-              JsBoolean(true).toString()
-            }
-          } ~
-            path(IntNumber / IntNumber) { (x, y) =>
-              complete {
-                WebServer.gameBoard = WebServer.gameBoard.setField((x, y), Field(x, y, None))
-                JsBoolean(true).toString()
-              }
-            }
         } ~
         path("getString") {
           complete {
