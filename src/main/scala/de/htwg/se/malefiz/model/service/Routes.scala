@@ -6,7 +6,7 @@ import akka.http.scaladsl.server.Route
 import com.google.inject.name.Names
 import de.htwg.se.malefiz.model.gameboard.{BlockStone, Field, GameBoardInterface, PlayerStone}
 import net.codingwell.scalaguice.InjectorExtensions._
-import play.api.libs.json.{JsBoolean, JsNumber, Json}
+import play.api.libs.json.{JsBoolean, JsNumber, JsValue, Json}
 
 
 object Routes {
@@ -45,7 +45,7 @@ object Routes {
           }
         } ~
         pathPrefix("resetPlayerStone") {
-          path(IntNumber / IntNumber / IntNumber / IntNumber /IntNumber) { (x, y, startX, startY, color) =>
+          path(IntNumber / IntNumber / IntNumber / IntNumber / IntNumber) { (x, y, startX, startY, color) =>
             complete {
               WebServer.gameBoard = WebServer.gameBoard.resetPlayerStone(PlayerStone(startX, startY, x, y, color))
               JsBoolean(true).toString()
@@ -75,11 +75,11 @@ object Routes {
               }
             }
           }
-        }~
+        } ~
         pathPrefix("markPossibleMoves") {
           path(IntNumber / IntNumber / IntNumber / IntNumber) { (x, y, playerColor, diced) =>
             complete {
-              if (WebServer.gameBoard.board.contains((x, y))&& !WebServer.gameBoard.board((x, y)).available) {
+              if (WebServer.gameBoard.board.contains((x, y)) && !WebServer.gameBoard.board((x, y)).available) {
                 WebServer.gameBoard = WebServer.gameBoard.unmarkPossibleMoves()
               }
               if (WebServer.gameBoard.board.contains((x, y))
@@ -115,6 +115,25 @@ object Routes {
         path("getJson") {
           complete {
             WebServer.gameBoard.toJson.toString
+          }
+        } ~
+        pathPrefix("save") {
+          path(IntNumber / IntNumber) { (activePlayer, diced) =>
+            complete {
+              WebServer.gameBoard.save(Json.obj(
+                "activePlayer" -> JsNumber(activePlayer),
+                "diced" -> JsNumber(diced)))
+              JsBoolean(true).toString()
+            }
+          }
+        } ~
+        path("load") {
+          complete {
+            val (newGameBoard, activePlayer, diced) = WebServer.gameBoard.load()
+            WebServer.gameBoard = newGameBoard
+            Json.obj(
+              "activePlayer" -> JsNumber(activePlayer),
+              "diced" -> JsNumber(diced)).toString()
           }
         }
     }

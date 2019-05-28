@@ -2,11 +2,14 @@ package de.htwg.se.malefiz.model.gameboard
 
 import com.google.inject.Inject
 import com.google.inject.name.Named
+import de.htwg.sa.malefiz.model.db.{GameConfig, GameConfigDao}
 import play.api.libs.json._
 
 import scala.collection.{immutable, mutable}
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
 
-case class GameBoard @Inject() (@Named("DefaultSize") playerCount: Int, board: Map[(Int, Int), Field] =
+case class GameBoard @Inject()(@Named("DefaultSize") playerCount: Int, board: Map[(Int, Int), Field] =
 immutable.HashMap.empty[(Int, Int), Field]) extends GameBoardInterface {
   override def createBoard: GameBoard = {
     var tmp = defineField(8, 0).defineField(8, 4)
@@ -33,8 +36,11 @@ immutable.HashMap.empty[(Int, Int), Field]) extends GameBoardInterface {
     }
     tmp
   }
+
   def defineField(x: Int, y: Int): GameBoard = copy(board = board + ((x, y) -> Field(x, y, None)))
+
   def defineBlockStone(x: Int, y: Int): GameBoard = copy(board = board + ((x, y) -> Field(x, y, Some(BlockStone()))))
+
   def definePlayerStones(xFirst: Int, player: Player): GameBoard = {
     copy(board = board + (
       (xFirst, 14) -> Field(xFirst, 14, Some(PlayerStone(xFirst, 14, xFirst, 14, player.color))),
@@ -96,6 +102,7 @@ immutable.HashMap.empty[(Int, Int), Field]) extends GameBoardInterface {
           x <- 0 to 16
         } yield fieldToJson(x, y)))
   }
+
   private def fieldToJson(x: Int, y: Int): JsObject = {
     if (board.contains((x, y))) {
       val field = board((x, y))
@@ -165,9 +172,9 @@ immutable.HashMap.empty[(Int, Int), Field]) extends GameBoardInterface {
 
   def setBlockStoneOnField(field: Field): (Boolean, GameBoard) = {
     if (checkDestForBlockStone(field.x, field.y))
-      (true,copy(board = board - ((field.x, field.y)) + ((field.x, field.y) -> board((field.x, field.y)).copy(stone = Some(BlockStone())))))
+      (true, copy(board = board - ((field.x, field.y)) + ((field.x, field.y) -> board((field.x, field.y)).copy(stone = Some(BlockStone())))))
     else
-      (false,copy())
+      (false, copy())
   }
 
   def removeStoneOnField(field: Field): GameBoard = copy(board = board - ((field.x, field.y))
@@ -223,7 +230,9 @@ immutable.HashMap.empty[(Int, Int), Field]) extends GameBoardInterface {
     tmpB.foreach(f => tmp = tmp.unmarkField(f._1._1, f._1._2))
     tmp
   }
-  private def unmarkField(x: Int, y: Int):GameBoard = copy(board = board - ((x, y)) + ((x, y) -> board((x, y)).copy(available = false)))
+
+  private def unmarkField(x: Int, y: Int): GameBoard = copy(board = board - ((x, y)) + ((x, y) -> board((x, y)).copy(available = false)))
+
   private def validField(x: Int, y: Int): Boolean = y <= 13 && board.contains((x, y))
 
   def checkDestForPlayerStone(x: Int, y: Int): Boolean = validField(x, y) && board((x, y)).available
@@ -232,4 +241,58 @@ immutable.HashMap.empty[(Int, Int), Field]) extends GameBoardInterface {
   def checkWin: Boolean = board((8, 0)).stone.isDefined
 
   def setField(target: (Int, Int), whatToSet: Field): GameBoard = copy(board = board - target + (target -> whatToSet))
+
+  override def save(controllerJson: JsValue): Unit = {
+    val gameeBoardJson = Json.obj(
+      "playerCount" -> JsNumber(playerCount),
+      "blockStones" -> Json.toJson(
+        (0 to 16) flatMap (x =>
+          (0 to 13) filter (y => board.contains((x, y)))
+            filter (y => board((x, y)).stone.isDefined)
+            filter (y => board((x, y)).stone.get.isInstanceOf[BlockStone])
+            map (y => Json.obj("x" -> JsNumber(x), "y" -> JsNumber(y))))),
+      "playerStones" -> Json.toJson(
+        (0 to 16) flatMap (x =>
+          (0 to 15) filter (y => board.contains((x, y)))
+            filter (y => board((x, y)).stone.isDefined)
+            filter (y => board((x, y)).stone.get.isInstanceOf[PlayerStone])
+            map (y => Json.obj(
+            "x" -> JsNumber(x),
+            "y" -> JsNumber(y),
+            "startX" -> JsNumber(board((x, y)).stone.get.asInstanceOf[PlayerStone].startX),
+            "startY" -> JsNumber(board((x, y)).stone.get.asInstanceOf[PlayerStone].startY),
+            "playerColor" -> JsNumber(board((x, y)).stone.get.asInstanceOf[PlayerStone].playerColor))))))
+
+    val saveJson = Json.obj("controller" -> controllerJson, "gameBoard" -> gameeBoardJson)
+
+    GameConfigDao.insert(GameConfig("saveGame", saveJson.toString()))
+
+    println(Json.prettyPrint(saveJson))
+  }
+
+  override def load(): (GameBoardInterface, Int, Int) = {
+    val f = GameConfigDao.getLatestSave()
+    val res: GameConfig = Await.result(f, Duration.Inf)
+    val js = Json.parse(res.config)
+
+    var tmp_board: GameBoard = this.asInstanceOf[GameBoard]
+    this.board.seq.foreach(f => tmp_board = tmp_board.setField((f._1._1, f._1._2), Field(f._1._1, f._1._2, None)))
+
+    (js \ "gameBoard" \ "blockStones").as[JsArray].value.foreach(blockStone => {
+      val x = (blockStone \ "x").get.toString().toInt
+      val y = (blockStone \ "y").get.toString().toInt
+      tmp_board = tmp_board.setField((x, y), Field(x, y, Some(BlockStone())))
+    })
+
+    (js \ "gameBoard" \ "playerStones").as[JsArray].value.foreach(playerStone => {
+      val x = (playerStone \ "x").get.toString().toInt
+      val y = (playerStone \ "y").get.toString().toInt
+      val startX = (playerStone \ "startX").get.toString().toInt
+      val startY = (playerStone \ "startY").get.toString().toInt
+      val playerColor = (playerStone \ "playerColor").get.toString().toInt
+      tmp_board = tmp_board.setField((x, y), Field(x, y, Some(PlayerStone(startX, startY, x, y, playerColor))))
+    })
+
+    (tmp_board, (js \ "controller" \ "activePlayer").get.toString().toInt, (js \ "controller" \ "diced").get.toString().toInt)
+  }
 }

@@ -21,7 +21,6 @@ case class Controller @Inject()() extends ControllerInterface with Publisher {
   val injector: Injector = Guice.createInjector(new MalefizModule)
   private val six = 6
   private val logger = Logger(classOf[Controller])
-  private val fileIO = injector.instance[FileIOInterface]
   private var chosenPlayerStone: Option[(Int, Int)] = None
   private var needToSetBlockStone = false
   private var needToMove = true
@@ -32,16 +31,6 @@ case class Controller @Inject()() extends ControllerInterface with Publisher {
   private implicit val executionContext = system.dispatcher
   private var message = "Start a Game" // check win "Victory"
 
-
-  override def loadSavedGame(): Unit = {
-    fileIO.load(this)
-    ViewSocket.updateGame()
-  }
-
-  override def saveGame(): Unit = {
-    fileIO.save(this)
-    ViewSocket.updateGame()
-  }
 
   def newGame(playerCount: Int): Unit = {
     Http().singleRequest(HttpRequest(HttpMethods.GET, "http://localhost:8081/new/" + playerCount)).onComplete {
@@ -138,17 +127,17 @@ case class Controller @Inject()() extends ControllerInterface with Publisher {
               case Success(value) =>
                 val hit = Json.parse(value)
                 val moved: Boolean = (hit \ "moved").get.toString.replace("\"", "").toBoolean
-                if(moved){
+                if (moved) {
                   println("here")
                   needToMove = false
                 }
 
                 val sort: String = (hit \ "sort").get.toString.replace("\"", "")
                 sort match {
-                  case "b"=>
+                  case "b" =>
                     needToSetBlockStone = true
                     message = "Set a BlockStone"
-                  case "p"=>
+                  case "p" =>
                     val xN: Int = (hit \ "x").get.toString.replace("\"", "").toInt
                     val yN: Int = (hit \ "y").get.toString.replace("\"", "").toInt
                     val startX: Int = (hit \ "startX").get.toString.replace("\"", "").toInt
@@ -173,8 +162,8 @@ case class Controller @Inject()() extends ControllerInterface with Publisher {
                       case Failure(_) =>
                     }
 
-                  case   _=>
-                    if(!needToSetBlockStone && !needToMove)
+                  case _ =>
+                    if (!needToSetBlockStone && !needToMove)
                       nextTurn()
                 }
                 chosenPlayerStone = None
@@ -230,7 +219,7 @@ case class Controller @Inject()() extends ControllerInterface with Publisher {
           response.entity.toStrict(Duration(5000, "millis")).map {
             _.data
           }.map(_.utf8String).onComplete {
-            case Success(value) => println( value)
+            case Success(value) => println(value)
               gameBoardAsString = value + "§"
             case Failure(_) =>
           }
@@ -238,7 +227,7 @@ case class Controller @Inject()() extends ControllerInterface with Publisher {
       case Failure(_) =>
     }
     Await.result(resp2, Duration(5000, "millis"))
-    while(!gameBoardAsString.endsWith("§")) {
+    while (!gameBoardAsString.endsWith("§")) {
       Thread.sleep(100)
     }
     Json.obj(
@@ -249,6 +238,37 @@ case class Controller @Inject()() extends ControllerInterface with Publisher {
       "gbstring" -> gameBoardAsString
     )
 
+  }
+
+  override def loadSavedGame(): Unit = {
+    Http().singleRequest(HttpRequest(HttpMethods.GET, "http://localhost:8081/load")).onComplete {
+      case Success(response: HttpResponse) =>
+        if (response.status.isSuccess()) {
+          response.entity.toStrict(Duration(5000, "millis")).map {
+            _.data
+          }.map(_.utf8String).onComplete {
+            case Success(value) =>
+              val js = Json.parse(value)
+              activePlayerColor = (js \ "activePlayer").get.toString().toInt
+              diced = (js \ "diced").get.toString().toInt
+              ViewSocket.updateGame()
+            case Failure(_) =>
+          }
+        }
+      case Failure(_) =>
+    }
+
+    ViewSocket.updateGame()
+  }
+
+  override def saveGame(): Unit = {
+    Http().singleRequest(HttpRequest(HttpMethods.GET, "http://localhost:8081/save/" + activePlayerColor + "/" + diced)).onComplete {
+      case Success(response: HttpResponse) =>
+        if (response.status.isSuccess()) {
+
+        }
+      case Failure(_) =>
+    }
   }
 
 }
