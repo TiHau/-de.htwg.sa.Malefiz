@@ -8,8 +8,6 @@ import com.google.inject.{Guice, Inject, Injector}
 import com.typesafe.scalalogging.Logger
 import de.htwg.se.malefiz.MalefizModule
 import de.htwg.se.malefiz.aview.ViewSocket
-import de.htwg.se.malefiz.model.fileio.FileIOInterface
-import net.codingwell.scalaguice.InjectorExtensions._
 import play.api.libs.json.{JsBoolean, JsNumber, JsObject, JsString, JsValue, Json}
 
 import scala.concurrent.{Await, Future}
