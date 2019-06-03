@@ -9,10 +9,39 @@ object GameConfigDao {
   val collection: MongoCollection[Document] = database.getCollection("saves")
 
   def getLatestSave(): JsValue = {
-    return JsBoolean(true)
+    var waitOnRes = true
+    var res: JsValue = JsBoolean(true)
+    val observable: Observable[Document] = collection.find().first()
+
+      observable.subscribe(new Observer[Document] {
+      override def onNext(result: Document): Unit = {
+        res = Json.parse(result("config").toString)
+      }
+
+      override def onError(e: Throwable): Unit = println("Failed")
+
+      override def onComplete(): Unit = {
+        waitOnRes = false
+        println("Completed")
+      }
+    })
+
+    while(waitOnRes)
+      Thread.sleep(10)
+
+    res
   }
 
   def insert(name: String, config: JsValue): Unit = {
-    collection.insertOne(Document(Json.obj("name" -> name, "config" -> config).toString()))
+    val observable: Observable[Completed] = collection.insertOne(Document(Json.obj("name" -> name, "config" -> config).toString()))
+
+    observable.subscribe(new Observer[Completed] {
+
+      override def onNext(result: Completed): Unit = println("Inserted")
+
+      override def onError(e: Throwable): Unit = println("Failed")
+
+      override def onComplete(): Unit = println("Completed")
+    })
   }
 }
