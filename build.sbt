@@ -33,10 +33,8 @@ libraryDependencies += "com.typesafe.akka" %% "akka-stream" % "2.5.22"
 
 libraryDependencies += "com.typesafe.akka" %% "akka-http-spray-json" % "10.1.8"
 
-libraryDependencies ++= Seq(
-  "com.typesafe.slick" %% "slick" % "3.3.0",
-  "org.slf4j" % "slf4j-nop" % "1.6.4",
-  "com.typesafe.slick" %% "slick-hikaricp" % "3.3.0"
-)
-
-libraryDependencies += "com.h2database" % "h2" % "1.4.187"
+libraryDependencies += "org.mongodb.scala" %% "mongo-scala-bson" % "2.6.0"
+libraryDependencies += "org.mongodb" % "bson" % "3.10"
+libraryDependencies += "org.mongodb" % "mongodb-driver-core" % "3.10.0"
+libraryDependencies += "org.mongodb" % "mongodb-driver-async" % "3.10.0"
+libraryDependencies += "org.mongodb.scala" %% "mongo-scala-driver" % "2.6.0"

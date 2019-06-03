@@ -1,20 +1,18 @@
 package de.htwg.sa.malefiz.model.db
 
-import slick.jdbc.H2Profile.api._
-
-import scala.concurrent.duration.Duration
-import scala.concurrent.{Await, Future}
+import org.mongodb.scala._
+import play.api.libs.json.{JsBoolean, JsValue, Json}
 
 object GameConfigDao {
-  private lazy val db = Database.forConfig("h2mem1")
-  private lazy val gameConfigs = TableQuery[GameConfigTable]
+  val mongoClient: MongoClient = MongoClient()
+  val database: MongoDatabase = mongoClient.getDatabase("malefiz")
+  val collection: MongoCollection[Document] = database.getCollection("saves")
 
-  def getLatestSave(): Future[GameConfig] = {
-    db.run(gameConfigs.sortBy(_.id.desc).take(1).result.head)
+  def getLatestSave(): JsValue = {
+    return JsBoolean(true)
   }
 
-  def insert(gameConfig: GameConfig): Future[Int] = {
-    Await.result(db.run(gameConfigs.schema.createIfNotExists), Duration.Inf)
-    db.run(gameConfigs += gameConfig)
+  def insert(name: String, config: JsValue): Unit = {
+    collection.insertOne(Document(Json.obj("name" -> name, "config" -> config).toString()))
   }
 }
