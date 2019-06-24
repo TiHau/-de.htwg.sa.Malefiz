@@ -21,3 +21,16 @@ services:
       default:
         aliases:
           - myconroller
+
+  h2:
+    image: oscarfonts/h2:latest
+    hostname: h2
+    ports:
+      - 1521:1521
+      - 81:81
+      - 8082:8082
+
+    networks:
+      default:
+         aliases:
+            - database
