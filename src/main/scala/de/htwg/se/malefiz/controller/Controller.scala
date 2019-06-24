@@ -8,8 +8,6 @@ import com.google.inject.{ Guice, Inject, Injector }
 import com.typesafe.scalalogging.Logger
 import de.htwg.se.malefiz.MalefizModule
 import de.htwg.se.malefiz.aview.ViewSocket
-import de.htwg.se.malefiz.model.fileio.FileIOInterface
-import net.codingwell.scalaguice.InjectorExtensions._
 import play.api.libs.json.{ JsBoolean, JsNumber, JsObject, JsString, JsValue, Json }
 
 import scala.concurrent.{ Await, Future }
@@ -21,7 +19,6 @@ case class Controller @Inject() () extends ControllerInterface with Publisher {
   val injector: Injector = Guice.createInjector(new MalefizModule)
   private val six = 6
   private val logger = Logger(classOf[Controller])
-  private val fileIO = injector.instance[FileIOInterface]
   private var chosenPlayerStone: Option[(Int, Int)] = None
   private var needToSetBlockStone = false
   private var needToMove = true
@@ -33,12 +30,34 @@ case class Controller @Inject() () extends ControllerInterface with Publisher {
   private var message = "Start a Game" // check win "Victory"
 
   override def loadSavedGame(): Unit = {
-    fileIO.load(this)
+    Http().singleRequest(HttpRequest(HttpMethods.GET, "http://mymodel:8081/load")).onComplete {
+      case Success(response: HttpResponse) =>
+        if (response.status.isSuccess()) {
+          response.entity.toStrict(Duration(5000, "millis")).map {
+            _.data
+          }.map(_.utf8String).onComplete {
+            case Success(value) =>
+              val js = Json.parse(value)
+              activePlayerColor = (js \ "activePlayer").get.toString().toInt
+              diced = (js \ "diced").get.toString().toInt
+              ViewSocket.updateGame()
+            case Failure(_) =>
+          }
+        }
+      case Failure(_) =>
+    }
+
     ViewSocket.updateGame()
   }
 
   override def saveGame(): Unit = {
-    fileIO.save(this)
+    Http().singleRequest(HttpRequest(HttpMethods.GET, "http://mymodel:8081/save/" + activePlayerColor + "/" + diced)).onComplete {
+      case Success(response: HttpResponse) =>
+        if (response.status.isSuccess()) {
+
+        }
+      case Failure(_) =>
+    }
     ViewSocket.updateGame()
   }
 

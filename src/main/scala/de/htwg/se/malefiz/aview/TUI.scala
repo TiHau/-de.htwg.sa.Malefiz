@@ -1,14 +1,13 @@
 package de.htwg.se.malefiz.aview
 
-import akka.{ Done, NotUsed }
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
-import akka.http.scaladsl.model.{ HttpMethods, HttpRequest, HttpResponse, StatusCodes }
-import akka.http.scaladsl.model.ws.{ Message, TextMessage, WebSocketRequest }
+import akka.http.scaladsl.model.ws.{Message, TextMessage, WebSocketRequest}
+import akka.http.scaladsl.model.{HttpMethods, HttpRequest, HttpResponse, StatusCodes}
 import akka.stream.ActorMaterializer
-import akka.stream.scaladsl.{ Flow, Keep, Sink, Source }
+import akka.stream.scaladsl.{Flow, Keep, Sink, Source}
+import akka.{Done, NotUsed}
 import com.typesafe.scalalogging.Logger
-import de.htwg.se.malefiz.controller.{ ControllerInterface, State }
 import de.htwg.se.malefiz.util.Observer
 import play.api.libs.json.Json
 
@@ -25,7 +24,6 @@ case class TUI() extends Observer {
   private var activePlayer: Int = 3
   private var diced: Int = 0
   private var gbString: String = ""
-  private var newG = false
 
   implicit val system = ActorSystem()
   implicit val materializer = ActorMaterializer()
@@ -125,9 +123,8 @@ case class TUI() extends Observer {
               val tmpJson = Json.parse(value)
               activePlayer = (tmpJson \ "activePlayer").get.toString.replace("\"", "").toInt
               diced = (tmpJson \ "diced").get.toString.replace("\"", "").toInt
-              if (!newG) {
-                message = (tmpJson \ "message").get.toString.replace("\"", "")
-              }
+              message = (tmpJson \ "message").get.toString.replace("\"", "")
+
               gbString = (tmpJson \ "gbstring").get.toString.replace("\"", "").replace("\\n", "\n")
               println(gbString)
               message match {

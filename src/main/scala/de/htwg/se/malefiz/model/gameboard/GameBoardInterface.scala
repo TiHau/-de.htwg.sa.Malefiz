@@ -1,6 +1,6 @@
 package de.htwg.se.malefiz.model.gameboard
 
-import play.api.libs.json.JsObject
+import play.api.libs.json.{JsObject, JsValue}
 
 import scala.swing.Publisher
 
@@ -110,5 +110,9 @@ trait GameBoardInterface extends Publisher {
   def toJson: JsObject
 
   def setField(target: (Int, Int), whatToSet: Field): GameBoardInterface
+
+  def save(controllerJson: JsValue): Unit
+
+  def load(): (GameBoardInterface, Int, Int)
 
 }

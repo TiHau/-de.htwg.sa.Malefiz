@@ -75,26 +75,11 @@ object Routes {
             }
           }
         } ~
-        pathPrefix("removeStoneOnField") {
-          path(IntNumber / IntNumber) { (x, y) =>
-            complete {
-              WebServer.gameBoard = WebServer.gameBoard.removeStoneOnField(WebServer.gameBoard.board((x, y)))
-              JsBoolean(true).toString()
-            }
-          }
-        } ~
         pathPrefix("resetPlayerStone") {
           path(IntNumber / IntNumber / IntNumber / IntNumber / IntNumber) { (x, y, startX, startY, color) =>
             complete {
               WebServer.gameBoard = WebServer.gameBoard.resetPlayerStone(PlayerStone(startX, startY, x, y, color))
               JsBoolean(true).toString()
-            }
-          }
-        } ~
-        pathPrefix("checkDestForPlayerStone") {
-          path(IntNumber / IntNumber) { (x, y) =>
-            complete {
-              JsBoolean(WebServer.gameBoard.checkDestForPlayerStone(x, y)).toString()
             }
           }
         } ~
@@ -119,16 +104,6 @@ object Routes {
                 case Some(_: BlockStone) => Json.obj("moved" -> JsBoolean(res._1), "sort" -> "b").toString()
                 case _ => Json.obj("moved" -> JsBoolean(res._1), "sort" -> "f").toString()
               }
-            }
-          }
-        } ~
-        pathPrefix("forceMoveStone") {
-          path(IntNumber / IntNumber / IntNumber / IntNumber) { (x, y, xDest, yDest) =>
-            complete {
-              val start = WebServer.gameBoard.board((x, y))
-              val dest = WebServer.gameBoard.board((xDest, yDest))
-              WebServer.gameBoard = WebServer.gameBoard.forceMoveStone(start, dest)
-              JsBoolean(true).toString()
             }
           }
         } ~
@@ -168,24 +143,6 @@ object Routes {
             JsBoolean(WebServer.gameBoard.checkWin).toString()
           }
         } ~
-        pathPrefix("setField") {
-          path(IntNumber / IntNumber / IntNumber / IntNumber / IntNumber) { (x, y, playerColor, stoneXstart, stoneYstart) =>
-            complete {
-              val stone = playerColor match {
-                case 0 => BlockStone()
-                case _ => PlayerStone(stoneXstart, stoneYstart, x, y, playerColor)
-              }
-              WebServer.gameBoard = WebServer.gameBoard.setField((x, y), Field(x, y, Some(stone)))
-              JsBoolean(true).toString()
-            }
-          } ~
-            path(IntNumber / IntNumber) { (x, y) =>
-              complete {
-                WebServer.gameBoard = WebServer.gameBoard.setField((x, y), Field(x, y, None))
-                JsBoolean(true).toString()
-              }
-            }
-        } ~
         path("getString") {
           complete {
             WebServer.gameBoard.toString
@@ -194,6 +151,25 @@ object Routes {
         path("getJson") {
           complete {
             WebServer.gameBoard.toJson.toString
+          }
+        } ~
+        pathPrefix("save") {
+          path(IntNumber / IntNumber) { (activePlayer, diced) =>
+            complete {
+              WebServer.gameBoard.save(Json.obj(
+                "activePlayer" -> JsNumber(activePlayer),
+                "diced" -> JsNumber(diced)))
+              JsBoolean(true).toString()
+            }
+          }
+        } ~
+        path("load") {
+          complete {
+            val (newGameBoard, activePlayer, diced) = WebServer.gameBoard.load()
+            WebServer.gameBoard = newGameBoard
+            Json.obj(
+              "activePlayer" -> JsNumber(activePlayer),
+              "diced" -> JsNumber(diced)).toString()
           }
         }
     }

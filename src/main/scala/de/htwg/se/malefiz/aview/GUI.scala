@@ -193,10 +193,11 @@ class GUI extends Frame {
         update()
       })
       contents += new MenuItem(Action("Save") {
-
+        save()
         repaint()
       })
       contents += new MenuItem(Action("Load") {
+        load()
         repaint()
       })
       contents += new MenuItem(Action("Quit") {
@@ -242,6 +243,18 @@ class GUI extends Frame {
               repaint()
           }
         }
+    }
+  }
+
+  def save(): Unit ={
+    Http().singleRequest(HttpRequest(HttpMethods.GET, "http://localhost:8080/save")).onComplete {
+      case Success(response: HttpResponse) =>
+    }
+  }
+
+  def load(): Unit = {
+    Http().singleRequest(HttpRequest(HttpMethods.GET, "http://localhost:8080/load")).onComplete {
+      case Success(response: HttpResponse) =>
     }
   }
 
