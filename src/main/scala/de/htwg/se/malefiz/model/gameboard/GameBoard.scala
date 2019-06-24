@@ -258,15 +258,13 @@ case class GameBoard @Inject() (@Named("DefaultSize") playerCount: Int, board: M
 
     val saveJson = Json.obj("controller" -> controllerJson, "gameBoard" -> gameeBoardJson)
 
-    GameConfigDao.insert(GameConfig("saveGame", saveJson.toString()))
+    GameConfigDao.insert("saveGame", saveJson)
 
     println(Json.prettyPrint(saveJson))
   }
 
   override def load(): (GameBoardInterface, Int, Int) = {
-    val f = GameConfigDao.getLatestSave()
-    val res: GameConfig = Await.result(f, Duration.Inf)
-    val js = Json.parse(res.config)
+    val js = GameConfigDao.getLatestSave
 
     var tmp_board: GameBoard = this.asInstanceOf[GameBoard]
     this.board.seq.foreach(f => tmp_board = tmp_board.setField((f._1._1, f._1._2), Field(f._1._1, f._1._2, None)))
