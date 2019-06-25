@@ -34,3 +34,13 @@ services:
       default:
          aliases:
             - database
+  mongo:
+    image: mongo:latest
+    hostname: mongo
+    ports:
+      - 27017:27017
+    networks:
+      default:
+         aliases:
+           - mongodb
+

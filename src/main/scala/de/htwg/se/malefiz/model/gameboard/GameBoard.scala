@@ -2,7 +2,8 @@ package de.htwg.se.malefiz.model.gameboard
 
 import com.google.inject.Inject
 import com.google.inject.name.Named
-import de.htwg.sa.malefiz.model.db.{GameConfig, GameConfigDao}
+import de.htwg.sa.malefiz.model.db.{GameConfig, GameConfigDaoSlick}
+import de.htwg.se.malefiz.model.db.{DBInstance, GameConfigDaoMongo}
 import play.api.libs.json._
 
 import scala.collection.{immutable, mutable}
@@ -258,13 +259,13 @@ case class GameBoard @Inject() (@Named("DefaultSize") playerCount: Int, board: M
 
     val saveJson = Json.obj("controller" -> controllerJson, "gameBoard" -> gameeBoardJson)
 
-    GameConfigDao.insert("saveGame", saveJson)
+    DBInstance.db.insert("saveGame", saveJson)
 
     println(Json.prettyPrint(saveJson))
   }
 
   override def load(): (GameBoardInterface, Int, Int) = {
-    val js = GameConfigDao.getLatestSave
+    val js = DBInstance.db.getLatestSave
 
     var tmp_board: GameBoard = this.asInstanceOf[GameBoard]
     this.board.seq.foreach(f => tmp_board = tmp_board.setField((f._1._1, f._1._2), Field(f._1._1, f._1._2, None)))

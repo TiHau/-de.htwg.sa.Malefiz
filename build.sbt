@@ -38,3 +38,9 @@ libraryDependencies ++= Seq(
 )
 
 libraryDependencies += "com.h2database" % "h2" % "1.4.187"
+libraryDependencies += "org.mongodb.scala" %% "mongo-scala-bson" % "2.6.0"
+libraryDependencies += "org.mongodb" % "bson" % "3.10"
+libraryDependencies += "org.mongodb" % "mongodb-driver-core" % "3.10.0"
+libraryDependencies += "org.mongodb" % "mongodb-driver-async" % "3.10.0"
+libraryDependencies += "org.mongodb.scala" %% "mongo-scala-driver" % "2.6.0"
+
